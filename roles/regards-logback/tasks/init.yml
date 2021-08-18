@@ -1,0 +1,11 @@
+---
+  
+  - name: Create logback main folder
+    file:
+      path: "{{ role_regards_logback_workdir }}"
+      state: directory
+      mode: '0750'
+      owner: "{{ role_regards_logback_container_root_user }}"
+      group: "{{ role_regards_logback_container_root_group }}"
+      setype: "{{ role_regards_logback_setype }}"
+      seuser: "{{ role_regards_logback_seuser }}"

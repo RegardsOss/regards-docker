@@ -1,0 +1,28 @@
+{
+{% if 'docker_bip' in hostvars[inventory_hostname] %}
+    "bip": "{{ hostvars[inventory_hostname]['docker_bip'] }}",
+{% endif %}
+{% if 'docker_dns' in hostvars[inventory_hostname] %}
+    "dns": [
+  {% for host in hostvars[inventory_hostname]['docker_dns'] %}
+      "{{ host }}"
+      {% if not loop.last %}
+      ,
+      {% endif %}
+  {% endfor %}
+    ],
+{% endif %}
+{% if 'docker_data_root' in hostvars[inventory_hostname] %}
+    "data-root": "{{ hostvars[inventory_hostname]['docker_data_root'] }}",
+{% endif %}
+{% if 'docker_storage_driver' in hostvars[inventory_hostname] %}
+    "storage-driver": "{{ hostvars[inventory_hostname]['docker_storage_driver'] }}",
+{% endif %}
+    "userns-remap": "dockermapuid:dockermapgid",
+    "ipv6": false,
+    "tlsverify": true,
+    "tlscacert": "/var/docker-server/ca.pem",
+    "tlscert": "/var/docker-server/server-cert-{{ ansible_facts["fqdn"] }}.pem",
+    "tlskey": "/var/docker-server/server-key-{{ ansible_facts["fqdn"] }}.pem",
+    "hosts": ["tcp://{{ ansible_facts["fqdn"] }}:2376"]
+}

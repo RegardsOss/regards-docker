@@ -1,0 +1,90 @@
+# Default values for regards-common.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  registry: hfjcmwgl.gra5.container-registry.ovh.net/regards
+  name: mapproxy
+  tag: latest
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: regards-regards-docker-registry
+
+# livenessProbe:
+#   httpGet:
+#     path: /
+#     port: http
+#   initialDelaySeconds: 20
+#   timeoutSeconds: 10
+#   periodSeconds: 5
+
+# readinessProbe:
+#   httpGet:
+#     path: /
+#     port: http
+#   initialDelaySeconds: 5
+#   timeoutSeconds: 2
+#   periodSeconds: 5
+
+persistence:
+  accessMode: ReadWriteOnce
+  volumeMode: Filesystem
+  size: 5Gi
+  # storageClass: "-"
+
+service:
+  type: ClusterIP
+  port:
+    name: mapproxy
+    port: 8080
+    targetPort: nginx
+    protocol: TCP
+
+nginx:
+  image:
+    registry: hfjcmwgl.gra5.container-registry.ovh.net/regards
+    name: nginx
+    tag: latest
+    pullPolicy: IfNotPresent
+  ports:
+    - name: nginx
+      containerPort: 80
+      protocol: TCP
+#   livenessProbe:
+#     httpGet:
+#       path: /
+#       port: http
+#     initialDelaySeconds: 20
+#     timeoutSeconds: 10
+#     periodSeconds: 5
+#   readinessProbe:
+#     httpGet:
+#       path: /
+#       port: http
+#     initialDelaySeconds: 5
+#     timeoutSeconds: 2
+#     periodSeconds: 5
+
+mapserver:
+  nameOverride: mapserver
+  replicaCount: 1
+  image:
+    registry: hfjcmwgl.gra5.container-registry.ovh.net/regards
+    name: docker-mapserver
+    tag: latest
+    pullPolicy: IfNotPresent
+  # Override this dummy when installing
+  mapfiles: {}
+    # awsCredentials: config/mapfiles/aws_credentials.inc.map.sample
+    # postgresConnection: config/mapfiles/postgres_connection.inc.map.sample
+  ports:
+    - name: mapserver
+      containerPort: 80
+      protocol: TCP
+  service:
+    port:
+      name: mapserver
+      port: 80
+      targetPort: mapserver
+      protocol: TCP

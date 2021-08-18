@@ -1,0 +1,73 @@
+---
+  - name: Delete previous helm charts for REGARDS µServices
+    file:
+      state: absent
+      path: "{{ output_dir }}"
+
+  - name: Init generated helm charts structure
+    file:
+      state: directory
+      path: "{{ output_dir }}"
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+
+  - name: Reinstate volatile notice (README)
+    copy:
+      src: "REAME-volatile.md"
+      dest: "{{ output_dir }}/README.md"
+
+  - name: "Helm repo update"
+    shell: helm repo update
+    register: repo_out
+  
+  - debug: var=repo_out.stdout_lines
+
+  - name: "Build microservices charts"
+    include_tasks: build-chart.yaml
+    vars:
+      bms_ms_name: "{{ chart.name | mandatory }}"
+      bms_build_config: "{{ chart.build_config | default(true) }}"
+      bms_helm_depup: "{{ chart.helm_depup | default(true) }}"
+    with_items:
+      # The order in the list of builded chart is important. It should not be whanged
+      # because of chart dependency update.
+      #
+
+      # charts without configuration or templating (i.e. just copy pasted)
+      - name: regards-common
+        build_config: false
+      - name: regards-cots-elasticsearch
+        build_config: false
+      - name: regards-cots-mapproxy
+        build_config: false
+        
+      # charts with common configuration. The tasks used to build config and render
+      # values are located in build-chart-config.yaml
+      - name: access-instance
+      - name: access-project
+      - name: admin
+      - name: admin-instance
+      - name: authentication
+      - name: registry
+      - name: gateway
+      - name: ingest
+      - name: dam
+      - name: notifier
+      - name: fem
+      - name: catalog
+      - name: order
+      - name: processing
+      - name: dataprovider
+      - name: storage
+
+      # chart with specific configuration. The specific tasks
+      # for configuration templating must be located under tasks folder
+      # and names <chart-name>.yaml, with 'chart-name' being the name of the helm chart.
+      - name: front
+      - name: config
+      - name: regards-cots
+      - name: regards
+
+    loop_control:
+      loop_var: chart
+      

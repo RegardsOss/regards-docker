@@ -1,0 +1,28 @@
+---
+  - name: Create REGARDS folders mounted inside containers on the network workspace to get access to profiling tool snapshots
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: '2750'
+      group: "{{ role_regards_init_network_workdir_container_run_group }}"
+      setype: "{{ role_regards_init_network_workdir_setype }}"
+      seuser: "{{ role_regards_init_network_workdir_seuser }}"
+    with_items:
+      - "{{ role_regards_init_network_workdir_workspace_network }}regards/yourkitSnapshot"
+    become: true
+    become_user: "{{ role_regards_init_network_workdir_container_run_user }}"
+    when: not role_regards_init_network_workdir_network_allow_root
+
+  - name: Create REGARDS folders mounted inside containers on the network workspace to get access to profiling tool snapshots
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: '2750'
+      owner: "{{ role_regards_init_network_workdir_container_run_user }}"
+      group: "{{ role_regards_init_network_workdir_container_run_group }}"
+      setype: "{{ role_regards_init_network_workdir_setype }}"
+      seuser: "{{ role_regards_init_network_workdir_seuser }}"
+    with_items:
+      - "{{ role_regards_init_network_workdir_workspace_network }}regards/yourkitSnapshot"
+    become: true
+    when: role_regards_init_network_workdir_network_allow_root

@@ -1,0 +1,9 @@
+---
+  - name: Generate reverse proxy config file
+    template:
+      src: nginx.conf
+      dest: "{{ role_regards_front_conf_local }}"
+      mode: '0700'
+      owner: "{{ role_regards_front_container_run_user }}"
+      group: "{{ role_regards_front_container_run_group }}"
+      

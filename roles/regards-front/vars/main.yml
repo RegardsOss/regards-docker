@@ -1,0 +1,21 @@
+---
+
+# NGINX Workspace
+role_regards_front_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/regards/nginx/"
+
+# Docker user
+role_regards_front_container_root_user: "{{ group_container_root_user }}"
+role_regards_front_container_root_group: "{{ group_container_root_group }}"
+role_regards_front_container_run_user: "{{ group_container_run_user }}"
+role_regards_front_container_run_group: "{{ group_container_run_group }}"
+role_regards_front_setype: "{{ group_setype }}"
+role_regards_front_seuser: "{{ group_seuser }}"
+
+# Vars for config file
+role_regards_front_public_server_port: "{{ group_docker_mservices.front.port }}"
+# Gateway URI to address when using regards-front reverse proxy
+gateway_default:
+  host: rs-gateway
+  http: 9030
+role_regards_gateway_uri: "{{ group_docker_mservices.gateway.host | default(gateway_default.host) }}:{{ group_docker_mservices.gateway.http | default(gateway_default.http) }}"
+role_regards_dns_resolver: "127.0.0.11"

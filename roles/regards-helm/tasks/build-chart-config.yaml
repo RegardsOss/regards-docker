@@ -1,0 +1,27 @@
+#
+# Create a chart in output directory. 
+# Charts with specific structure have specific task file.
+#
+---
+  - name: "[helm/{{ bms_ms_name }}] Copy logback ConfigMap source file"
+    copy:
+      src: "{{ playbook_dir }}/roles/regards-logback/files/{{ bms_ms_name }}/logback.xml"
+      dest: "{{ output_dir }}/{{ bms_ms_name }}/config/logback.xml"
+
+  - name: "[helm/{{ bms_ms_name }}] Generate default values"
+    template:
+      src: "{{ role_path }}/charts/{{ bms_ms_name }}/{{ template_file }}"
+      dest: "{{ output_dir }}/{{ bms_ms_name }}/{{ template_file }}"
+    vars:
+      config_maps:
+        - name: "rs-{{ bms_ms_name }}-config"
+          paths: 
+            - sub_path: "bootstrap.properties"
+              mount_path: "/bootstrap.properties"
+            - sub_path: "logback.xml"
+              mount_path: "/config/logback.xml"
+    with_items:
+      - Chart.yaml
+      - values.yaml
+    loop_control:
+      loop_var: template_file

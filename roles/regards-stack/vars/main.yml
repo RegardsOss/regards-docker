@@ -1,0 +1,56 @@
+---
+# Stack infos
+role_regards_stack_stack_name: "{{ group_stack_name }}"
+
+# Folder structure
+role_regards_stack_workspace_local: "{{ group_workdir_local }}{{ group_stack_name }}/workspace/"
+role_regards_stack_workspace_network: "{{ group_workdir_network }}{{ group_stack_name }}/workspace/"
+role_regards_stack_workdir_network: "{{ group_workdir_network }}"
+role_regards_stack_config: "{{ group_workdir_local }}{{ group_stack_name }}/config/"
+role_regards_stack_logback: "{{ role_regards_stack_config }}regards/logback/"
+role_regards_stack_stack: "{{ group_workdir_local }}{{ group_stack_name }}/stack/"
+
+# Files owners
+role_regards_stack_container_root_user: "{{ group_container_root_user }}"
+role_regards_stack_container_root_group: "{{ group_container_root_group }}"
+
+# Docker users
+role_regards_stack_container_run_uid: "{{ group_container_run_uid }}"
+role_regards_stack_container_run_gid: "{{ group_container_run_gid }}"
+
+# Docker conf
+role_regards_stack_docker_network_name: "{{ group_docker_network_name }}"
+role_regards_stack_registry: "{{ group_docker_registry }}"
+
+# List of microservices to run (with config), COTS to deploy and infos to access to these COTS
+role_regards_stack_mservices: "{{ group_docker_mservices }}"
+role_regards_stack_cots: "{{ group_docker_cots }}"
+role_regards_stack_cots_configuration: "{{ group_docker_cots_configuration }}"
+
+role_regards_stack_mservices_admin_image_name: "{{ (group_docker_mservices.admin | default({})).get('imageName', 'rs-admin') }}"
+role_regards_stack_mservices_admin_instance_image_name: "{{ (group_docker_mservices.admin_instance | default({})).get('imageName', 'rs-admin-instance') }}"
+
+postgres_default:
+  user: azertyuiop123456789
+  password: azertyuiop123456789
+
+role_regards_stack_config_postgres: 
+  user: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('user', postgres_default.user) }}"
+  password: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('user', postgres_default.password) }}"
+
+# Front conf
+# When true, the volume can be mounted
+role_regards_stack_mount_front_volume: "{{ group_workdir_network_allow_root }}"
+role_regards_stack_public_url: "{{ group_docker_mservices.front.protocol }}:\\/\\/{{ group_docker_mservices.front.host }}:{{ group_docker_mservices.front.port }}"
+
+# Microservices conf
+# When true, the workspace is granulary mounted, otherwise everything is mounted together
+role_regards_stack_mount_mservice_granular_network_volume: "{{ group_workdir_network_allow_root }}"
+
+# Fluent conf
+# When true, all microservices write logs on the same network file system
+role_regards_stack_all_logs_inside_same_network_storage: "{{ group_workdir_network == group_workdir_local }}"
+
+# When true, COTS workspace are mounted together and the configuration of each COTS makes the right link
+role_regards_stack_cots_configuration_use_ungranular_workspace_on_workdir_network: "{{ group_docker_cots_configuration.use_ungranular_workspace_on_workdir_network | default(false) }}"
+role_regards_stack_attach_cots_to_specific_node: "{{ role_regards_stack_workspace_local != role_regards_stack_workspace_network and not role_regards_stack_cots_configuration_use_ungranular_workspace_on_workdir_network }}"

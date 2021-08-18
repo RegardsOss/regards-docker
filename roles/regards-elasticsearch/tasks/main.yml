@@ -1,0 +1,45 @@
+---
+  - name: Create REGARDS structure
+    file:
+      path: "{{ role_regards_elasticsearch_workspace_local }}elasticsearch/"
+      state: directory
+      mode: '0750'
+      owner: "{{ role_regards_elasticsearch_container_root_user }}"
+      group: "{{ role_regards_elasticsearch_container_root_group }}"
+      setype: "{{ role_regards_elasticsearch_setype }}"
+      seuser: "{{ role_regards_elasticsearch_seuser }}"
+
+  - name: Create Elasticsearch workspace
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: '2770'
+      owner: "{{ role_regards_elasticsearch_container_run_user }}"
+      group: "{{ role_regards_elasticsearch_container_run_group }}"
+      setype: "{{ role_regards_elasticsearch_setype }}"
+      seuser: "{{ role_regards_elasticsearch_seuser }}"
+    with_items:
+      - "{{ role_regards_elasticsearch_workspace_local }}elasticsearch/data"
+      - "{{ role_regards_elasticsearch_workspace_local }}elasticsearch/backup"
+      - "{{ role_regards_elasticsearch_workspace_local }}elasticsearch/tmpjna"
+      - "{{ role_regards_elasticsearch_workspace_local }}elasticsearch/data-logs"
+      - "{{ role_regards_elasticsearch_workspace_local }}elasticsearch/backup-logs"
+      - "{{ role_regards_elasticsearch_workspace_local }}elasticsearch/tmpjna-logs"
+
+  - name: Copy configuraton
+    template:
+      src: "{{ item }}"
+      dest: "{{ role_regards_elasticsearch_conf_local }}"
+      mode: '0555'
+      owner: "{{ role_regards_elasticsearch_container_run_user }}"
+      group: "{{ role_regards_elasticsearch_container_run_group }}"
+    with_items:
+      - elasticsearch.yml
+      - elasticsearch-logs.yml
+
+  - name: Set vm.max_map_count to sysctl for Ref
+    sysctl:
+      name: vm.max_map_count
+      value: "262144"
+      sysctl_file: /etc/sysctl.d/55-regards-ref.conf
+      reload: yes

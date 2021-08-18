@@ -1,0 +1,114 @@
+version: '3.7'
+services:
+
+{% if role_regards_stack_cots.elasticsearch_logs is defined %}
+  rs-logs-elasticsearch:
+    image: {{role_regards_stack_registry}}/regards-elasticsearch:{{ role_regards_stack_cots.elasticsearch_logs.tag | default("latest") }}
+    user: "{{role_regards_stack_container_run_uid}}:{{role_regards_stack_container_run_gid}}"
+    hostname: rs-logs-elasticsearch
+    read_only: true
+    networks:
+      - {{ role_regards_stack_docker_network_name }}
+    volumes:
+{% if role_regards_stack_cots_configuration_use_ungranular_workspace_on_workdir_network %}
+      - {{ role_regards_stack_workdir_network }}:/share
+{% else %}
+      - {{role_regards_stack_workspace_local}}elasticsearch/data-logs:/usr/share/elasticsearch/data
+      - {{role_regards_stack_workspace_local}}elasticsearch/backup-logs:/usr/share/elasticsearch/backup
+{% endif %}
+      - {{role_regards_stack_workspace_local}}elasticsearch/tmpjna-logs:/tmpjna
+      - {{ role_regards_stack_config }}elasticsearch/elasticsearch-logs.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - type: tmpfs
+        target: /tmp
+      - type: tmpfs
+        target: /usr/share/elasticsearch/logs
+{% if role_regards_stack_cots.elasticsearch_logs.http is defined or role_regards_stack_cots.elasticsearch_logs.client is defined %}
+    ports:
+{% if role_regards_stack_cots.elasticsearch_logs.http is defined %}
+      - "{{ role_regards_stack_cots.elasticsearch_logs.http }}:9200"
+{% endif %}
+{% if role_regards_stack_cots.elasticsearch_logs.client is defined %}
+      - "{{ role_regards_stack_cots.elasticsearch_logs.client }}:9300"
+{% endif %}
+{% endif %}
+    environment:
+      - cluster.name={{ role_regards_stack_cots_configuration.elasticsearch_logs.cluster_name }}
+      - bootstrap.memory_lock=false
+      - "ES_JAVA_OPTS=-Xms500m -Xmx500m -Djna.tmpdir=/tmpjna"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+{% if role_regards_stack_attach_cots_to_specific_node|bool %}
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.hostname == {{ hostvars[groups.elasticsearch[0]].ansible_host }}]
+{% endif %}
+{% endif %}
+
+{% if role_regards_stack_cots.fluent is defined %}
+  rs-fluent:
+    image: {{role_regards_stack_registry}}/regards-fluent:{{ role_regards_stack_cots.fluent.tag | default("latest") }}
+    user: "{{role_regards_stack_container_run_uid}}:{{role_regards_stack_container_run_gid}}"
+    hostname: rs-fluent
+    read_only: true
+    networks:
+      - {{ role_regards_stack_docker_network_name }}
+    volumes:
+      - {{ role_regards_stack_config }}fluentd/fluent.conf:/fluentd/etc/fluent.conf:ro
+      - {{ role_regards_stack_workspace_local }}regards/logs/config:/logs/config
+      - {{ role_regards_stack_workspace_local }}regards/logs/registry:/logs/registry
+      - {{ role_regards_stack_workspace_local }}regards/logs/gateway:/logs/gateway
+      - {{ role_regards_stack_workspace_local }}regards/logs/admin-instance:/logs/admin-instance
+      - {{ role_regards_stack_workspace_local }}regards/logs/admin:/logs/admin
+      - {{ role_regards_stack_workspace_local }}regards/logs/authentication:/logs/authentication
+      - {{ role_regards_stack_workspace_local }}regards/logs/dam:/logs/dam
+      - {{ role_regards_stack_workspace_local }}regards/logs/notifier:/logs/notifier
+      - {{ role_regards_stack_workspace_local }}regards/logs/fem:/logs/fem
+      - {{ role_regards_stack_workspace_local }}regards/logs/catalog:/logs/catalog
+      - {{ role_regards_stack_workspace_local }}regards/logs/access-instance:/logs/access-instance
+      - {{ role_regards_stack_workspace_local }}regards/logs/access-project:/logs/access-project
+      - {{ role_regards_stack_workspace_local }}regards/logs/front:/logs/front
+      - {{ role_regards_stack_workspace_local }}regards/logs/storage:/logs/storage
+      - {{ role_regards_stack_workspace_local }}regards/logs/order:/logs/order
+      - {{ role_regards_stack_workspace_local }}regards/logs/ingest:/logs/ingest
+      - {{ role_regards_stack_workspace_local }}regards/logs/dataprovider:/logs/dataprovider
+      - type: tmpfs
+        target: /tmp
+      - type: tmpfs
+        target: /fluentd/logs
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+{% if not role_regards_stack_all_logs_inside_same_network_storage|bool %}
+    deploy:
+      mode: global
+{% endif %}
+{% endif %}
+
+
+
+{% if role_regards_stack_cots.kibana_logs is defined %}
+  rs-logs-kibana:
+    image: {{role_regards_stack_registry}}/regards-kibana:{{ role_regards_stack_cots.kibana_logs.tag | default("latest") }}
+    user: "{{role_regards_stack_container_run_uid}}:{{role_regards_stack_container_run_gid}}"
+    hostname: rs-logs-kibana
+    read_only: true
+    networks:
+      - {{ role_regards_stack_docker_network_name }}
+    volumes:
+      - type: tmpfs
+        target: /usr/share/kibana/optimize/
+    environment:
+      - ELASTICSEARCH_URL=http://rs-logs-elasticsearch:9200
+{% if role_regards_stack_cots.kibana_logs.http is defined %}
+    ports:
+      - "{{ role_regards_stack_cots.kibana_logs.http }}:5601"
+{% endif %}
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+{% endif %}

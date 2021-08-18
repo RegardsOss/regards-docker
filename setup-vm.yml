@@ -1,0 +1,27 @@
+---
+- name: "[ON ANSIBLE HOST] Create Docker certificates for inventory>docker_nodes"
+  hosts: ansible_host
+  connection: local
+  roles:
+    - ansible-docker-swarm/roles/gen-certificates
+
+- name: Setup Docker and Docker Swarm
+  hosts: docker_nodes
+  roles:
+    - ansible-docker-swarm/roles/install-modules
+    - ansible-docker-swarm/roles/docker-installation
+
+- name: Initialize Docker Swarm
+  hosts: swarm_manager
+  roles:
+    - ansible-docker-swarm/roles/docker-swarm-init
+
+- name: Add workers to the Swarm
+  hosts: swarm_workers
+  roles:
+    - ansible-docker-swarm/roles/docker-swarm-add-worker
+
+- name: Setup Regards pre-requisites
+  hosts: docker_nodes
+  roles:
+    - setup-system

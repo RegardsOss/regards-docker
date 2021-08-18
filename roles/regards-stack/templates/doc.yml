@@ -1,0 +1,25 @@
+version: '3.7'
+services:
+
+{% if role_regards_stack_cots.doc is defined %}
+  rs-doc:
+    image: {{role_regards_stack_registry}}/regards-doc:{{ role_regards_stack_cots.doc.tag }}
+    user: "{{role_regards_stack_container_run_uid}}:{{role_regards_stack_container_run_gid}}"
+    hostname: rs-doc
+    read_only: true
+    networks:
+      - {{role_regards_stack_docker_network_name}}
+{% if role_regards_stack_cots.doc.http is defined %}
+    ports:
+      - "{{ role_regards_stack_cots.doc.http }}:8080"
+{% endif %}
+    volumes:
+      - type: tmpfs
+        target: /var/cache/nginx
+      - type: tmpfs
+        target: /run
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+{% endif %}

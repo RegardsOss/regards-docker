@@ -1,0 +1,71 @@
+#
+# Copyright 2018-2020, CS GROUP – France, http://www.c-s.fr
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+- name: Check if Swarm has already been Initialized. This step can be safely ignored and has no impact on a successful Swarm setup
+  become: yes
+  shell: >
+        . /etc/profile.d/docker-client.sh;
+        docker node ls
+  register: swarm_status
+  ignore_errors: true
+  tags: swarm
+
+- name: Initialize Docker Swarm
+  become: yes
+  shell: >
+        . /etc/profile.d/docker-client.sh;
+        docker swarm init
+        --advertise-addr={{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:2377
+  when: swarm_status.rc != 0
+  run_once: true
+  tags: swarm
+
+- name: Remove ingress network
+  become: yes
+  shell: >
+        . /etc/profile.d/docker-client.sh;
+        printf 'Y' | docker network rm ingress
+  when: "'docker_ingress_network' in hostvars[inventory_hostname] and 'docker_ingress_network_gateway' in hostvars[inventory_hostname]"
+  run_once: true
+  ignore_errors: true
+  tags: swarm
+
+- name: Set netmask for Ingress network
+  become: yes
+  shell: >
+        . /etc/profile.d/docker-client.sh;
+        docker network create --driver overlay --ingress --subnet={{ docker_ingress_network }} --gateway={{ docker_ingress_network_gateway }} --opt com.docker.network.driver.mtu=1200 ingress
+  when: "'docker_ingress_network' in hostvars[inventory_hostname] and 'docker_ingress_network_gateway' in hostvars[inventory_hostname]"
+  run_once: true
+  retries: 3
+  delay: 5
+  register: result
+  until: result.rc == 0
+  tags: swarm
+
+- name: Get the Manager join-token
+  become: yes
+  shell: >
+        . /etc/profile.d/docker-client.sh;
+        docker swarm join-token --quiet manager
+  register: manager_token
+  tags: swarm
+
+- name: Get the worker join-token
+  become: yes
+  shell: >
+        . /etc/profile.d/docker-client.sh;
+        docker swarm join-token --quiet worker
+  register: worker_token
+  tags: swarm

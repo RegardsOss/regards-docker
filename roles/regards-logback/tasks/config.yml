@@ -1,0 +1,9 @@
+---
+
+  - name: Send config files
+    copy:
+      src: files/
+      dest: "{{ role_regards_logback_workdir }}/"
+      mode: '0555'
+      owner: "{{ role_regards_logback_container_run_user }}"
+      group: "{{ role_regards_logback_container_run_group }}"

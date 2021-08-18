@@ -1,0 +1,75 @@
+---
+  - name: Create REGARDS basic structure
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: '0750'
+      owner: "{{ role_regards_init_master_container_root_user }}"
+      group: "{{ role_regards_init_master_container_root_group }}"
+      setype: "{{ role_regards_init_master_setype }}"
+      seuser: "{{ role_regards_init_master_seuser }}"
+    with_items:
+      - "{{ role_regards_init_master_config }}"
+      - "{{ role_regards_init_master_stack }}"
+      # legacy
+      - "{{ role_regards_init_master_cli }}"
+    become: true
+
+  - name: Create docker network if not existing
+  # Requires shell module when it includes stream operations
+  # The current user shall be in the docker group
+    shell: > 
+      docker network inspect {{ role_regards_init_master_docker_network_name | quote }} >/dev/null 2>&1 ||
+      docker network create 
+      --driver overlay 
+      --subnet={{ role_regards_init_master_docker_network_subnet  | quote }} 
+      --gateway={{ role_regards_init_master_docker_network_gateway | quote }} 
+      {{ role_regards_init_master_docker_network_name | quote }}
+
+
+  - name: Add dev CLI (legacy)
+    template:
+      src: "{{ item }}"
+      dest: "{{ role_regards_init_master_cli }}"
+      mode: '0750'
+      owner: "{{ role_regards_init_master_container_root_user }}"
+      group: "{{ role_regards_init_master_container_root_group }}"
+    with_items:
+      - status.sh
+      - deploy.sh
+      - update.sh
+      - logs.sh
+      - reboot.sh
+      - exec.sh
+      - health.sh
+      - shutdown.sh
+    become: true
+
+  - name: Create REGARDS basic structure
+    file:
+      path: "{{ role_regards_init_master_cli_system_install }}"
+      state: directory
+      mode: '0750'
+      owner: root
+      group: "{{ role_regards_init_master_container_root_group }}"
+      setype: "{{ role_regards_init_master_setype }}"
+      seuser: "{{ role_regards_init_master_seuser }}"
+    become: true
+
+  - name: Add dev CLI into etc
+    template:
+      src: "{{ item }}"
+      dest: "{{ role_regards_init_master_cli_system_install }}"
+      mode: '0750'
+      owner: root
+      group: "{{ role_regards_init_master_container_root_group }}"
+    with_items:
+      - status.sh
+      - deploy.sh
+      - update.sh
+      - logs.sh
+      - reboot.sh
+      - exec.sh
+      - health.sh
+      - shutdown.sh
+    become: true

@@ -1,0 +1,25 @@
+---
+
+role_regards_postgres_workspace_local: "{{ group_workdir_local }}{{group_stack_name}}/workspace/"
+role_regards_postgres_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/postgres/"
+
+role_regards_postgres_container_run_user: "{{ group_container_run_user }}"
+role_regards_postgres_container_run_group: "{{ group_container_run_group }}"
+role_regards_postgres_setype: "{{ group_setype }}"
+role_regards_postgres_seuser: "{{ group_seuser }}"
+
+role_regards_postgres_config_default_project: "{{ group_config_mservices.init_project }}"
+
+role_regards_postgres_nb_connections_by_tenant: 5
+role_regards_postgres_nb_instance_mservices: 2
+# role_regards_postgres_nb_instance_mservices + front + gateway + registry + config
+role_regards_postgres_nb_service_not_multi_tenant: 6
+# nbServiceCrossTenant * maxPoolConnectionByTenant * nbTenant
+role_regards_postgres_nb_connections_instance: "{{( group_docker_mservices | length - role_regards_postgres_nb_service_not_multi_tenant) * role_regards_postgres_nb_connections_by_tenant * group_docker_cots_configuration.postgres.nbTenant }}"
+# nbServiceInstance * maxPoolConnection
+role_regards_postgres_nb_connections_tenant: "{{ role_regards_postgres_nb_instance_mservices * role_regards_postgres_nb_connections_by_tenant }}"
+role_regards_postgres_nb_connections: "{{ role_regards_postgres_nb_connections_instance | int + role_regards_postgres_nb_connections_tenant | int}}"
+
+# When true, the container will have to use another location for postgres data
+role_regards_postgres_cots_configuration_use_ungranular_workspace_on_workdir_network: "{{ group_docker_cots_configuration.use_ungranular_workspace_on_workdir_network | default(false) }}"
+role_regards_postgres_cots_configuration_use_ungranular_workspace_on_workdir_network_path: "/share/{{ group_stack_name }}/workspace/postgres"

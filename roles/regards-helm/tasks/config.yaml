@@ -1,0 +1,98 @@
+---
+  - name: "[helm/{{ bms_ms_name }}] Generate config templates"
+    include_role:
+      name: regards-mconfig
+    vars:
+      role_regards_mconfig_workdir: "{{ output_dir }}/{{ bms_ms_name }}/config/"
+      role_regards_mconfig_container_run_user: "{{ ansible_user }}"
+      role_regards_mconfig_container_run_group: "{{ ansible_user }}"
+      group_config_mservices:
+        jwt_secret: "{{ '{{' }} default .Values.global.regards.jwtSecret .Values.regards.jwtSecret {{ '}}' }}"
+        cipher_iv: "{{ '{{' }} default .Values.global.regards.cipherIV .Values.regards.cipherIV {{ '}}' }}"
+        init_project: "{{ '{{' }} default .Values.global.regards.initProject .Values.regards.initProject {{ '}}' }}"
+        instance_admin:
+          username: "{{ '{{' }} default .Values.global.regards.instanceAdmin.username .Values.regards.instanceAdmin.username {{ '}}' }}"
+          password: "{{ '{{' }} default .Values.global.regards.instanceAdmin.password .Values.regards.instanceAdmin.password {{ '}}' }}"
+        mail:
+          host: "{{ '{{' }} default .Values.global.regards.mail.host .Values.regards.mail.host {{ '}}' }}"
+          port: "{{ '{{' }} default .Values.global.regards.mail.port .Values.regards.mail.port {{ '}}' }}"
+          username: "{{ '{{' }} default .Values.global.regards.mail.username .Values.regards.mail.username {{ '}}' }}"
+          password: "{{ '{{' }} default .Values.global.regards.mail.password .Values.regards.mail.password {{ '}}' }}"
+          noreply: "{{ '{{' }} default .Values.global.regards.mail.noreply .Values.regards.mail.noreply {{ '}}' }}"
+        proxy:
+          host: "{{ '{{' }} default .Values.global.regards.proxy.host .Values.regards.proxy.host {{ '}}' }}"
+          port: "{{ '{{' }} default .Values.global.regards.proxy.port .Values.regards.proxy.port {{ '}}' }}"
+          no_proxy: "{{ '{{' }} default .Values.global.regards.proxy.noProxy .Values.regards.proxy.noProxy {{ '}}' }}"
+        eureka:
+          host: "{{ '{{' }} default .Values.global.regards.eureka.host .Values.regards.eureka.host {{ '}}' }}"
+          port: "{{ '{{' }} default .Values.global.regards.eureka.port .Values.regards.eureka.port {{ '}}' }}"
+        elastic:
+          host: "{{ '{{' }} default .Values.global.regards.elastic.host .Values.regards.elastic.host {{ '}}' }}"
+          cluster: "{{ '{{' }} default .Values.global.regards.elastic.cluster .Values.regards.elastic.cluster {{ '}}' }}"
+          port: "{{ '{{' }} default .Values.global.regards.elastic.port .Values.regards.elastic.port {{ '}}' }}"
+        postgres:
+          host: "{{ '{{' }} default .Values.global.regards.postgres.host .Values.regards.postgres.host {{ '}}' }}"
+          port: "{{ '{{' }} default .Values.global.regards.postgres.port .Values.regards.postgres.port {{ '}}' }}"
+          user: "{{ '{{' }} default .Values.global.regards.postgres.user .Values.regards.postgres.user {{ '}}' }}"
+          password: "{{ '{{' }} default .Values.global.regards.postgres.password .Values.regards.postgres.password {{ '}}' }}"
+        amqp:
+          host: "{{ '{{' }} default .Values.global.regards.amqp.host .Values.regards.amqp.host {{ '}}' }}"
+          client: "{{ '{{' }} default .Values.global.regards.amqp.client .Values.regards.amqp.client {{ '}}' }}"
+          http: "{{ '{{' }} default .Values.global.regards.amqp.http .Values.regards.amqp.http {{ '}}' }}"
+          user: "{{ '{{' }} default .Values.global.regards.amqp.user .Values.regards.amqp.user {{ '}}' }}"
+          password: "{{ '{{' }} default .Values.global.regards.amqp.password .Values.regards.amqp.password {{ '}}' }}"
+      group_docker_mservices:
+        front:
+          protocol: http
+          host: "{{ '{{' }} default .Values.global.regards.front.host .Values.regards.front.host {{ '}}' }}"
+          port: "{{ '{{' }} default .Values.global.regards.front.port .Values.regards.front.port {{ '}}' }}"
+      group_workdir_network_allow_root: true
+      group_stack_name: nil
+
+  - name: "[helm/{{ bms_ms_name }}] Generate default values"
+    template:
+      src: "{{ role_path }}/charts/{{ bms_ms_name }}/{{ template_file }}"
+      dest: "{{ output_dir }}/{{ bms_ms_name }}/{{ template_file }}"
+    vars:
+      config_maps:
+        - name: "rs-{{ bms_ms_name }}-config"
+          paths:
+            - sub_path: "application.properties"
+              mount_path: "/config/regards/application.properties"
+            - sub_path: "rs-access-project.properties"
+              mount_path: "/config/regards/rs-access-project.properties"
+            - sub_path: "rs-admin.properties"
+              mount_path: "/config/regards/rs-admin.properties"
+            - sub_path: "rs-catalog.properties"
+              mount_path: "/config/regards/rs-catalog.properties"
+            - sub_path: "rs-dataprovider.properties"
+              mount_path: "/config/regards/rs-dataprovider.properties"
+            - sub_path: "rs-notifier.properties"
+              mount_path: "/config/regards/rs-notifier.properties"
+            - sub_path: "rs-registry.properties"
+              mount_path: "/config/regards/rs-registry.properties"
+            - sub_path: "rs-gateway.properties"
+              mount_path: "/config/regards/rs-gateway.properties"
+            - sub_path: "rs-access-instance.properties"
+              mount_path: "/config/regards/rs-access-instance.properties"
+            - sub_path: "rs-admin-instance.properties"
+              mount_path: "/config/regards/rs-admin-instance.properties"
+            - sub_path: "rs-authentication.properties"
+              mount_path: "/config/regards/rs-authentication.properties"
+            - sub_path: "rs-dam.properties"
+              mount_path: "/config/regards/rs-dam.properties"
+            - sub_path: "rs-fem.properties"
+              mount_path: "/config/regards/rs-fem.properties"
+            - sub_path: "rs-ingest.properties"
+              mount_path: "/config/regards/rs-ingest.properties"
+            - sub_path: "rs-order.properties"
+              mount_path: "/config/regards/rs-order.properties"
+            - sub_path: "rs-processing.properties"
+              mount_path: "/config/regards/rs-processing.properties"
+            - sub_path: "rs-storage.properties"
+              mount_path: "/config/regards/rs-storage.properties"
+    with_items:
+      - Chart.yaml
+      - values.yaml
+    loop_control:
+      loop_var: template_file

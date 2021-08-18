@@ -1,0 +1,114 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# Default values for front.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+#######################################
+#                                     #
+#          K8S configuration          #
+#                                     #
+#   Override values only.             #
+#   See regards-common for defaults   #
+#                                     #
+#######################################
+
+global:
+  regards: 
+    servicesVersion: "{{ regards_version }}"
+    imageRegistry: "{{ group_docker_registry }}"
+    imagePullPolicy: IfNotPresent
+    imagePullSecrets:
+      - name: regards-docker-registry
+    gatewayService:
+      host: "{{ group_docker_mservices.gateway.host }}"
+      port: {{ group_docker_mservices.gateway.http }}
+    kubedns: "{{ role_regards_dns_resolver }}"
+
+image:
+  tag: "{{ group_docker_mservices.front.tag  }}"
+  name: rs-front
+  # tag: {{ group_docker_mservices.front.tag }}
+
+env:
+  - name: GATEWAY_PUBLIC_URL
+    # NOTE: should be escaped: http://localhost => http\\/\\/localhost
+    value: {{ group_docker_mservices.front.protocol }}:\\/\\/{{ group_docker_mservices.front.host }}:{{ group_docker_mservices.front.port }}
+
+volumes:
+{% if config_maps %}
+  configmaps:
+  {% for config_map in config_maps %}
+    - name: "{{ config_map.name }}"
+  {% endfor %}
+{% else %}
+  configmaps: []
+{% endif %}
+  emptydirs:
+    - name: tmpfs-cache
+      medium: Memory
+    - name: tmpfs-conf
+      medium: Memory
+    - name: tmpfs-run
+      medium: Memory
+  persistentVolumeClaims:
+    - name: regards-plugins-front
+
+volumeMounts:
+{% if config_maps %}
+  configmaps:
+  {% for config_map in config_maps %}
+    {% for path in config_map.paths %}
+    - name: "{{ config_map.name }}"
+      subPath: "{{ path.sub_path }}"
+      mountPath: "{{ path.mount_path }}"
+    {% endfor %}
+  {% endfor %}
+{% else %}
+  configmaps: []
+{% endif %}
+  emptydirs:
+    - name: tmpfs-cache
+      mountPath: /var/cache/nginx
+    - name: tmpfs-conf
+      mountPath: /var/www/conf
+    - name: tmpfs-run
+      mountPath: /run
+  persistentVolumeClaims:
+    - name: regards-plugins-front
+      mountPath: /var/www/public/
+
+persistence:
+  name: regards-plugins-front
+  accessMode: ReadWriteOnce
+  volumeMode: Filesystem
+  size: 2Gi
+  # storageClass: "-"
+
+{% if group_docker_mservices.front.port is defined %}
+ports:
+  - name: http
+    containerPort: {{ group_docker_mservices.front.port }}
+    protocol: TCP
+{% endif %}
+
+# livenessProbe:
+#   httpGet:
+#     path: /
+#     port: http
+#   initialDelaySeconds: 20
+#   timeoutSeconds: 10
+#   periodSeconds: 5
+
+# readinessProbe:
+#   httpGet:
+#     path: /
+#     port: http
+#   initialDelaySeconds: 5
+#   timeoutSeconds: 2
+#   periodSeconds: 5
+
+service:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: {{ group_docker_mservices.front.port }}

@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mapproxy.fullname" . }}
+  labels:
+    {{- include "mapproxy.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "mapproxy.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "mapproxy.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/mapproxy-config: {{ tpl (.Files.Get "config/mapproxy.yaml" ) . | sha256sum }}
+        checksum/mapproxy-nginx-config:  {{ print (.Files.Get "config/nginx.conf" ) | sha256sum }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      containers:
+        - name: mapproxy
+          image: "{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+          volumeMounts:
+            - name: mapproxy-config
+              mountPath: "/mapproxy/config"
+            - name: mapproxy-cache-pvc
+              mountPath: "/mapproxy/cache_data"
+        {{- with .Values.ports }}
+          ports:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        - name: reverse-proxy
+          image: "{{ .Values.nginx.image.registry }}/{{ .Values.nginx.image.name }}:{{ .Values.nginx.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+        {{- with .Values.nginx.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+          volumeMounts:
+            - name: mapproxy-nginx-config
+              mountPath: "/etc/nginx/nginx.conf"
+              subPath: "nginx.conf"
+        {{- with .Values.nginx.ports }}
+          ports:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.nginx.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.nginx.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.nginx.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+        {{- with .Values.nginx.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+        {{- end }}
+      volumes:
+        - name: mapproxy-config
+          configMap:
+            name: {{ include "mapproxy.fullname" . }}-config
+        - name: mapproxy-nginx-config
+          configMap:
+            name: {{ include "mapproxy.fullname" . }}-nginx-config
+        - name: mapproxy-cache-pvc
+          persistentVolumeClaim:
+            claimName: {{ include "mapproxy.fullname" . }}-cache-pvc
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

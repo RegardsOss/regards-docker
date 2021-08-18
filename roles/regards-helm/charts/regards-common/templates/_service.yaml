@@ -1,0 +1,39 @@
+{{/*
+#########################
+#                       #
+#   Create a service.   #
+#                       #
+#########################
+*/}}
+{{- define "regards-common.service" -}}
+
+{{/*
+Helm template magic:
+Allow each chart depending on the common chart to
+override the common values with its own values.
+*/}}
+{{- $common := dict "Values" (get .Values "regards-common") -}} 
+{{- $noCommon := omit .Values "regards-common" -}} 
+{{- $overrides := dict "Values" $noCommon -}} 
+{{- $noValues := omit . "Values" -}} 
+{{- with merge $noValues $overrides $common -}}
+
+{{/*
+Now the template.
+*/}}
+apiVersion: v1
+kind: Service
+{{ template "regards-common.metadata" . }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  {{- range .Values.service.ports }}
+    - port: {{ .port }}
+      targetPort: http
+      protocol: TCP
+      name: {{ .name }}
+  {{- end }}
+  selector:
+    {{- include "regards-common.selectorLabels" . | nindent 4 }}
+{{- end -}}
+{{- end -}}

@@ -1,0 +1,62 @@
+#
+# Copyright 2018-2020, CS GROUP – France, http://www.c-s.fr
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+- name: Add Docker’s official GPG key
+  become: yes
+  apt_key:
+    url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
+    state: present
+
+- name: "[DEBIAN] {{ ansible_facts['distribution'] }} Add Docker Repository"
+  become: yes
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/{{ ansible_os_family | lower }} {{ ansible_distribution_release | lower }} stable
+    state: present
+  when: role_docker_install_enable_add_repo
+  tags: docker
+
+- name: "[DEBIAN] Remove banned Packages (Debian)"
+  become: yes
+  apt:
+    name:
+      - firewalld
+      - firewalld-filesystem
+      - docker
+      - docker-client
+      - docker-client-latest
+      - docker-common
+      - docker-latest
+      - docker-latest-logrotate
+      - docker-logrotate
+      - docker-engine
+    state: absent
+    update_cache: no
+  when: ansible_facts['os_family'] == "Debian"
+  tags: docker
+
+- name: "[DEBIAN] Install Docker Dependencies"
+  become: yes
+  apt:
+    name:
+      - ca-certificates
+      - curl
+      - iptables
+      - ufw
+      - containerd.io
+      - docker-ce-cli
+      - docker-ce
+    state: latest
+    update_cache: yes
+  when: ansible_facts['os_family'] == "Debian"
+  tags: docker

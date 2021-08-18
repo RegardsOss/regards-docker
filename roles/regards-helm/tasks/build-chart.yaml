@@ -1,0 +1,34 @@
+#
+# Create a chart in output directory. 
+# Charts with specific structure have specific task file.
+#
+---
+  - block:
+      - name: "[helm/{{ bms_ms_name }}] Copy static Helm files"
+        copy:
+          src: "{{ role_path }}/charts/{{ bms_ms_name }}"
+          dest: "{{ output_dir }}"
+
+      - name: "[helm/{{ bms_ms_name }}] Get configuration tasks filename."
+        stat: path="{{ role_path }}/tasks/{{ bms_ms_name }}.yaml"
+        register: p
+
+      
+      # for charts that needs configuration
+      - include_tasks: "{{ bms_config_tasks_file }}"
+        vars:
+          # The default configuration building tasks file is build-chart-config.yaml, 
+          # unless a file exists in tasks folder, with the name <chart-name>.yaml
+          bms_config_tasks_file: "{% if p.stat.exists %}{{ bms_ms_name }}.yaml{% else %}build-chart-config.yaml{% endif %}"
+        when: bms_build_config|bool == true
+
+      # update dependency of the chart
+      - name: "[helm/{{ bms_ms_name }}] Dependency update"
+        when: bms_helm_depup|bool == true
+        shell: helm dep up {{ bms_ms_name }} --skip-refresh
+        args:
+          chdir: "{{ output_dir }}"
+        register: helm_out
+      
+      - debug: var=helm_out.stdout_lines
+        when: bms_helm_depup|bool == true

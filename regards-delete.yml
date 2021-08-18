@@ -1,0 +1,13 @@
+---
+  - name: Shutdown REGARDS and delete network disk
+    hosts: master
+  
+    roles:
+      - regards-erase
+
+  - name: Delete all local files
+    hosts: regards_nodes
+
+    roles:
+      - regards-erase-node
+    

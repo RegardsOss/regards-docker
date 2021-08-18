@@ -1,0 +1,108 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# Default values for registry.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+#######################################
+#                                     #
+#          K8S configuration          #
+#                                     #
+#   Override values only.             #
+#   See regards-common for defaults   #
+#                                     #
+#######################################
+
+global:
+  regards: 
+    servicesVersion: "{{ regards_version }}"
+    imageRegistry: "{{ group_docker_registry }}"
+    imagePullPolicy: IfNotPresent
+    imagePullSecrets:
+      - name: regards-docker-registry
+    configService:
+      host: "{{ group_docker_mservices.config.host }}"
+      port: {{ group_docker_mservices.config.http }}
+
+image:
+  tag: "{{ group_docker_mservices.registry.tag }}"
+  name: rs-registry
+
+entrypointOverride: #TODO do this with an initContainer instead?
+  startCommand: "java -Xmx128m -Djava.security.egd=file:/dev/./urandom -agentlib:jdwp=transport=dt_socket,address=10500,server=y,suspend=n -jar /bootstrap-registry-{{ regards_version }}.jar"
+  waitForIts:
+    - host: {{ group_docker_mservices.config.host }}
+      port: {{ group_docker_mservices.config.http }}
+      strict: false
+      quiet: false
+      timeout: 0
+
+volumes:
+{% if config_maps %}
+  configmaps:
+  {% for config_map in config_maps %}
+    - name: "{{ config_map.name }}"
+  {% endfor %}
+{% else %}
+  configmaps: []
+{% endif %}
+  emptydirs:
+    - name: tmpfs
+      medium: Memory
+
+volumeMounts:
+{% if config_maps %}
+  configmaps:
+  {% for config_map in config_maps %}
+    {% for path in config_map.paths %}
+    - name: "{{ config_map.name }}"
+      subPath: "{{ path.sub_path }}"
+      mountPath: "{{ path.mount_path }}"
+    {% endfor %}
+  {% endfor %}
+{% else %}
+  configmaps: []
+{% endif %}
+  emptydirs:
+    - name: tmpfs
+      mountPath: /tmp
+
+{% if group_docker_mservices.registry.http is defined or group_docker_mservices.registry.jdwp is defined or group_docker_mservices.registry.jmx is defined %}
+ports:
+{% if group_docker_mservices.registry.http is defined %}
+  - name: http
+    containerPort: {{ group_docker_mservices.registry.http }}
+    protocol: TCP
+{% endif %}
+{% if group_docker_mservices.registry.jdwp is defined %}
+  - name: jdwp
+    containerPort: {{ group_docker_mservices.registry.jdwp }}
+    protocol: TCP
+{% endif %}
+{% if group_docker_mservices.registry.jmx is defined %}
+  - name: jmx
+    containerPort: {{ group_docker_mservices.registry.jmx }}
+    protocol: TCP
+{% endif %}
+{% endif %}
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health
+    port: http
+  initialDelaySeconds: 20
+  timeoutSeconds: 10
+  periodSeconds: 5
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health
+    port: http
+  initialDelaySeconds: 5
+  timeoutSeconds: 2
+  periodSeconds: 5
+
+service:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: {{ group_docker_mservices.registry.http }}

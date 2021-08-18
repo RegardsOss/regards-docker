@@ -1,0 +1,49 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# Default values for regards-cots.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+#######################################
+#                                     #
+#          K8S configuration          #
+#                                     #
+#   Override values only.             #
+#   See regards-common for defaults   #
+#                                     #
+#######################################
+
+global:
+  kibanaEnabled: false
+  # When kibanaEnabled is true, use the coordinating name below so that es pods naming is consistent
+  # coordinating:
+    # name: rs-elasticsearch-coordinating
+  postgresql: {}
+  regards:
+    initProject: "{{ group_config_mservices.init_project }}"
+
+nbConnections: {{ role_regards_postgres_nb_connections }}
+
+postgresql:
+  enabled: true
+  postgresqlUsername: "{{ group_config_mservices.postgres.instance.user }}"
+  postgresqlPassword: "{{ group_config_mservices.postgres.instance.password }}"
+  initdbScriptsConfigMap: "{{ initdb_script_configmap_name }}"
+  extendedConfConfigMap: "{{ override_conf_configmap_name }}"
+
+rabbitmq:
+  enabled: true
+  auth:
+    username: "{{ group_config_mservices.amqp.user }}"
+    password: "{{ group_config_mservices.amqp.password }}"
+
+elasticsearch:
+  enabled: true
+  image:
+    tag: 6.5.0
+  kibana:
+    image:
+      tag: 6.5.0
+    configuration:
+      server:
+        basePath: /kibana
+        rewriteBasePath: true

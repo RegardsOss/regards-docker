@@ -1,0 +1,20 @@
+---
+
+dependencies: []
+
+galaxy_info:
+  author: Chronos
+  categories:
+  - docker
+  company: c-s.fr
+  description: Installing and configuring Docker and Docker Swarm.
+  galaxy_tags:
+    - system
+    - docker
+    - swarm
+  license: license (Apache-2.0)
+  min_ansible_version: 2.9.7
+  platforms:
+  - name: CentOS
+    versions:
+    - 7.6.1811

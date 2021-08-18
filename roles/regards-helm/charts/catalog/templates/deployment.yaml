@@ -1,0 +1,16 @@
+{{- template "regards-common.deployment" . -}}
+{{/*
+# {% if role_regards_stack_mservices.catalog is defined %}
+#   rs-catalog:
+#     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
+#     read_only: true
+#     networks:
+#       - {{ role_regards_stack_docker_network_name }}
+#     volumes:
+#       - {{ role_regards_stack_workspace_local }}regards/logs/catalog:/logs
+#     logging:
+#       options:
+#         max-size: "10m"
+#         max-file: "10"
+# {% endif %}
+*/}}

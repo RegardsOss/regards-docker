@@ -1,0 +1,9 @@
+# When false, regards users creation need to be done externally
+role_setup_enable_setup_regards_users : "{{ group_enable_setup_regards_users | default(true) }}"
+
+role_setup_container_root_group: "{{ group_container_root_group }}"
+role_setup_container_run_group: "{{ group_container_run_group }}"
+role_setup_container_run_user : "{{ group_container_run_user }}"
+
+role_setup_regards_user_uid: "{{ name_space_uid + group_container_run_uid }}"
+role_setup_regards_user_gid: "{{ name_space_gid + group_container_run_gid }}"

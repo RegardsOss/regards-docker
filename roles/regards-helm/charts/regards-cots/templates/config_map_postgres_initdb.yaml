@@ -1,0 +1,25 @@
+{{- if .Values.postgresql.enabled -}}
+{{/*
+Helm template magic:
+override the common values with this chart own values.
+*/}}
+{{- $common := dict "Values" (get .Values "regards-common") -}}
+{{- $noCommon := omit .Values "regards-common" -}}
+{{- $overrides := dict "Values" $noCommon -}}
+{{- $root := omit . "Values" -}}
+{{- with merge $root $overrides $common -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rs-postgres-initdb
+data:
+  0-init.sql: |-
+    {{- tpl (.Files.Get "config/init.sql" ) $root | nindent 4 }}
+
+  1-createPostgisExtensionForRsInstance.sh: |-
+    #!/bin/bash
+    PGPASSWORD={{ include "postgresql.postgres.password" . }} psql -U postgres -d rs_instance \
+    -c "create extension if not exists POSTGIS schema public;" \
+    -c "create extension if not exists POSTGIS_TOPOLOGY;"
+{{- end }}
+{{- end -}}

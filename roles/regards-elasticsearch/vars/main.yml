@@ -1,0 +1,17 @@
+---
+
+role_regards_elasticsearch_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/elasticsearch/"
+role_regards_elasticsearch_workspace_local: "{{ group_workdir_local }}{{group_stack_name}}/workspace/"
+
+role_regards_elasticsearch_container_root_user: "{{ group_container_root_user }}"
+role_regards_elasticsearch_container_root_group: "{{ group_container_root_group }}"
+
+role_regards_elasticsearch_container_run_user: "{{ group_container_run_user }}"
+role_regards_elasticsearch_container_run_group: "{{ group_container_run_group }}"
+role_regards_elasticsearch_setype: "{{ group_setype }}"
+role_regards_elasticsearch_seuser: "{{ group_seuser }}"
+
+
+# When true, the container will have to use another location for ES data
+role_regards_elasticsearch_cots_configuration_use_ungranular_workspace_on_workdir_network: "{{ group_docker_cots_configuration.use_ungranular_workspace_on_workdir_network | default(false) }}"
+role_regards_elasticsearch_cots_configuration_use_ungranular_workspace_on_workdir_network_path: "/share/{{ group_stack_name }}/workspace/elasticsearch"

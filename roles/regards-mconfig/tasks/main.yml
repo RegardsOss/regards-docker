@@ -1,0 +1,28 @@
+---
+
+  - name: Generate config files
+    template:
+      src: "{{ item }}"
+      dest: "{{ role_regards_mconfig_workdir }}"
+      mode: '0700'
+      owner: "{{ role_regards_mconfig_container_run_user }}"
+      group: "{{ role_regards_mconfig_container_run_group }}"
+    with_items:
+      - application.properties
+      - rs-access-project.properties
+      - rs-admin.properties
+      - rs-catalog.properties
+      - rs-dataprovider.properties
+      - rs-gateway.properties
+      - rs-notifier.properties
+      - rs-registry.properties
+      - rs-access-instance.properties
+      - rs-admin-instance.properties
+      - rs-authentication.properties
+      - rs-dam.properties
+      - rs-fem.properties
+      - rs-ingest.properties
+      - rs-order.properties
+      - rs-storage.properties
+      - rs-processing.properties
+      

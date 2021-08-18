@@ -1,0 +1,47 @@
+---
+
+- name: Create REGARDS structure
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0750'
+    owner: "{{ role_regards_plugins_container_root_user }}"
+    group: "{{ role_regards_plugins_container_root_group }}"
+    setype: "{{ role_regards_plugins_setype }}"
+    seuser: "{{ role_regards_plugins_seuser }}"
+  with_items:
+    - "{{ role_regards_plugins_workspace_local }}regards/plugins/"
+    - "{{ role_regards_plugins_workspace_local }}regards/storage/"
+  become: true
+
+- name: Create REGARDS plugins folders
+  file:
+    path: "{{ role_regards_plugins_workspace_local }}regards/plugins/{{ item }}"
+    state: directory
+    # Allow root and non root to write in this folder. Why ?
+    # These folders are mounted to containers;  but the parent folder too while deploying plugins 
+    mode: '2777'
+    owner: "{{ role_regards_plugins_container_run_user }}"
+    group: "{{ role_regards_plugins_container_run_group }}"
+    setype: "{{ role_regards_plugins_setype }}"
+    seuser: "{{ role_regards_plugins_seuser }}"
+  with_items:
+    - "{{ role_regards_plugins_microservice_having_plugin }}"
+  become: true
+
+- name: Pull plugins images
+  command:  docker pull {{ role_regards_plugins_docker_registry }}/{{ item.image }}:{{ item.tag }}
+  with_items:
+    - "{{ role_regards_plugins_plugins }}"
+
+- name: Run plugins container
+  command: > 
+    docker run --rm -i 
+    -v {{ role_regards_plugins_workspace }}:/regards-plugins 
+    {{ role_regards_plugins_docker_registry }}/{{ item.image }}:{{ item.tag }}
+  with_items:
+    - "{{ role_regards_plugins_plugins }}"
+
+- name: Ensure files are 0555
+  command: find {{ role_regards_plugins_workspace }} -type f -exec chmod 0555 {} \;
+  become: true

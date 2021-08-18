@@ -1,0 +1,11 @@
+{{/*
+Common metadata
+*/}}
+{{- define "regards-common.metadata" -}}
+metadata:
+  name: {{ include "regards-common.fullname" . }}
+  labels:
+    {{- include "regards-common.selectorLabels" . | nindent 4 }}
+    helm.sh/chart: {{ include "regards-common.chart" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end -}}

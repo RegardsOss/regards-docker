@@ -1,0 +1,29 @@
+global_stack:
+  # Master node host name
+  master_node_host_name: PO15489
+  # Regards installation directory
+  workdir: /opt/regards-demo/
+  # Docker configuration
+  docker:
+    # Docker installation directory
+    workdir: /home/docker
+    # Docker network interface
+    network_interface: eth0
+
+# Regards basic configuration
+global_regards:
+  # Version to deploy
+  version: 1.5.0
+  # Name of the first initialized project
+  project_name: demo
+  # Default instance admin user
+  admin:
+    login: regards@cnes.fr
+    password: regards
+    
+# Allow install new repository for docker installation
+group_enable_add_repo: true
+
+global_proxy:
+#  url: http://proxy.exemple.fr:1234
+#  no_proxy: localhost,127.0.0.1

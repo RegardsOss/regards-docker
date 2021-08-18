@@ -1,0 +1,33 @@
+---
+  - name: Create rabbitMQ workingdir folder
+    file:
+      path: "{{ role_regards_rabbitmq_workspace_local }}rabbitmq"
+      state: directory
+      mode: '2750'
+      owner: "{{ role_regards_rabbitmq_container_run_user }}"
+      group: "{{ role_regards_rabbitmq_container_run_group }}"
+      setype: "{{ role_regards_rabbitmq_setype }}"
+      seuser: "{{ role_regards_rabbitmq_seuser }}"
+
+  - name: Create rabbitMQ config folder
+    file:
+      dest: "{{ role_regards_rabbitmq_conf_local }}"
+      state: directory
+      mode: '0555'
+      owner: "{{ role_regards_rabbitmq_container_run_user }}"
+      group: "{{ role_regards_rabbitmq_container_run_group }}"
+      setype: "{{ role_regards_rabbitmq_setype }}"
+      seuser: "{{ role_regards_rabbitmq_seuser }}"
+
+  - name: Create the config file for RabbitMQ
+    copy:
+      dest: "{{ role_regards_rabbitmq_conf_local }}/definitions.json"
+      content: "{{ role_regards_rabbitmq_definition | to_nice_json }}"
+      mode: '0555'
+      owner: "{{ role_regards_rabbitmq_container_run_user }}"
+      group: "{{ role_regards_rabbitmq_container_run_group }}"
+      setype: "{{ role_regards_rabbitmq_setype }}"
+      seuser: "{{ role_regards_rabbitmq_seuser }}"
+
+
+  

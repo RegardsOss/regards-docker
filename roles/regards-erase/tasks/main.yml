@@ -1,0 +1,18 @@
+---
+  - name: Exterminate REGARDS from the server
+    pause: prompt='Please confirm you want to exterminate REGARDS and all related files! Press return to continue. Press Ctrl+c and then "a" to abort'
+
+  - name: Shutdown REGARDS
+    command: "docker stack rm {{ role_regards_erase_stack_name }}"
+
+  - set_fact:
+      role_regards_erase_rootdir: "{% if group_workdir_network_allow_root %}{{ role_regards_erase_rootdir_network_with_stack_name }}{% else %}{{ role_regards_erase_rootdir_network_root_folder }}{% endif %}"
+
+  - name: Delete REGARDS network root directory (retry when containers are stopping too slowly)
+    command: "rm -rf {{ role_regards_erase_rootdir }}"
+    args:
+      warn: false # We use command instead of file to be able to retry
+    retries: 3 
+    delay: 5
+    register: result
+    until: result is not failed

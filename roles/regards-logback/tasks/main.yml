@@ -1,0 +1,3 @@
+---
+  - include: "{{ role_path }}/tasks/init.yml"
+  - include: "{{ role_path }}/tasks/config.yml"

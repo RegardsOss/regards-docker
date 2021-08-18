@@ -1,0 +1,31 @@
+globals:
+  http:
+    client_timeout: 600
+  cache:
+    base_dir: '/mapproxy/cache_data'
+
+services:
+  demo:
+  tms:
+  wms:
+    md:
+      title: World-Cover WMS Proxy
+
+layers:
+  - name: cached_worldcover
+    title: Cached World-Cover Layer
+    sources: [worldcover_wms_cache]
+
+caches:
+  worldcover_wms_cache:
+    sources: [worldcover_wms]
+    # GLOBAL_GEODETIC defines a grid that covers the whole world. It uses EPSG:4326 as the spatial reference system
+    grids: [GLOBAL_GEODETIC]
+
+sources:
+  worldcover_wms:
+    type: wms
+    req:
+      url: http://{{ include "mapserver.fullname" . }}:{{ .Values.mapserver.service.port.port }}/mapserv?LAYERS=worldcover_layer&MAP=/usr/src/mapfiles/mapfile.map
+      layers: worldcover_layer
+      transparent: true

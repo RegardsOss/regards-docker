@@ -1,0 +1,24 @@
+- name: Create regards admin group
+  become: yes
+  group:
+    name: "{{ role_setup_container_root_group }}"
+    state: present
+    gid: 1040
+    #FIXME
+  tags: docker
+
+- name: Create regards user group
+  become: yes
+  group:
+    name: "{{ role_setup_container_run_group }}"
+    state: present
+    gid: "{{ role_setup_regards_user_gid }}"
+  tags: docker
+
+- name: Create regards user
+  become: yes
+  user:
+    name: "{{ role_setup_container_run_user }}"
+    uid: "{{ role_setup_regards_user_uid }}"
+    group: "{{ role_setup_container_run_group }}"
+  tags: docker

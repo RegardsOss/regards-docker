@@ -1,0 +1,37 @@
+{{- template "regards-common.deployment" . -}}
+{{/*
+## 
+## 
+## {% if role_regards_stack_mservices.admin_instance is defined %}
+##   rs-admin-instance:
+##     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
+##     hostname: rs-admin-instance
+##     read_only: true
+##     networks:
+##       - {{ role_regards_stack_docker_network_name }}
+##     volumes:
+##       - {{ role_regards_stack_logback }}admin-instance:/config:ro
+##       - {{ role_regards_stack_workspace_local }}regards/logs/admin-instance:/logs
+##     logging:
+##       options:
+##         max-size: "10m"
+##         max-file: "10"
+## {% endif %}
+## 
+## 
+## 
+## 
+##  rs-admin-instance:
+##    user: "1403050:1401050"
+##    hostname: rs-admin-instance
+##    read_only: true
+##    networks:
+##      - regards_network_leo_3
+##    volumes:
+##      - /DATA/sandbox/geode/config/regards/logback/admin-instance:/config:ro
+##      - /DATA/sandbox/geode/workspace/regards/logs/admin-instance:/logs
+##    logging:
+##      options:
+##        max-size: "10m"
+##        max-file: "10"
+*/}}

@@ -1,0 +1,24 @@
+{{- template "regards-common.deployment" . -}}
+{{/*
+##        volumeMounts:
+##        - mountPath: /logs
+##          name: rs-registry-claim0
+##      volumes:
+##      - name: rs-registry-claim0
+##        persistentVolumeClaim:
+##          claimName: rs-registry-claim0
+##
+##
+##  rs-registry:
+##    user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
+##    hostname: rs-registry
+##    read_only: true
+##    networks:
+##      - {{ role_regards_stack_docker_network_name }}
+##    volumes:
+##      - {{ role_regards_stack_workspace_local }}regards/logs/registry:/logs
+##    logging:
+##      options:
+##        max-size: "10m"
+##        max-file: "10"
+*/}}

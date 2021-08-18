@@ -1,0 +1,30 @@
+apiVersion: v2
+name: regards-cots
+description: A Helm chart for rs-rabbitmq
+type: application
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+version: {{ regards_version }}
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application.
+appVersion: {{ regards_version }}
+
+dependencies:
+- name: regards-common
+  version: 0.1.0
+  repository: "file://../regards-common"
+- name: elasticsearch
+  version: 15.10.0
+  condition: elasticsearch.enabled
+  repository: https://charts.bitnami.com/bitnami
+#  repository: "file://../regards-cots-elasticsearch"
+- name: postgresql
+  version: 8.10.10
+  condition: postgresql.enabled
+  repository: https://charts.bitnami.com/bitnami
+- name: rabbitmq
+  version: 7.3.3
+  condition: rabbitmq.enabled
+  repository: https://charts.bitnami.com/bitnami

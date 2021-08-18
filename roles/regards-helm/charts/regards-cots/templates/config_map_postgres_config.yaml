@@ -1,0 +1,19 @@
+{{- if .Values.postgresql.enabled -}}
+{{/*
+Helm template magic:
+override the common values with this chart own values.
+*/}}
+{{- $common := dict "Values" (get .Values "regards-common") -}}
+{{- $noCommon := omit .Values "regards-common" -}}
+{{- $overrides := dict "Values" $noCommon -}}
+{{- $root := omit . "Values" -}}
+{{- with merge $root $overrides $common -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rs-postgres-config
+data:
+  postgresql.conf: |-
+    {{- tpl (.Files.Get "config/postgresql.conf" ) $root | nindent 4 -}}
+{{- end }}
+{{- end -}}

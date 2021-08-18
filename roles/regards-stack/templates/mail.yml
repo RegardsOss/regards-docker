@@ -1,0 +1,14 @@
+version: '3.7'
+services:
+
+{% if role_regards_stack_cots.maildev is defined %}
+  rs-maildev:
+    image: {{role_regards_stack_registry}}/regards-maildev:{{ role_regards_stack_cots.maildev.tag | default("latest") }}
+    user: "{{role_regards_stack_container_run_uid}}:{{role_regards_stack_container_run_gid}}"
+    networks:
+      - {{role_regards_stack_docker_network_name}}
+{% if role_regards_stack_cots.maildev.http is defined %}
+    ports:
+      - "{{ role_regards_stack_cots.maildev.http }}:1080"
+{% endif %}
+{% endif %}

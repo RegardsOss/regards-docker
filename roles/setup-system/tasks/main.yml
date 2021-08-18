@@ -1,0 +1,44 @@
+- include_tasks: setup-users.yml
+  when: role_setup_enable_setup_regards_users
+
+- name: Appending the regards admin group to dockermapuid user
+  become: yes
+  user:
+    name: dockermapuid
+    groups: "{{ role_setup_container_root_group }}"
+    append: yes
+  tags: docker
+
+- name: Reload sysctl settings
+  become: yes
+  shell: "sysctl -p"
+  tags: docker
+
+- name: Get the username running the deploy on the target server
+  command: whoami
+  changed_when: false
+  become: false
+  register: role_setup_ansible_user
+
+- name: Appending the various docker and regards groups to user
+  become: yes
+  user:
+    name: "{{ role_setup_ansible_user.stdout }}"
+    groups: "docker,{{ role_setup_container_root_group }},{{ role_setup_container_run_group }}"
+    append: yes
+  tags: docker
+  when: role_setup_enable_setup_regards_users
+
+- name: Appending the various docker groups to user
+  become: yes
+  user:
+    name: "{{ role_setup_ansible_user.stdout }}"
+    groups: "docker"
+    append: yes
+  tags: docker
+  when: not role_setup_enable_setup_regards_users
+
+# reload user groups, especially useful for docker
+- name: reset ssh connection - if you using a local connection to perform install - YOU MUST LOGOUT & LOGIN AGAIN in order to refresh the group and add the Docker group to your current user
+  meta: reset_connection
+  tags: docker

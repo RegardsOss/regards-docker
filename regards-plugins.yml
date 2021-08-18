@@ -1,0 +1,6 @@
+---
+  - name: Refresh the REGARDS with all the conf within the Ansible project
+    hosts: regards_nodes
+  
+    roles:
+      - regards-plugins

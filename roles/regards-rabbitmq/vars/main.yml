@@ -1,0 +1,62 @@
+---
+
+role_regards_rabbitmq_workspace_local: "{{ group_workdir_local }}{{group_stack_name}}/workspace/"
+role_regards_rabbitmq_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/rabbitmq/"
+
+role_regards_rabbitmq_container_run_user: "{{ group_container_run_user }}"
+role_regards_rabbitmq_container_run_group: "{{ group_container_run_group }}"
+role_regards_rabbitmq_setype: "{{ group_setype }}"
+role_regards_rabbitmq_seuser: "{{ group_seuser }}"
+
+# ----------------------------------
+# RabbitMQ generation of definitions.json
+# This files contains REGARDS user, custom users, users rights and shovel if required
+# ----------------------------------
+amqp_default:
+  user: guest
+  password: guest
+
+# Users 
+# REGARDS admin account
+role_regards_rabbitmq_admin:
+  name: "{{ (group_config_mservices.amqp | default({})).get('user', amqp_default.user )}}"
+  password: "{{ (group_config_mservices.amqp | default({})).get('password', amqp_default.password ) }}"
+  hashing_algorithm: rabbit_password_hashing_sha256
+  tags: administrator
+
+role_regards_rabbitmq_additional_users: "{{ (group_docker_cots.rabbitmq | default({})).get('additional_users', []) | map('combine', {'hashing_algorithm':'rabbit_password_hashing_sha256'}) | list }}"
+
+role_regards_rabbitmq_all_users: "{{[role_regards_rabbitmq_admin, role_regards_rabbitmq_additional_users ] | flatten | rabbitpasswords}}"
+
+# Permissions to REGARDS admin account
+role_regards_rabbitmq_permission_admin:
+  - user: "{{ role_regards_rabbitmq_admin.name }}"
+    vhost: /
+    configure: .*
+    write: .*
+    read: .*
+  - user: "{{ role_regards_rabbitmq_admin.name }}"
+    vhost: regards.multitenant.manager
+    configure: .*
+    write: .*
+    read: .*
+  - user: "{{ role_regards_rabbitmq_admin.name }}"
+    vhost: regards.instance.manager
+    configure: .*
+    write: .*
+    read: .*
+
+role_regards_rabbitmq_permissions: "{{ role_regards_rabbitmq_permission_admin + (group_docker_cots.rabbitmq | default({})).get('user_permissions', []) }}"
+
+role_regards_rabbitmq_definition:
+  users: "{{ role_regards_rabbitmq_all_users }}"
+  vhosts:
+    - name: regards.multitenant.manager
+    - name: /
+    - name: regards.instance.manager
+  permissions: "{{ role_regards_rabbitmq_permissions }}"
+  parameters: "{{ (group_docker_cots.rabbitmq | default({})).get('additional_parameters', []) }}"
+  policies: []
+  queues: []
+  exchanges: []
+  bindings: []

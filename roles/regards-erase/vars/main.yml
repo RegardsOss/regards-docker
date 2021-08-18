@@ -1,0 +1,8 @@
+role_regards_erase_stack_name: "{{ group_stack_name }}"
+
+# If we can root inside workir_network, the folder can be multi project
+# If we do not use root, the workir_network is single project
+role_regards_erase_workdir_network_allow_root: "{{ group_workdir_network_allow_root }}"
+
+role_regards_erase_rootdir_network_with_stack_name: "{{ group_workdir_network }}{{group_stack_name}}"
+role_regards_erase_rootdir_network_root_folder: "{{group_workdir_network}}*"

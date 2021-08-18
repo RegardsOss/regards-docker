@@ -1,0 +1,21 @@
+{{- template "regards-common.deployment" . -}}
+{{/*
+# {% if role_regards_stack_mservices.dataprovider is defined %}
+#   rs-dataprovider:
+#     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
+#     read_only: true
+#     networks:
+#       - {{ role_regards_stack_docker_network_name }}
+#     volumes:
+#       - {{ role_regards_stack_workspace_local }}regards/logs/dataprovider:/logs
+# {% if role_regards_stack_mount_mservice_granular_network_volume %}
+#       - {{ role_regards_stack_workspace_network }}regards/input:/regards-input
+# {% else %}
+#       - {{ role_regards_stack_workdir_network }}:/share
+# {% endif %}
+#     logging:
+#       options:
+#         max-size: "10m"
+#         max-file: "10"
+# {% endif %}
+*/}}

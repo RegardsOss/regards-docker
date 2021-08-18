@@ -1,0 +1,6 @@
+---
+  - name: Shutdown REGARDS stack
+    hosts: master
+  
+    roles:
+      - regards-shutdown

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mapproxy.fullname" . }}
+  labels:
+    {{- include "mapproxy.selectorLabels" . | nindent 4 }}
+    helm.sh/chart: {{ include "mapproxy.chart" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  selector:
+    {{- include "mapproxy.selectorLabels" . | nindent 4 }}
+  type: {{ .Values.service.type }}
+  ports:
+  {{- with .Values.service.port }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort }}
+      protocol: {{ .protocol }}
+      name: {{ .name }}
+  {{- end }}

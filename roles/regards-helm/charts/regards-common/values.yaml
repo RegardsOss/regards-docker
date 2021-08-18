@@ -1,0 +1,227 @@
+# Default values for regards-common.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride: ""
+fullnameOverride: ""
+
+global:
+  regards: 
+    servicesVersion:
+    imageRegistry:
+    imagePullPolicy: Always
+    imagePullSecrets: []
+      # - name: dockerhub
+      #   credentials:
+      #     - registry: dockerhub.io
+      #       username: some
+      #       accessToken: silly
+    jwtSecret:
+    cipherIV:
+    initProject:
+    instanceAdmin:
+      username:
+      password:
+    mail:
+      host:
+      port:
+      username:
+      password:
+      noreply:
+    proxy:
+      host:
+      port:
+      no_proxy:
+    publicUrl:
+    eureka:
+      host:
+      port:
+    elastic:
+      host:
+      cluster:
+      port:
+    postgres:
+      host:
+      port:
+      db:
+      user:
+      password:
+    amqp:
+      host:
+      client:
+      http:
+      user:
+      password:
+    front:
+      host:
+      port:
+    configService: {}
+      # host: "rs-config.default"
+      # port: 9031
+    gatewayService: {}
+      # host: "rs-gateway.default"
+      # port: 9030
+
+regards:
+  jwtSecret:
+  cipherIV:
+  initProject:
+  instanceAdmin:
+    username:
+    password:
+  mail:
+    host:
+    port:
+    username:
+    password:
+    noreply:
+  proxy:
+    host:
+    port:
+    no_proxy:
+  publicUrl:
+  eureka:
+    host:
+    port:
+  elastic:
+    host:
+    cluster:
+    port:
+  postgres:
+    host:
+    port:
+    db:
+    user:
+    password:
+  amqp:
+    host:
+    client:
+    http:
+    user:
+    password:
+  front:
+    host:
+    port:
+  configService:
+    host: 
+    port: 
+  gatewayService:
+    host: 
+    port: 
+
+image:
+  registry:
+  name:
+  tag:
+  pullPolicy: 
+
+imagePullSecrets: []
+  # - name: dockerhub
+  #   credentials:
+  #     - registry: dockerhub.io
+  #       username: some
+  #       accessToken: silly
+
+restartPolicy: Always
+replicaCount: 1
+strategy: Recreate
+
+volumes:
+  configmaps: []
+    # - name: config-map-example
+    #   mountPath: /config/application.properties
+    #   subPath: application.properties
+  emptydirs: []
+    # - name: tmpfs-example
+    #   mountPath: /tmp
+    #   medium: Memory
+
+persistence: {}
+  # name: claimName
+  # accessMode: ReadWriteOnce
+  # volumeMode: Filesystem
+  # size: 10Gi
+  # storageClass: "-"
+
+ports: []
+  # - name: http
+  #   containerPort: 80
+  #   protocol: TCP
+
+livenessProbe: {}
+  # httpGet:
+  #   path: /
+  #   port: http
+
+readinessProbe: {}
+  # httpGet:
+  #   path: /
+  #   port: http
+
+env: []
+  # - name: HOST
+  #   value: "http://host"
+  # - name: PORT
+  #   value: "1234"
+
+service: {}
+  # type: ClusterIP
+  # ports:
+  #   - name: http
+  #     port: 80
+
+ingress: {}
+  # enabled: false
+  # annotations: {}
+  #   # kubernetes.io/ingress.class: nginx
+  #   # kubernetes.io/tls-acme: "true"
+  # rules:
+  # - host: chart-example.local
+  #   http:
+  #     paths:
+  #     - backend:
+  #         serviceName: foo
+  #         servicePort: http
+  #       path: /foo
+  # tls: []
+  # #  - secretName: chart-example-tls
+  # #    hosts:
+  # #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: 
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

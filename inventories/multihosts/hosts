@@ -1,0 +1,25 @@
+[ansible_host]
+ansible ansible_connection=local ansible_python_interpreter='{{ansible_playbook_python}}'
+
+[ansible_host:vars]
+gen_certificates_group_name=docker_nodes
+
+[regards_nodes]
+regards-master ansible_host=host-server1  ansible_user=root ansible_password=password
+regards-slave ansible_host=host-server2  ansible_user=root ansible_password=password
+
+[master]
+regards-master
+
+[slaves]
+regards-slave
+
+[docker_nodes]
+regards-master
+regards-slave
+
+[swarm_manager]
+regards-master
+
+[swarm_workers]
+regards-slave

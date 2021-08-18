@@ -1,0 +1,193 @@
+---
+- name: Generate the REGARDS configuration file templates for Helm from Ansible
+  hosts: localhost
+  connection: local
+  vars:
+    regards_version: '1.5.0'
+    group_docker_tags:
+      # back: "fast-release-V{{ regards_version }}"
+      # front: 'releaseV{{ regards_version }}'
+      back: "{{ regards_version }}"
+      front: 'releaseV{{ regards_version }}'
+      doc: 'V{{ regards_version }}'
+    init_project: 'project1'
+    k8s_namespace: 'regards'
+  tasks:
+    - set_fact:
+        output_dir: "{{ playbook_dir }}/../kubernetes/helm-gen"
+        group_stack_name: regards
+        group_docker_registry: 172.26.46.158
+        group_docker_registry_username: admin
+        group_docker_registry_password: password
+        group_docker_cots:
+          rabbitmq:
+            http: 15672
+            client: 5672
+          postgres:
+            client: 5432
+          phppgadmin:
+            http: 8080
+          doc:
+            http: 9086
+            tag: "{{ group_docker_tags.doc }}"
+        group_docker_cots_configuration:
+        group_docker_network_ip_network:
+        group_config_mservices:
+          jwt_secret: "!!!!!==========abcdefghijklmnopqrstuvwxyz0123456789==========!!!!!"
+          cipher_iv: "1234567812345678"
+          init_project: "{{ init_project }}"
+          instance_admin:
+            username: "regards-admin@c-s.fr"
+            password: "root_admin"
+          mail:
+            host: "rs-maildev.{{ k8s_namespace }}"
+            port: "1025"
+            username: ""
+            password: ""
+            noreply: "regards@noreply.fr"
+          proxy:
+            host: ""
+            port: ""
+            no_proxy: ""
+          eureka:
+            host: "rs-registry.{{ k8s_namespace }}"
+            port: "9032"
+          elastic:
+            host: "rs-elasticsearch.{{ k8s_namespace }}"
+            cluster: "regards"
+            port: 9200
+          postgres:
+            instance:
+              host: "rs-postgres.{{ k8s_namespace }}"
+              port: 5432
+              user: "azertyuiop123456789"
+              password: "azertyuiop123456789"
+              db: rs_instance
+            init_project:
+              host: "rs-postgres.{{ k8s_namespace }}"
+              port: 5432
+              user: "azertyuiop123456789"
+              password: "azertyuiop123456789"
+              db: "{{ init_project }}"
+          amqp:
+            host: "rs-rabbitmq.{{ k8s_namespace }}"
+            client: 5672
+            http: 15672
+            user: "guest"
+            password: "guest"
+        group_docker_mservices:
+          config:
+            host: "rs-config.{{ k8s_namespace }}"
+            http: 9031
+            tag: "{{ group_docker_tags.back }}"
+          registry:
+            host: "rs-registry.{{ k8s_namespace }}"
+            http: 9032
+            jdwp: 10500
+            jmx: 19032
+            tag: "{{ group_docker_tags.back }}"
+          admin_instance:
+            host: "rs-admin-instance.{{ k8s_namespace }}"
+            http: 9037
+            jdwp: 10500
+            jmx: 18037
+            tag: "{{ group_docker_tags.back }}"
+          admin:
+            host: "rs-admin.{{ k8s_namespace }}"
+            http: 9033
+            jdwp: 10500
+            jmx: 18033
+            tag: "{{ group_docker_tags.back }}"
+          access_instance:
+            host: "rs-access-instance.{{ k8s_namespace }}"
+            http: 9040
+            jdwp: 10500
+            jmx: 18040
+            tag: "{{ group_docker_tags.back }}"
+          access_project:
+            host: "rs-access-project.{{ k8s_namespace }}"
+            http: 9041
+            jdwp: 10500
+            jmx: 18041
+            tag: "{{ group_docker_tags.back }}"
+          gateway:
+            host: "rs-gateway.{{ k8s_namespace }}"
+            http: 9030
+            jdwp: 10500
+            jmx: 18030
+            tag: "{{ group_docker_tags.back }}"
+          authentication:
+            host: "rs-authentication.{{ k8s_namespace }}"
+            http: 9034
+            jdwp: 10500
+            jmx: 18034
+            tag: "{{ group_docker_tags.back }}"
+          ingest:
+            host: "rs-ingest.{{ k8s_namespace }}"
+            http: 9044
+            jdwp: 10500
+            jmx: 18044
+            tag: "{{ group_docker_tags.back }}"
+          dam:
+            host: "rs-dam.{{ k8s_namespace }}"
+            http: 9035
+            jdwp: 10500
+            jmx: 18035
+            tag: "{{ group_docker_tags.back }}"
+          notifier:
+            host: "rs-notifier.{{ k8s_namespace }}"
+            http: 9039
+            jdwp: 10500
+            jmx: 18039
+            tag: "{{ group_docker_tags.back }}"
+          fem:
+            host: "rs-fem.{{ k8s_namespace }}"
+            http: 9038
+            jdwp: 10500
+            jmx: 18038
+            tag: "{{ group_docker_tags.back }}"
+          catalog:
+            host: '"rs-catalog.{{ k8s_namespace }}"'
+            http: 9036
+            jdwp: 10500
+            jmx: 18036
+            tag: "{{ group_docker_tags.back }}"
+          order:
+            host: '"rs-order.{{ k8s_namespace }}"'
+            http: 9043
+            jdwp: 10500
+            jmx: 18043
+            tag: "{{ group_docker_tags.back }}"
+          dataprovider:
+            host: '"rs-dataprovider.{{ k8s_namespace }}"'
+            http: 9045
+            jdwp: 10500
+            jmx: 18045
+            tag: "{{ group_docker_tags.back }}"
+          processing:
+            host: '"rs-processing.{{ k8s_namespace }}"'
+            http: 9046
+            jdwp: 10500
+            jmx: 18046
+            tag: "{{ group_docker_tags.back }}"
+          storage:
+            host: '"rs-storage.{{ k8s_namespace }}"'
+            http: 9042
+            jdwp: 19042
+            jmx: 18042
+            tag: "{{ group_docker_tags.back }}"
+          front:
+            protocol: http
+            host: "rs-front.{{ k8s_namespace }}"
+            port: 8080
+            tag: "{{ group_docker_tags.front }}"
+        group_docker_plugins:
+          - image: rs-plugins
+            tag: "{{ group_docker_tags.back }}"
+          - image: rs-cnes-plugins
+            tag: "{{ group_docker_tags.back }}"
+
+    - name: "Generate Charts"
+      include_role:
+        name: regards-helm
+

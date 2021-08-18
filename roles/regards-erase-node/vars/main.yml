@@ -1,0 +1,2 @@
+role_regards_erase_node_stack_name: "{{ group_stack_name }}"
+role_regards_erase_node_rootdir_local: "{{ group_workdir_local }}{{group_stack_name}}"
