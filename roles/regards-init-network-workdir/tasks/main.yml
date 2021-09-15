@@ -13,10 +13,9 @@
       - "{{ role_regards_init_network_workdir_workspace_network }}regards/storage/"
     when: role_regards_init_network_workdir_network_allow_root
     become: true
-    become_user: "{{ role_regards_init_network_workdir_container_root_user }}"
-    # When we cannot run command as root in that folder
-    # the network_workdir must exists and folders with be created with the here under command only with run_user:run_group
 
+  # When we cannot run command as root in that folder
+  # the network_workdir must exists and folders with be created with the here under command only with run_user:run_group
   - name: Create REGARDS folders mounted inside containers on the network workspace
     file:
       path: "{{ item }}"

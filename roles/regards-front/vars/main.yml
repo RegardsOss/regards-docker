@@ -3,6 +3,10 @@
 # NGINX Workspace
 role_regards_front_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/regards/nginx/"
 
+# NGINX configuration file
+role_regards_front_nginx_conf: "{{ group_docker_mservices.front.nginx_conf | default('nginx.conf') }}"
+role_regards_front_nginx_target_conf: "{{ role_regards_front_conf_local }}nginx.conf"
+
 # Docker user
 role_regards_front_container_root_user: "{{ group_container_root_user }}"
 role_regards_front_container_root_group: "{{ group_container_root_group }}"
