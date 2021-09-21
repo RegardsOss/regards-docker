@@ -32,7 +32,7 @@ group_container_run_gid: 1050
 group_docker_network_name: 'regards_{{ group_stack_name }}'
 group_docker_network_ip_network: '10.11.7.'
 
-group_docker_registry: ghcr.io/regardsoss/regards-docker
+group_docker_registry: ghcr.io/regardsoss
 
 group_docker_tags:
   cots: '{{ global_regards.version }}'
