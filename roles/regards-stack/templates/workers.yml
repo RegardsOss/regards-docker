@@ -1,0 +1,32 @@
+version: '3.7'
+services:
+
+{% for worker in role_regards_stack_workers %}
+  {{ worker.name }}:
+    image: 172.26.46.158/{{ worker.name }}:{{ worker.tag }}
+    user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
+    hostname: {{ worker.name }}
+    read_only: true
+    deploy:
+      replicas: {{ worker.replicas | default(1) }}
+    networks:
+      - {{ role_regards_stack_docker_network_name }}
+    volumes:
+      - {{ role_regards_stack_workspace_local }}regards/workers/{{ worker.name }}/logs:/logs
+{% if worker.volumes is defined %}
+{% for volume in worker.volumes %}
+      - {{ volume.source }}:{{ volume.destination }}
+{% endfor %}
+{% endif %}
+      - type: tmpfs
+        target: /tmp
+{% if worker.jdwp is defined %}
+    ports:
+      - "{{ worker.jdwp }}:10500"
+{% endif %}
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+
+{% endfor %}

@@ -21,11 +21,11 @@ group_container_root_group: 'gregards_admin'
 # Used to create folders mounted by containers, all files created by containers will use this user
 group_container_run_user: 'docker-regards-data'
 group_container_run_group: 'gregards_data'
-# When Docker user namespace is active, we substract from the run_user:run_group
+# When Docker user namespace is active, we substract from the run_user:run_group
 # the shift we setup in Docker. It ensures that
-# 1. containers are running with run_user:run_group on host server
-# 2. inside containers, prevent privilege escalation as uid:gid are at least the Docker uid:gid shift
-# When unactive, just provide run_user uid and run_group gid
+# 1. containers are running with run_user:run_group on host server
+# 2. inside containers, prevent privilege escalation as uid:gid are at least the Docker uid:gid shift
+# When unactive, just provide run_user uid and run_group gid
 group_container_run_uid: 3050
 group_container_run_gid: 1050
 
@@ -42,46 +42,46 @@ group_docker_tags:
 # Plugins
 group_docker_plugins:
   - image: rs-plugins
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
 
-# Stack
+# Stack
 group_docker_mservices:
   config:
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
     http: 9031
   registry:
     http: 9032
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   gateway:
     # jdwp: 19030
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   admin_instance:
     # jdwp: 19037
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   admin:
     # jdwp: 19033
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   authentication:
     # jdwp: 19034
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   dam:
     # jdwp: 19035
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   notifier:
     # jdwp: 19039
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   fem:
     # jdwp: 19038
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   catalog:
     # jdwp: 19036
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   access_instance:
     # jdwp: 19040
-    tag: "{{ group_docker_tags.back }}"
-  access:
+    tag: "{{ group_docker_tags.back }}"
+  access_project:
     # jdwp: 19041
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   storage:
     # jdwp: 19042
     tag: "{{ group_docker_tags.back }}"
@@ -90,10 +90,10 @@ group_docker_mservices:
     tag: "{{ group_docker_tags.back }}"
   ingest:
     # jdwp: 19044
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   dataprovider:
     # jdwp: 19045
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   processing:
     # jdwp: 19046
     tag: "{{ group_docker_tags.back }}"
@@ -101,7 +101,7 @@ group_docker_mservices:
     protocol: http
     host: "{{ global_stack.master_node_host_name }}"
     port: 80
-    tag: "{{ group_docker_tags.front }}"
+    tag: "{{ group_docker_tags.front }}"
 
 # COTS
 group_docker_cots:
@@ -148,3 +148,4 @@ group_config_mservices:
     password: "{{ global_regards.admin.password }}"
   proxy:
     url: "{{ global_proxy.url | default(false) }}"
+    no_proxy: "{{ global_proxy.no_proxy | default(None) }}"

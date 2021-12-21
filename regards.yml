@@ -29,6 +29,7 @@
       - regards-postgres
       - regards-elasticsearch
       - regards-rabbitmq
+      - regards-workers
 
   - name: Launch stack
     hosts: master

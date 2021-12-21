@@ -14,6 +14,7 @@
       - mail.yml
       - postgresql.yml
       - rabbitmq.yml
+      - workers.yml
     become: true
 
   - set_fact:
@@ -34,6 +35,9 @@
         -c {{ role_regards_stack_stack }}postgresql.yml
         {% endif %}
         -c {{ role_regards_stack_stack }}rabbitmq.yml 
+        {% if role_regards_stack_workers | length > 0 %}
+        -c {{ role_regards_stack_stack }}workers.yml 
+        {% endif %}
         --with-registry-auth 
         {{ role_regards_stack_stack_name }}
 

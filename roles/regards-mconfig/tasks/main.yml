@@ -1,28 +1,73 @@
 ---
 
-  - name: Generate config files
+  - name: Create config folder
+    file:
+      dest: "{{ role_regards_mconfig_workdir }}{{ item }}/"
+      state: directory
+      mode: '0700'
+      owner: "{{ role_regards_mconfig_container_run_user }}"
+      group: "{{ role_regards_mconfig_container_run_group }}"
+      setype: "{{ role_regards_mconfig_setype }}"
+      seuser: "{{ role_regards_mconfig_seuser }}"
+    with_items:
+     - regards-oss-backend
+     - regards-workers
+
+  - name: Generate a config file used by all services with label=regards-oss-backend  (LEGACY)
     template:
-      src: "{{ item }}"
+      src: "application.properties"
       dest: "{{ role_regards_mconfig_workdir }}"
       mode: '0700'
       owner: "{{ role_regards_mconfig_container_run_user }}"
       group: "{{ role_regards_mconfig_container_run_group }}"
-    with_items:
-      - application.properties
-      - rs-access-project.properties
-      - rs-admin.properties
-      - rs-catalog.properties
-      - rs-dataprovider.properties
-      - rs-gateway.properties
-      - rs-notifier.properties
-      - rs-registry.properties
-      - rs-access-instance.properties
-      - rs-admin-instance.properties
-      - rs-authentication.properties
-      - rs-dam.properties
-      - rs-fem.properties
-      - rs-ingest.properties
-      - rs-order.properties
-      - rs-storage.properties
-      - rs-processing.properties
-      
+    when: role_regards_mconfig_workdir_legacy|bool == true
+
+  - name: Generate a config file used by all services with label=regards-oss-backend 
+    template:
+      src: "application.properties"
+      dest: "{{ role_regards_mconfig_workdir }}regards-oss-backend/"
+      mode: '0700'
+      owner: "{{ role_regards_mconfig_container_run_user }}"
+      group: "{{ role_regards_mconfig_container_run_group }}"
+    when: role_regards_mconfig_workdir_legacy|bool == false
+
+  - name: Generate microservices config files (LEGACY)
+    template:
+      src: "rs-{{ item.key | replace('_', '-') }}.properties"
+      dest: "{{ role_regards_mconfig_workdir }}"
+      mode: '0700'
+      owner: "{{ role_regards_mconfig_container_run_user }}"
+      group: "{{ role_regards_mconfig_container_run_group }}"
+    when: "(item.key != 'config') and (item.key != 'front') and (role_regards_mconfig_workdir_legacy|bool == true)"
+    with_dict: "{{ role_regards_mconfig_mservices }}"
+
+  - name: Generate microservices config files
+    template:
+      src: "rs-{{ item.key | replace('_', '-') }}.properties"
+      dest: "{{ role_regards_mconfig_workdir }}regards-oss-backend/"
+      mode: '0700'
+      owner: "{{ role_regards_mconfig_container_run_user }}"
+      group: "{{ role_regards_mconfig_container_run_group }}"
+    when: "(item.key != 'config') and (item.key != 'front')  and (role_regards_mconfig_workdir_legacy|bool == false)"
+    with_dict: "{{ role_regards_mconfig_mservices }}"
+
+  - name: Generate a config file used by all services with label=regards-workers 
+    template:
+      src: "application.yml"
+      dest: "{{ role_regards_mconfig_workdir }}/regards-workers/"
+      mode: '0700'
+      owner: "{{ role_regards_mconfig_container_run_user }}"
+      group: "{{ role_regards_mconfig_container_run_group }}"
+    when: role_regards_mconfig_workers|length > 0
+
+  - name: Generate regards-workers config files
+    copy:
+      content: "{{ item.config | to_nice_yaml }}"
+      dest: "{{ role_regards_mconfig_workdir }}regards-workers/{{ item.name }}.yml"
+      mode: '0700'
+      owner: "{{ role_regards_mconfig_container_run_user }}"
+      group: "{{ role_regards_mconfig_container_run_group }}"
+      setype: "{{ role_regards_mconfig_setype }}"
+      seuser: "{{ role_regards_mconfig_seuser }}"
+    loop: "{{ role_regards_mconfig_workers }}"
+    when: item.config is defined

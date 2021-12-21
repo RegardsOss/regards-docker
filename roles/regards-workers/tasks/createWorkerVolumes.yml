@@ -1,0 +1,12 @@
+---
+  - name: Create specific REGARDS worker volume sources
+    file:
+      path: "{{ item.source }}"
+      state: directory
+      mode: '0750'
+      owner: "{{ role_regards_workers_container_run_user }}"
+      group: "{{ role_regards_workers_container_run_group }}"
+      setype: "{{ role_regards_workers_setype }}"
+      seuser: "{{ role_regards_workers_seuser }}"
+    loop: "{{ worker.volumes | default([]) }}"
+    when: item.create is defined and item.create == true

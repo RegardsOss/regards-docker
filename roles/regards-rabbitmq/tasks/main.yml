@@ -28,6 +28,3 @@
       group: "{{ role_regards_rabbitmq_container_run_group }}"
       setype: "{{ role_regards_rabbitmq_setype }}"
       seuser: "{{ role_regards_rabbitmq_seuser }}"
-
-
-  

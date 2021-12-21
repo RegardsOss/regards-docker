@@ -31,3 +31,4 @@ role_regards_fluentd_logs_directory:
   - ingest
   - dataprovider
   - processing
+  - worker-manager

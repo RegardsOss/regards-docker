@@ -176,6 +176,12 @@
             jdwp: 19042
             jmx: 18042
             tag: "{{ group_docker_tags.back }}"
+          worker_manager:
+            host: '"rs-worker-manager.{{ k8s_namespace }}"'
+            http: 9047
+            jdwp: 19047
+            jmx: 18047
+            tag: "{{ group_docker_tags.back }}"
           front:
             protocol: http
             host: "rs-front.{{ k8s_namespace }}"

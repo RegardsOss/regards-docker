@@ -59,6 +59,7 @@
       - name: processing
       - name: dataprovider
       - name: storage
+      - name: worker-manager
 
       # chart with specific configuration. The specific tasks
       # for configuration templating must be located under tasks folder

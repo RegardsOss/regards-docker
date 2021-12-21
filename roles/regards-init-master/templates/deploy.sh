@@ -11,6 +11,7 @@ docker stack deploy \
 {% if role_regards_init_master_cots.doc is defined %}  -c {{ role_regards_init_master_stack }}doc.yml {% endif %}
 {% if role_regards_init_master_cots.maildev is defined %}  -c {{ role_regards_init_master_stack }}mail.yml {% endif %}
 {% if role_regards_init_master_cots.postgres is defined or role_regards_init_master_cots.phppgadmin is defined %}  -c {{ role_regards_init_master_stack }}postgresql.yml {% endif %}
+{% if role_regards_init_workers | length > 0 %} -c {{ role_regards_init_master_stack }}workers.yml {% endif %}
   -c {{ role_regards_init_master_stack }}rabbitmq.yml \
   --with-registry-auth \
   {{ role_regards_init_master_stack_name }}

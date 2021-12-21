@@ -1,0 +1,6 @@
+spring:
+  rabbitmq:
+    host: {{ role_regards_mconfig_amqp.host }}
+    port: {{ role_regards_mconfig_amqp.client }}
+    username: {{ role_regards_mconfig_amqp.user }}
+    password: {{ role_regards_mconfig_amqp.password }}

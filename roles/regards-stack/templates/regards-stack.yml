@@ -65,6 +65,8 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-gateway
     read_only: true
+    deploy:
+       replicas: {{ role_regards_stack_mservices.gateway.replicas | default(1) }}
 {% if role_regards_stack_mservices.gateway.jdwp is defined %}
     environment: 
       - ACTIVE_DEBUG=true
@@ -147,6 +149,8 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-admin
     read_only: true
+    deploy:
+       replicas: {{ role_regards_stack_mservices.admin.replicas | default(1) }}
 {% if role_regards_stack_mservices.admin.jdwp is defined %}
     environment: 
       - ACTIVE_DEBUG=true
@@ -188,6 +192,8 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-authentication
     read_only: true
+    deploy:
+       replicas: {{ role_regards_stack_mservices.authentication.replicas | default(1) }}
 {% if role_regards_stack_mservices.authentication.jdwp is defined %}
     environment: 
       - ACTIVE_DEBUG=true
@@ -230,6 +236,8 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-dam
     read_only: true
+    deploy:
+       replicas: {{ role_regards_stack_mservices.dam.replicas | default(1) }}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.dam.jdwp is defined %}
@@ -240,6 +248,11 @@ services:
       - ACTIVE_YOURKIT=true
 {% endif %}
     volumes:
+{% if role_regards_stack_mservices.volumes is defined %}
+{% for volume in role_regards_stack_mservices.volumes %}
+      - {{ volume.source }}:{{ volume.destination }}
+{% endfor %}
+{% endif %}
       - {{ role_regards_stack_logback }}dam:/config:ro
       - {{ role_regards_stack_workspace_local }}regards/plugins/dam:/plugins:ro
       - {{ role_regards_stack_workspace_local }}regards/logs/dam:/logs
@@ -278,6 +291,8 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-notifier
     read_only: true
+    deploy:
+       replicas: {{ role_regards_stack_mservices.notifier.replicas | default(1) }}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.notifier.jdwp is defined %}
@@ -320,6 +335,8 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-fem
     read_only: true
+    deploy:
+       replicas: {{ role_regards_stack_mservices.fem.replicas | default(1) }}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.fem.jdwp is defined %}
@@ -330,6 +347,11 @@ services:
       - ACTIVE_YOURKIT=true
 {% endif %}
     volumes:
+{% if role_regards_stack_mservices.fem.volumes is defined %}
+{% for volume in role_regards_stack_mservices.fem.volumes %}
+      - {{ volume.source }}:{{ volume.destination }}
+{% endfor %}
+{% endif %}
       - {{ role_regards_stack_logback }}fem:/config:ro
       - {{ role_regards_stack_workspace_local }}regards/logs/fem:/logs
       - {{ role_regards_stack_workspace_local }}regards/plugins/fem:/plugins:ro
@@ -368,6 +390,8 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-catalog
     read_only: true
+    deploy:
+       replicas: {{ role_regards_stack_mservices.catalog.replicas | default(1) }}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.catalog.jdwp is defined %}
@@ -450,17 +474,19 @@ services:
         max-file: "10"
 {% endif %}
 
-{% if role_regards_stack_mservices.access is defined %}
+{% if role_regards_stack_mservices.access_project is defined %}
   rs-access-project:
-    image: {{ role_regards_stack_registry }}/rs-access-project:{{ role_regards_stack_mservices.access.tag }}
+    image: {{ role_regards_stack_registry }}/rs-access-project:{{ role_regards_stack_mservices.access_project.tag }}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-access-project
     read_only: true
-{% if role_regards_stack_mservices.access.jdwp is defined %}
+    deploy:
+       replicas: {{ role_regards_stack_mservices.access.replicas | default(1) }}
+{% if role_regards_stack_mservices.access_project.jdwp is defined %}
     environment: 
       - ACTIVE_DEBUG=true
 {% endif %}
-{% if role_regards_stack_mservices.access.yourkit is defined %}
+{% if role_regards_stack_mservices.access_project.yourkit is defined %}
       - ACTIVE_YOURKIT=true
 {% endif %}
     volumes:
@@ -470,19 +496,19 @@ services:
         target: /tmp
     networks:
       - {{ role_regards_stack_docker_network_name }}
-{% if role_regards_stack_mservices.access.http is defined or role_regards_stack_mservices.access.jdwp is defined or role_regards_stack_mservices.access.jmx is defined or role_regards_stack_mservices.access.yourkit is defined %}
+{% if role_regards_stack_mservices.access_project.http is defined or role_regards_stack_mservices.access_project.jdwp is defined or role_regards_stack_mservices.access_project.jmx is defined or role_regards_stack_mservices.access_project.yourkit is defined %}
     ports:
-{% if role_regards_stack_mservices.access.http is defined %}
-      - "{{ role_regards_stack_mservices.access.http }}:9041"
+{% if role_regards_stack_mservices.access_project.http is defined %}
+      - "{{ role_regards_stack_mservices.access_project.http }}:9041"
 {% endif %}
-{% if role_regards_stack_mservices.access.jdwp is defined %}
-      - "{{ role_regards_stack_mservices.access.jdwp }}:10500"
+{% if role_regards_stack_mservices.access_project.jdwp is defined %}
+      - "{{ role_regards_stack_mservices.access_project.jdwp }}:10500"
 {% endif %}
-{% if role_regards_stack_mservices.access.jmx is defined %}
-      - "{{ role_regards_stack_mservices.access.jmx }}:18041"
+{% if role_regards_stack_mservices.access_project.jmx is defined %}
+      - "{{ role_regards_stack_mservices.access_project.jmx }}:18041"
 {% endif %}
-{% if role_regards_stack_mservices.access.yourkit is defined %}
-      - "{{ role_regards_stack_mservices.access.yourkit }}:10001"
+{% if role_regards_stack_mservices.access_project.yourkit is defined %}
+      - "{{ role_regards_stack_mservices.access_project.yourkit }}:10001"
 {% endif %}
 {% endif %}
     logging: 
@@ -497,6 +523,8 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-front
     read_only: true
+    deploy:
+       replicas: {{ role_regards_stack_mservices.front.replicas | default(1) }}
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
@@ -529,6 +557,8 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-storage
     read_only: true
+    deploy:
+       replicas: {{ role_regards_stack_mservices.storage.replicas | default(1) }}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.storage.jdwp is defined %}
@@ -554,6 +584,11 @@ services:
 {% endif %}
 {% endif %}
     volumes:
+{% if role_regards_stack_mservices.storage.volumes is defined %}
+{% for volume in role_regards_stack_mservices.storage.volumes %}
+      - {{ volume.source }}:{{ volume.destination }}
+{% endfor %}
+{% endif %}
       - {{ role_regards_stack_logback }}storage:/config
       - {{ role_regards_stack_workspace_local }}regards/logs/storage:/logs
       - {{ role_regards_stack_workspace_local }}regards/plugins/storage:/plugins
@@ -579,6 +614,8 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-order
     read_only: true
+    deploy:
+       replicas: {{ role_regards_stack_mservices.order.replicas | default(1) }}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.order.jdwp is defined %}
@@ -604,6 +641,11 @@ services:
 {% endif %}
 {% endif %}
     volumes:
+{% if role_regards_stack_mservices.order.volumes is defined %}
+{% for volume in role_regards_stack_mservices.order.volumes %}
+      - {{ volume.source }}:{{ volume.destination }}
+{% endfor %}
+{% endif %}
       - {{ role_regards_stack_logback }}order:/config:ro
       - {{ role_regards_stack_workspace_local }}regards/logs/order:/logs
 {% if role_regards_stack_mount_mservice_granular_network_volume %}
@@ -629,6 +671,8 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-processing
     read_only: true
+    deploy:
+       replicas: {{ role_regards_stack_mservices.processing.replicas | default(1) }}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.processing.jdwp is defined %}
@@ -643,7 +687,7 @@ services:
 {% if role_regards_stack_mservices.processing.http is defined or role_regards_stack_mservices.processing.jdwp is defined or role_regards_stack_mservices.processing.jmx is defined or role_regards_stack_mservices.processing.yourkit is defined %}
     ports:
 {% if role_regards_stack_mservices.processing.http is defined %}
-      - "{{ role_regards_stack_mservices.processing.http }}:9043"
+      - "{{ role_regards_stack_mservices.processing.http }}:9046"
 {% endif %}
 {% if role_regards_stack_mservices.processing.jdwp is defined %}
       - "{{ role_regards_stack_mservices.processing.jdwp }}:10500"
@@ -656,6 +700,11 @@ services:
 {% endif %}
 {% endif %}
     volumes:
+{% if role_regards_stack_mservices.processing.volumes is defined %}
+{% for volume in role_regards_stack_mservices.processing.volumes %}
+      - {{ volume.source }}:{{ volume.destination }}
+{% endfor %}
+{% endif %}
       - {{ role_regards_stack_logback }}processing:/config:ro
       - {{ role_regards_stack_workspace_local }}regards/logs/processing:/logs
 {% if role_regards_stack_mount_mservice_granular_network_volume %}
@@ -678,6 +727,8 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-ingest
     read_only: true
+    deploy:
+       replicas: {{ role_regards_stack_mservices.ingest.replicas | default(1) }}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.ingest.jdwp is defined %}
@@ -703,6 +754,11 @@ services:
 {% endif %}
 {% endif %}
     volumes:
+{% if role_regards_stack_mservices.ingest.volumes is defined %}
+{% for volume in role_regards_stack_mservices.ingest.volumes %}
+      - {{ volume.source }}:{{ volume.destination }}
+{% endfor %}
+{% endif %}
       - {{ role_regards_stack_logback }}ingest:/config:ro
       - {{ role_regards_stack_workspace_local }}regards/logs/ingest:/logs
       - {{ role_regards_stack_workspace_local }}regards/plugins/ingest:/plugins
@@ -726,6 +782,8 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-dataprovider
     read_only: true
+    deploy:
+       replicas: {{ role_regards_stack_mservices.dataprovider.replicas | default(1) }}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.dataprovider.jdwp is defined %}
@@ -751,6 +809,11 @@ services:
 {% endif %}
 {% endif %}
     volumes:
+{% if role_regards_stack_mservices.dataprovider.volumes is defined %}
+{% for volume in role_regards_stack_mservices.dataprovider.volumes %}
+      - {{ volume.source }}:{{ volume.destination }}
+{% endfor %}
+{% endif %}
       - {{ role_regards_stack_logback }}dataprovider:/config:ro
       - {{ role_regards_stack_workspace_local }}regards/logs/dataprovider:/logs
       - {{ role_regards_stack_workspace_local }}regards/plugins/dataprovider:/plugins
@@ -760,6 +823,54 @@ services:
 {% else %}
       - {{ role_regards_stack_workdir_network }}:/share
 {% endif %}
+      - type: tmpfs
+        target: /tmp
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+{% endif %}
+
+{% if role_regards_stack_mservices.worker_manager is defined %}
+  rs-worker-manager:
+    image: {{ role_regards_stack_registry }}/rs-worker-manager:{{ role_regards_stack_mservices.worker_manager.tag }}
+    user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
+    hostname: rs-worker-manager
+    read_only: true
+    deploy:
+       replicas: {{ role_regards_stack_mservices.worker_manager.replicas | default(1) }}
+    networks:
+      - {{ role_regards_stack_docker_network_name }}
+{% if role_regards_stack_mservices.worker_manager.jdwp is defined %}
+    environment: 
+      - ACTIVE_DEBUG=true
+{% endif %}
+{% if role_regards_stack_mservices.worker_manager.yourkit is defined %}
+      - ACTIVE_YOURKIT=true
+{% endif %}
+{% if role_regards_stack_mservices.worker_manager.http is defined or role_regards_stack_mservices.worker_manager.jdwp is defined or role_regards_stack_mservices.worker_manager.jmx is defined or role_regards_stack_mservices.worker_manager.yourkit is defined %}
+    ports:
+{% if role_regards_stack_mservices.worker_manager.http is defined %}
+      - "{{ role_regards_stack_mservices.worker_manager.http }}:9047"
+{% endif %}
+{% if role_regards_stack_mservices.worker_manager.jdwp is defined %}
+      - "{{ role_regards_stack_mservices.worker_manager.jdwp }}:10500"
+{% endif %}
+{% if role_regards_stack_mservices.worker_manager.jmx is defined %}
+      - "{{ role_regards_stack_mservices.worker_manager.jmx }}:18047"
+{% endif %}
+{% if role_regards_stack_mservices.worker_manager.yourkit is defined %}
+      - "{{ role_regards_stack_mservices.worker_manager.yourkit }}:10001"
+{% endif %}
+{% endif %}
+    volumes:
+{% if role_regards_stack_mservices.order.worker_manager is defined %}
+{% for volume in role_regards_stack_mservices.worker_manager.volumes %}
+      - {{ volume.source }}:{{ volume.destination }}
+{% endfor %}
+{% endif %}
+      - {{ role_regards_stack_logback }}worker-manager:/config:ro
+      - {{ role_regards_stack_workspace_local }}regards/logs/worker-manager:/logs
       - type: tmpfs
         target: /tmp
     logging:

@@ -1,6 +1,6 @@
 {{- template "regards-common.deployment" . -}}
 {{/*
-# {% if role_regards_stack_mservices.access is defined %}
+# {% if role_regards_stack_mservices.access_project is defined %}
 #   rs-access-project:
 #     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
 #     hostname: rs-access-project

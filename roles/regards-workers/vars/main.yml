@@ -1,0 +1,12 @@
+---
+role_regards_workers: "{{ group_docker_workers | default([]) }}"
+
+role_regards_workers_root_dir: "{{ group_workdir_local }}{{ group_stack_name }}/workspace/regards/workers"
+
+role_regards_workers_container_root_user: "{{ group_container_root_user }}"
+role_regards_workers_container_root_group: "{{ group_container_root_group }}"
+role_regards_workers_setype: "{{ group_setype }}"
+role_regards_workers_seuser: "{{ group_seuser }}"
+
+role_regards_workers_container_run_user: "{{ group_container_run_user }}"
+role_regards_workers_container_run_group: "{{ group_container_run_group }}"

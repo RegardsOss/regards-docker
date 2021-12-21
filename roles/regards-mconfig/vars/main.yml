@@ -2,6 +2,7 @@
 
   # Workspace
   role_regards_mconfig_workdir: "{{ group_workdir_local }}{{ group_stack_name }}/config/regards/config/"
+  role_regards_mconfig_workdir_legacy: "{{ group_workdir_local_legacy|default(false) }}"
 
   # Docker users
   role_regards_mconfig_container_run_group: "{{ group_container_run_group }}"
@@ -20,7 +21,12 @@
   role_regards_mconfig_mservice_jwt_secret: "{{ role_regards_mconfig_config_mservices.jwt_secret | default('!!!!!==========abcdefghijklmnopqrstuvwxyz0123456789==========!!!!!') }}"
   role_regards_mconfig_mservice_access_token_validity: "{{ role_regards_mconfig_config_mservices.access_token_validity | default('3600') }}"
   role_regards_mconfig_mservice_cipher_iv: "{{ role_regards_mconfig_config_mservices.cipher_iv | default('1234567812345678') }}"
+  role_regards_mconfig_mservice_order_jwt_secret: "{{ role_regards_mconfig_config_mservices.order_jwt_secret | default('~~~~~!!!!!!!!!!!0123456789abcdefghijklmnopqrstuvwxyz!!!!!!!!!!!~~~~~') }}"
   
+
+  role_regards_mconfig_setype: "{{ group_setype }}"
+  role_regards_mconfig_seuser: "{{ group_seuser }}"
+
   # ----------------------------------
   # Admin configuration
   # ----------------------------------
@@ -118,23 +124,23 @@
     host: rs-postgres
     port: 5432
     instance_db_name: rs_instance
-    project_db_name: "{{ group_config_mservices.init_project }}"
+    project_db_name: "{{ group_config_mservices.init_project }}"
 
   role_regards_mconfig_postgres:
     # first project configuration
     project:
-      host: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('host', postgres_default.host )}}"
-      port: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('port', postgres_default.port )}}"
-      db: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('db', postgres_default.project_db_name )}}"
-      user: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('user', postgres_default.user )}}"
-      password: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('password', postgres_default.password )}}"
+      host: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('host', postgres_default.host )}}"
+      port: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('port', postgres_default.port )}}"
+      db: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('db', postgres_default.project_db_name )}}"
+      user: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('user', postgres_default.user )}}"
+      password: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('password', postgres_default.password )}}"
     # Instance db connection
     instance_db:
-      host: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('host', postgres_default.host )}}"
-      port: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('port', postgres_default.port )}}"
-      db: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('db', postgres_default.instance_db_name )}}"
-      user: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('user', postgres_default.user )}}"
-      password: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('password', postgres_default.password )}}"
+      host: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('host', postgres_default.host )}}"
+      port: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('port', postgres_default.port )}}"
+      db: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('db', postgres_default.instance_db_name )}}"
+      user: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('user', postgres_default.user )}}"
+      password: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('password', postgres_default.password )}}"
         
   role_regards_mconfig_public_url: "{{ group_docker_mservices.front.protocol }}://{{ group_docker_mservices.front.host }}:{{ group_docker_mservices.front.port }}"
 
@@ -142,6 +148,8 @@
   # Microservice list
   # ----------------------------------
   role_regards_mconfig_mservices: "{{ group_docker_mservices }}"
+
+  role_regards_mconfig_workers: "{{ group_docker_workers|default([]) }}"
 
   # ----------------------------------
   # Swagger config
@@ -175,8 +183,8 @@
       name: Catalog
       title: MICROSERVICE CATALOG
       description: Search API
-    access:
-      name: Access
+    access_project:
+      name: Access project
       title: MICROSERVICE ACCESS
       description: Configuration for project GUI
     access_instance:
@@ -203,6 +211,10 @@
       name: Processing
       title: MICROSERVICE PROCESSING
       description: Processing API
+    worker_manager:
+      name: Worker manager
+      title: MICROSERVICE WORKER MANAGER
+      description: Worker Manager API
   role_regards_mconfig_swagger_license: GPL-3.0
   
   # ----------------------------------
