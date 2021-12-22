@@ -13,10 +13,10 @@
 ALL_DEAD_CONTAINERS=$(docker stack ps --no-trunc -f  "desired-state=shutdown" --format '{{ '{{' }} .CurrentState {{ '}}' }}\t{{ '{{' }} .Name {{ '}}' }}\t{{ '{{' }}.Node{{ '}}' }}\t{{ '{{' }}.Error{{ '}}' }}' {{ role_regards_init_master_stack_name }} \
 | grep -v '\\_' \
 | sed --unbuffered -e "s/{{ role_regards_init_master_stack_name }}_//" \
-| awk -F'\t' '{system("date --rfc-3339=seconds -u -d \"$(printf \"" $1 "\" | cut -d \" \" -f2- | sed \"s/about//g\" | sed \"s/less than//g\" | sed \"s/an /1 /g\") \" | tr -d \"\n\"") ; printf "\t%s\t%s\t%s\t%s\t%s\n", $1, $2, $3, $4, $5;}' \
+| awk -F'\t' '{system("date --rfc-3339=seconds -u -d \"$(printf \"" $1 "\" | cut -d \" \" -f2- | sed \"s/about//g\" | sed \"s/less than//g\" | sed \"s/an /1 /g\" | sed \"s/a minute/1 minute/g\") \" | tr -d \"\n\"") ; printf "\t%s\t%s\t%s\t%s\t%s\n", $1, $2, $3, $4, $5;}' \
 | sort -r \
 | awk -F'\t' '{ printf "\033[33m%s\033[39m\t%s\t%s\t\033[31m%s \033[39m\n", $2, $3, $4, $5, $6;}' \
-| column -o " " -t -s $'\t')
+| column -t -s $'\t')
 
 
 # Test there is dead containers (first line is header)
@@ -48,10 +48,10 @@ fi
 # Running containers list
 docker stack ps -f "desired-state=running" --format '{{ '{{' }} .CurrentState {{ '}}' }}\t{{ '{{' }} .Name {{ '}}' }}\t{{ '{{' }}.Node{{ '}}' }}\t{{ '{{' }}.Image{{ '}}' }}' {{ role_regards_init_master_stack_name }} \
   | sed --unbuffered -e "s/{{ role_regards_init_master_stack_name }}_//" \
-  | awk -F'\t' '{system("date --rfc-3339=seconds -u -d \"$(printf \"" $1 "\" | cut -d \" \" -f2- | sed \"s/about//g\" | sed \"s/less than//g\" | sed \"s/an /1 /g\") \" | tr -d \"\n\"") ; printf "\t%s\t%s\t%s\t%s\t%s\n", $1, $2, $3, $4, $5;}' \
+  | awk -F'\t' '{system("date --rfc-3339=seconds -u -d \"$(printf \"" $1 "\" | cut -d \" \" -f2- | sed \"s/about//g\" | sed \"s/less than//g\" | sed \"s/an /1 /g\" | sed \"s/a minute/1 minute/g\") \" | tr -d \"\n\"") ; printf "\t%s\t%s\t%s\t%s\t%s\n", $1, $2, $3, $4, $5;}' \
   | sort -r \
   | awk -F'\t' '{ printf "\033[32m%s\033[39m\t%s\t%s\t%s\n", $2, $3, $4, $5, $6;}' \
-  | column -o " " -t -s $'\t'
+  | column -t -s $'\t'
 
 # Display microservices that are not up
 MISSING_SERVICES=$(docker stack services --format '{{ '{{' }} .Name {{ '}}' }}\t{{ '{{' }}split .Replicas "/"{{ '}}' }}' {{ role_regards_init_master_stack_name }} \
