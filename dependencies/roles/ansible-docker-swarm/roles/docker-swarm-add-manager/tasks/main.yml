@@ -12,13 +12,18 @@
 # limitations under the License.
 #
 ---
-- name: Check if Swarm is Already Initialized. This step can be safely ignored and has no impact on a successful Swarm setup
-  shell: docker node ls
-  register: swarm_status
-  ignore_errors: true
-  tags: swarm
+- name: Check worker status in the swarm
+  docker_host_info:
+  register: worker_status
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"
 
-- name: Add Managers to the Swarm
-  shell: ". /etc/profile.d/docker-client.sh; docker swarm join --token {{ hostvars[groups['swarm_manager'][0]]['manager_token']['stdout'] }} {{ hostvars[groups['swarm_manager'][0]]['ansible_default_ipv4']['address'] }}:2377"
-  when: swarm_status.rc != 0
-  tags: swarm
+- name: Add manager to the Swarm
+  docker_swarm:
+    state: join
+    join_token: "{{ add_manager_join_token_manager }}"
+    remote_addrs: "['{{ add_manager_remote_addr }}:2377']"
+    advertise_addr: 
+  when: worker_status.host_info.Swarm.LocalNodeState == "inactive"
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"

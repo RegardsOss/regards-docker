@@ -10,13 +10,6 @@
 
   # Global config used by µservices
   role_regards_mconfig_config_mservices: "{{ group_config_mservices }}"
-  
-  role_regards_mconfig_mservice_granular_network_volume: "{{ group_workdir_network_allow_root }}"
-  role_regards_mconfig_mservice_dam_volume: "/share/{{ group_stack_name }}/workspace/regards/storage/dam"
-
-  # When true, the container will have to use another location for microservice workspace
-  role_regards_mconfig_mservice_use_ungranular_workspace_on_workdir_network: "{{ group_docker_cots_configuration.use_ungranular_workspace_on_workdir_network | default(false) }}"
-  role_regards_mconfig_mservice_use_ungranular_workspace_on_workdir_network_path: "/share/{{ group_stack_name }}/workspace/regards/workspace"
 
   role_regards_mconfig_mservice_jwt_secret: "{{ role_regards_mconfig_config_mservices.jwt_secret | default('!!!!!==========abcdefghijklmnopqrstuvwxyz0123456789==========!!!!!') }}"
   role_regards_mconfig_mservice_access_token_validity: "{{ role_regards_mconfig_config_mservices.access_token_validity | default('3600') }}"

@@ -29,18 +29,19 @@
     - "{{ role_regards_plugins_microservice_having_plugin }}"
   become: true
 
-- name: Pull plugins images
-  command:  docker pull {{ role_regards_plugins_docker_registry }}/{{ item.image }}:{{ item.tag }}
-  with_items:
-    - "{{ role_regards_plugins_plugins }}"
-
 - name: Run plugins container
-  command: > 
-    docker run --rm -i 
-    -v {{ role_regards_plugins_workspace }}:/regards-plugins 
-    {{ role_regards_plugins_docker_registry }}/{{ item.image }}:{{ item.tag }}
+  docker_container:
+    name: "{{ item.image }}"
+    image: "{{ role_regards_plugins_docker_registry }}/{{ item.image }}:{{ item.tag }}"
+    pull: true
+    cleanup: true
+    volumes:
+      - "{{ role_regards_plugins_workspace }}:/regards-plugins"
+    detach: false
   with_items:
     - "{{ role_regards_plugins_plugins }}"
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"
 
 - name: Ensure files are 0555
   command: find {{ role_regards_plugins_workspace }} -type f -exec chmod 0555 {} \;

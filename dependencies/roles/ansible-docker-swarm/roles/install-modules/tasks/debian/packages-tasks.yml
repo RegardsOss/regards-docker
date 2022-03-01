@@ -12,16 +12,29 @@
 # limitations under the License.
 #
 ---
-- name: "[DEBIAN] Install Packages"
-  become: yes
+- name: "[DEBIAN] Update basic packages"
   apt:
     name: 
       - ntp
-      - python
       - tcpdump
       - wget
       - openssl
       - curl
     state: latest
     update_cache: yes
-  when: ansible_facts['os_family'] == "Debian"
+
+- name: "[DEBIAN] Install Pip3"
+  apt:
+    name:
+      - python3-pip
+    state: latest
+    update_cache: yes
+  when: python_version == 3
+
+- name: "[DEBIAN] Install Pip2"
+  apt:
+    name:
+      - python2-pip
+    state: latest
+    update_cache: yes
+  when: python_version == 2

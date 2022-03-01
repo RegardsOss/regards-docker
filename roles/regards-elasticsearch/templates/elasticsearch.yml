@@ -1,16 +1,26 @@
-cluster.name: "docker-cluster"
-network.host: 0.0.0.0
-
 # minimum_master_nodes need to be explicitly set when bound on a public IP
 # set to 1 to allow single node clusters
 # Details: https://github.com/elastic/elasticsearch/pull/17288
-discovery.zen.minimum_master_nodes: 1
+discovery.zen.minimum_master_nodes: "{{ role_regards_elasticsearch_config_elasticsearch.minimum_master_nodes | default(1) }}"
 
-{% if role_regards_elasticsearch_cots_configuration_use_ungranular_workspace_on_workdir_network %}
-# Move the data location to the mount folder
-path.repo: ["{{ role_regards_elasticsearch_cots_configuration_use_ungranular_workspace_on_workdir_network_path }}/backup"]
-path.data: ["{{ role_regards_elasticsearch_cots_configuration_use_ungranular_workspace_on_workdir_network_path }}/data"]
+{% if role_regards_elasticsearch_config_elasticsearch.global_service is defined %}
+# Specify the interface to use between elasticsearches, otherwise it uses eth1
+network.host: _eth0_
 {% else %}
-path.repo: ["/usr/share/elasticsearch/backup"]
+network.host: 0.0.0.0
 {% endif %}
+
+{% if role_regards_elasticsearch_config_elasticsearch.get("legacy", false) == false %}
+discovery.seed_hosts: rs-elasticsearch
+xpack.security.enabled: false
+ingest.geoip.downloader.enabled: false
+{% if role_regards_elasticsearch_config_elasticsearch.global_service is not defined %}
+discovery.type: single-node
+{% endif %}
+{% elif role_regards_elasticsearch_config_elasticsearch.global_service is defined %}
+# Auto discover elasticsearch using round-robin DNS
+discovery.zen.ping.unicast.hosts: rs-elasticsearch
+{% endif %}
+
+path.repo: ["/usr/share/elasticsearch/backup"]
 

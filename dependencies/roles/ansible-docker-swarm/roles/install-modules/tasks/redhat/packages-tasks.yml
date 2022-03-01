@@ -12,16 +12,28 @@
 # limitations under the License.
 #
 ---
-- name: "[REDHAT] Install Packages"
-  become: yes
+- name: "[REDHAT] Update basic packages"
   yum:
     name:
       - ntp
-      - python
       - tcpdump
       - wget
       - openssl
       - curl
+      - python-setuptools
     state: latest
     update_cache: yes
-  when: ansible_facts['os_family'] == "RedHat"
+
+- name: "[REDHAT] Install Pip3"
+  yum:
+    name:
+      - python3-pip
+    state: latest
+  when: python_version == 3
+
+- name: "[REDHAT] Install Pip2"
+  yum:
+    name:
+      - python2-pip
+    state: latest
+  when: python_version == 2

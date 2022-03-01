@@ -13,6 +13,4 @@
 #
 ---
 - name: "[REDHAT] Configure Docker with namespaces and TLS"
-  become: yes
   shell: 'grubby --args="namespace.unpriv_enable=1 user_namespace.enable=1" --update-kernel="$(grubby --default-kernel)";'
-  tags: docker

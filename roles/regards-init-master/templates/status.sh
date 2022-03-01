@@ -36,8 +36,12 @@ fi
 # Display how many containers are missing
 typeset -i MAX_NB_CONTAINERS
 typeset -i NB_CONTAINERS
-MAX_NB_CONTAINERS={{ 1 + role_regards_init_master_mservices | length + role_regards_init_master_cots | length + role_regards_init_workers | length + role_regards_init_has_many_fluentd|bool | ternary(groups['regards_nodes'] | length - 1, 0)}}
-NB_CONTAINERS=$(docker stack ps -f "desired-state=running" {{ role_regards_init_master_stack_name }} |wc -l)
+MAX_NB_CONTAINERS=$(docker stack services --format '{{ '{{' }} .Name {{ '}}' }}\t{{ '{{' }}split .Replicas "/"{{ '}}' }}' {{ role_regards_init_master_stack_name }} \
+  | sed 's/[][]//g' \
+  | awk '{s+=$3} END {print s}')
+NB_CONTAINERS=$(docker stack services --format '{{ '{{' }} .Name {{ '}}' }}\t{{ '{{' }}split .Replicas "/"{{ '}}' }}' {{ role_regards_init_master_stack_name }} \
+  | sed 's/[][]//g' \
+  | awk '{s+=$2} END {print s}')
 if [ $MAX_NB_CONTAINERS -eq $NB_CONTAINERS ]; then
   printf >&2 "[\033[32mRUNNING\033[m]\t$NB_CONTAINERS/$MAX_NB_CONTAINERS\n"
 else
@@ -48,21 +52,18 @@ fi
 # Running containers list
 docker stack ps -f "desired-state=running" --format '{{ '{{' }} .CurrentState {{ '}}' }}\t{{ '{{' }} .Name {{ '}}' }}\t{{ '{{' }}.Node{{ '}}' }}\t{{ '{{' }}.Image{{ '}}' }}' {{ role_regards_init_master_stack_name }} \
   | sed --unbuffered -e "s/{{ role_regards_init_master_stack_name }}_//" \
+  | grep -vw "Pending" \
   | awk -F'\t' '{system("date --rfc-3339=seconds -u -d \"$(printf \"" $1 "\" | cut -d \" \" -f2- | sed \"s/about//g\" | sed \"s/less than//g\" | sed \"s/an /1 /g\" | sed \"s/a minute/1 minute/g\") \" | tr -d \"\n\"") ; printf "\t%s\t%s\t%s\t%s\t%s\n", $1, $2, $3, $4, $5;}' \
   | sort -r \
   | awk -F'\t' '{ printf "\033[32m%s\033[39m\t%s\t%s\t%s\n", $2, $3, $4, $5, $6;}' \
   | column -t -s $'\t'
 
-# Display microservices that are not up
-MISSING_SERVICES=$(docker stack services --format '{{ '{{' }} .Name {{ '}}' }}\t{{ '{{' }}split .Replicas "/"{{ '}}' }}' {{ role_regards_init_master_stack_name }} \
-  | sed 's/[][]//g' \
-  | sed --unbuffered -e "s/{{ role_regards_init_master_stack_name }}_//" \
-  | awk '$2!=$3{printf "%s %s active / %s expected\n", $1,$2, $3;}')
-
-typeset -i nbMissingServices
-nbMissingServices=$(printf "$MISSING_SERVICES" |wc -l)
-if [ $nbMissingServices -gt 0 ]; then
+# Display microservices that are not reaching replica goal
+if [ $MAX_NB_CONTAINERS -ne $NB_CONTAINERS ]; then
   printf >&2 "[\033[31mERROR\033[m]\t MISSING SERVICES\n"
   printf >&2 "NAME  /  REPLICATION STATUS\n"
-  echo "$MISSING_SERVICES"
+  docker stack services --format '{{ '{{' }} .Name {{ '}}' }}\t{{ '{{' }}split .Replicas "/"{{ '}}' }}' {{ role_regards_init_master_stack_name }} \
+    | sed 's/[][]//g' \
+    | sed --unbuffered -e "s/{{ role_regards_init_master_stack_name }}_//" \
+    | awk '$2!=$3{printf "%s %s active / %s expected\n", $1,$2, $3;}'
 fi

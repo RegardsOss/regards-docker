@@ -1,25 +1,19 @@
 ---
   - name: Install REGARDS on master node
     hosts: master
-  
     roles:
       - regards-init-master
       - regards-init-network-workdir
-      - regards-yourkit
-
 
 
   - name: Install REGARDS plugins on all nodes
-    hosts: regards_nodes
-
+    hosts: regards_nodes:!swarm_manager_only_nodes
     roles:
       - regards-plugins
 
 
   - name: Install REGARDS structure on all nodes
-    hosts: regards_nodes
-    # Avoid to run copy of configuration files on all nodes at the same times. The destination is the same nfs mount so do it one by one.
-    serial: 1
+    hosts: regards_nodes:!swarm_manager_only_nodes
     become: true
     roles:
       - regards-logback
@@ -33,6 +27,5 @@
 
   - name: Launch stack
     hosts: master
-
     roles:
       - regards-stack

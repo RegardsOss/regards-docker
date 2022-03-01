@@ -30,9 +30,5 @@ role_regards_init_master_cots: "{{ group_docker_cots }}"
 
 role_regards_init_public_url: "{{ group_docker_mservices.front.protocol }}://{{ group_docker_mservices.front.host }}:{{ group_docker_mservices.front.port }}"
 
-#Logs
-role_regards_init_use_ungranular_workspace_on_workdir_network: "{{ group_docker_cots_configuration.use_ungranular_workspace_on_workdir_network | default(false) }}"
-role_regards_init_has_many_fluentd: "{{ role_regards_init_master_workdir_local != role_regards_init_master_workdir_network and not role_regards_init_use_ungranular_workspace_on_workdir_network }}"
-
 #Workers
 role_regards_init_workers: "{{ group_docker_workers | default([]) }}"

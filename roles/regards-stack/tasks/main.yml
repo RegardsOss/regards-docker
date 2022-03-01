@@ -1,5 +1,5 @@
 ---
-  - name: Generate stacks files
+  - name: Generate mandatory stacks files
     template:
       src: "{{ item }}"
       dest: "{{ role_regards_stack_stack }}"
@@ -9,13 +9,58 @@
     with_items:
       - regards-stack.yml
       - elastic.yml
-      - logs.yml
-      - doc.yml
-      - mail.yml
-      - postgresql.yml
       - rabbitmq.yml
-      - workers.yml
     become: true
+
+  - name: Generate logs.yml
+    template:
+      src: logs.yml
+      dest: "{{ role_regards_stack_stack }}"
+      mode: '0740'
+      owner: "{{ role_regards_stack_container_root_user }}"
+      group: "{{ role_regards_stack_container_root_group }}"
+    become: true
+    when: role_regards_stack_cots.elasticsearch_logs is defined or role_regards_stack_cots.kibana_logs is defined or role_regards_stack_cots.fluent is defined
+
+  - name: Generate doc.yml
+    template:
+      src: doc.yml
+      dest: "{{ role_regards_stack_stack }}"
+      mode: '0740'
+      owner: "{{ role_regards_stack_container_root_user }}"
+      group: "{{ role_regards_stack_container_root_group }}"
+    become: true
+    when: role_regards_stack_cots.doc is defined
+
+  - name: Generate mail.yml
+    template:
+      src: mail.yml
+      dest: "{{ role_regards_stack_stack }}"
+      mode: '0740'
+      owner: "{{ role_regards_stack_container_root_user }}"
+      group: "{{ role_regards_stack_container_root_group }}"
+    become: true
+    when: role_regards_stack_cots.maildev is defined
+
+  - name: Generate postgresql.yml
+    template:
+      src: postgresql.yml
+      dest: "{{ role_regards_stack_stack }}"
+      mode: '0740'
+      owner: "{{ role_regards_stack_container_root_user }}"
+      group: "{{ role_regards_stack_container_root_group }}"
+    become: true
+    when: role_regards_stack_cots.postgres is defined or role_regards_stack_cots.phppgadmin is defined
+
+  - name: Generate workers.yml 
+    template:
+      src: workers.yml
+      dest: "{{ role_regards_stack_stack }}"
+      mode: '0740'
+      owner: "{{ role_regards_stack_container_root_user }}"
+      group: "{{ role_regards_stack_container_root_group }}"
+    become: true
+    when: role_regards_stack_workers | length > 0
 
   - set_fact:
       launch_swarm: >

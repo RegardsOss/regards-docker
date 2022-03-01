@@ -12,60 +12,30 @@
 # limitations under the License.
 #
 ---
-- name: Check if Swarm has already been Initialized. This step can be safely ignored and has no impact on a successful Swarm setup
-  become: yes
-  shell: >
-        . /etc/profile.d/docker-client.sh;
-        docker node ls
-  register: swarm_status
-  ignore_errors: true
-  tags: swarm
+- name: Check worker status in the swarm
+  docker_host_info:
+  register: worker_status
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"
 
 - name: Initialize Docker Swarm
-  become: yes
-  shell: >
-        . /etc/profile.d/docker-client.sh;
-        docker swarm init
-        --advertise-addr={{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:2377
-  when: swarm_status.rc != 0
-  run_once: true
-  tags: swarm
+  docker_swarm:
+    state: present
+    advertise_addr: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:2377"
+  when: worker_status.host_info.Swarm.LocalNodeState == "inactive"
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"
 
-- name: Remove ingress network
-  become: yes
-  shell: >
-        . /etc/profile.d/docker-client.sh;
-        printf 'Y' | docker network rm ingress
+- include_tasks: overrideIngress.yml
   when: "'docker_ingress_network' in hostvars[inventory_hostname] and 'docker_ingress_network_gateway' in hostvars[inventory_hostname]"
-  run_once: true
-  ignore_errors: true
-  tags: swarm
 
-- name: Set netmask for Ingress network
-  become: yes
-  shell: >
-        . /etc/profile.d/docker-client.sh;
-        docker network create --driver overlay --ingress --subnet={{ docker_ingress_network }} --gateway={{ docker_ingress_network_gateway }} --opt com.docker.network.driver.mtu=1200 ingress
-  when: "'docker_ingress_network' in hostvars[inventory_hostname] and 'docker_ingress_network_gateway' in hostvars[inventory_hostname]"
-  run_once: true
-  retries: 3
-  delay: 5
-  register: result
-  until: result.rc == 0
-  tags: swarm
+- name: Get Swarm infos
+  docker_swarm_info:
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"
+  register: swarm_info
 
-- name: Get the Manager join-token
-  become: yes
-  shell: >
-        . /etc/profile.d/docker-client.sh;
-        docker swarm join-token --quiet manager
-  register: manager_token
-  tags: swarm
-
-- name: Get the worker join-token
-  become: yes
-  shell: >
-        . /etc/profile.d/docker-client.sh;
-        docker swarm join-token --quiet worker
-  register: worker_token
-  tags: swarm
+- name: Save Swarm join tokens
+  set_fact:
+    manager_token: "{{ swarm_info.swarm_facts.JoinTokens.Manager }}"
+    worker_token: "{{ swarm_info.swarm_facts.JoinTokens.Worker }}"

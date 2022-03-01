@@ -1,0 +1,48 @@
+---
+- name: Create docker group
+  group:
+    name: docker
+    state: present
+    gid: "{{ docker_group_gid }}"
+
+- name: Create dockermap group for namespace
+  group:
+    name: "{{ gid_map_group_name }}"
+    state: present
+    gid: "{{ name_space_gid }}"
+
+- name: Create dockermap user for namespace
+  user:
+    name: "{{ uid_map_user_name }}"
+    comment: Docker namespace user
+    uid: "{{ name_space_uid }}"
+    group: "{{ gid_map_group_name }}"
+    create_home: false
+
+- include_tasks: redhat/usernamespace-tasks.yml
+  when: ansible_facts['os_family'] == "RedHat"
+
+- include_tasks: debian/usernamespace-tasks.yml
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Add user.max_user_namespace to /etc/sysctl.conf
+  sysctl:
+    name: "user.max_user_namespaces"
+    value: "{{ name_space_range | string() }}"
+    state: present
+
+- name: Create /etc/subuid
+  template:
+    src: 'subuid.j2'
+    dest: '/etc/subuid'
+    owner: 'root'
+    group: 'root'
+    mode: '0600'
+
+- name: Create /etc/subgid
+  template:
+    src: subgid.j2
+    dest: '/etc/subgid'
+    owner: 'root'
+    group: 'root'
+    mode: '0600'

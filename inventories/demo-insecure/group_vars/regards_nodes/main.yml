@@ -3,8 +3,7 @@ group_stack_name: regards
 # Network disk shared accross every nodes
 group_workdir_network: "{{ global_stack.workdir }}"
 # Do we allow root inside the network volume?
-# When false => group_workdir_network is entirely mounted to containers
-# As we cannot chown folders inside that volume
+# When false => tree structure cannot be created and must exists before playbook execution
 group_workdir_network_allow_root: true
 # Everything stored in the workdir_local is not shared across swarm nodes. 
 # We replicate everything on each swarm node to let microservice spawn whatever they want
@@ -24,7 +23,7 @@ group_container_root_group: "{{ global_regards.your_user }}"
 # Your user owns all files created by containers and runtime server
 group_container_run_user: "{{ global_regards.your_user }}"
 group_container_run_group: "{{ global_regards.your_user }}"
-# Your user uid / gid
+# Your user uid / gid
 group_container_run_uid: "{{ global_regards.your_user_id }}"
 group_container_run_gid: "{{ global_regards.your_user_id }}"
 # END - SPECIFIC PART RELATED TO LOCAL-INSECURE
@@ -40,49 +39,51 @@ group_docker_tags:
   back: '{{ global_regards.version }}'
   front: '{{ global_regards.version }}'
 
+group_workdir_local_legacy: true
+
 # Plugins
 group_docker_plugins:
   - image: rs-plugins
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
 
-# Stack
+# Stack
 group_docker_mservices:
   config:
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
     http: 9031
   registry:
     http: 9032
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   gateway:
     # jdwp: 19030
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   admin_instance:
     # jdwp: 19037
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   admin:
     # jdwp: 19033
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   authentication:
     # jdwp: 19034
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   dam:
     # jdwp: 19035
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   notifier:
     # jdwp: 19039
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   fem:
     # jdwp: 19038
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   catalog:
     # jdwp: 19036
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   access_instance:
     # jdwp: 19040
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   access_project:
     # jdwp: 19041
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   storage:
     # jdwp: 19042
     tag: "{{ group_docker_tags.back }}"
@@ -91,10 +92,10 @@ group_docker_mservices:
     tag: "{{ group_docker_tags.back }}"
   ingest:
     # jdwp: 19044
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   dataprovider:
     # jdwp: 19045
-    tag: "{{ group_docker_tags.back }}"
+    tag: "{{ group_docker_tags.back }}"
   processing:
     # jdwp: 19046
     tag: "{{ group_docker_tags.back }}"
@@ -102,14 +103,16 @@ group_docker_mservices:
     protocol: http
     host: "{{ global_stack.master_node_host_name }}"
     port: 80
-    tag: "{{ group_docker_tags.front }}"
+    tag: "{{ group_docker_tags.front }}"
 
 # COTS
 group_docker_cots:
   elasticsearch:
     tag: "{{ group_docker_tags.cots }}"
+    legacy: true
 #  elasticsearch_logs:
 #    tag: "{{ group_docker_tags.cots }}"
+#    legacy: true
 #  kibana:
 #    tag: "{{ group_docker_tags.cots }}"
 #    http: 5601
@@ -132,7 +135,6 @@ group_docker_cots:
 
 # COTS configuration
 group_docker_cots_configuration:
-  use_ungranular_workspace_on_workdir_network: false
   postgres:
     nbTenant: 10
   elasticsearch:

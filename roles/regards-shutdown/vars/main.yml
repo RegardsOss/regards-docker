@@ -1,0 +1,2 @@
+---
+role_regards_erase_stack_name: "{{ group_stack_name }}"

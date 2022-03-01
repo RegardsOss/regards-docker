@@ -1,0 +1,10 @@
+---
+- name: Start services 
+  hosts: docker_nodes
+  tasks:
+  - name: Start docker service
+    service:
+      name: docker
+      daemon_reload: true
+      state: "started"
+  become: yes

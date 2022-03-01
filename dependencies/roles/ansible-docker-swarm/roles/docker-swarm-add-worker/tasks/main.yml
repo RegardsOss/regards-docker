@@ -12,7 +12,18 @@
 # limitations under the License.
 #
 ---
-- name: Add Workers to the Swarm
-  become: yes
-  shell: ". /etc/profile.d/docker-client.sh; docker swarm join --token {{ hostvars[groups['swarm_manager'][0]]['worker_token']['stdout'] }} {{ hostvars[groups['swarm_manager'][0]][swarm_manager_eth]['ipv4']['address'] }}:2377"
-  tags: swarm
+- name: Check worker status in the swarm
+  docker_host_info:
+  register: worker_status
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"
+
+- name: Add nodes to the Swarm
+  docker_swarm:
+    state: join
+    join_token: "{{ add_worker_join_token_worker }}"
+    remote_addrs: "['{{ add_worker_remote_addr }}:2377']"
+    advertise_addr: 
+  when: worker_status.host_info.Swarm.LocalNodeState == "inactive"
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"

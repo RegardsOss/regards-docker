@@ -3,12 +3,17 @@ services:
 
 {% for worker in role_regards_stack_workers %}
   {{ worker.name }}:
-    image: 172.26.46.158/{{ worker.name }}:{{ worker.tag }}
+    image: {{ role_regards_stack_registry }}/{{ worker.name }}:{{ worker.tag }}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: {{ worker.name }}
     read_only: true
     deploy:
       replicas: {{ worker.replicas | default(1) }}
+{% if worker.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ worker.node_label_placement_constraint.key }} == {{ worker.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
     volumes:

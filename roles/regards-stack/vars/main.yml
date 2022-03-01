@@ -31,6 +31,8 @@ role_regards_stack_workers: "{{ group_docker_workers | default([]) }}"
 role_regards_stack_mservices_admin_image_name: "{{ (group_docker_mservices.admin | default({})).get('imageName', 'rs-admin') }}"
 role_regards_stack_mservices_admin_instance_image_name: "{{ (group_docker_mservices.admin_instance | default({})).get('imageName', 'rs-admin-instance') }}"
 
+role_regards_stack_mservices_access_instance_image_name: "rs-access-instance{{ ( (group_docker_mservices.access_instance | default({})).get('postgis', true) == false) | ternary('-light', '') }}"
+
 postgres_default:
   user: azertyuiop123456789
   password: azertyuiop123456789
@@ -39,19 +41,12 @@ role_regards_stack_config_postgres:
   user: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('user', postgres_default.user) }}"
   password: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('user', postgres_default.password) }}"
 
-# Front conf
-# When true, the volume can be mounted
-role_regards_stack_mount_front_volume: "{{ group_workdir_network_allow_root }}"
-role_regards_stack_public_url: "{{ group_docker_mservices.front.protocol }}:\\/\\/{{ group_docker_mservices.front.host }}:{{ group_docker_mservices.front.port }}"
+rabbitmq_erlang_cookie_default: MY-SECRET-KEY-123
 
-# Microservices conf
-# When true, the workspace is granulary mounted, otherwise everything is mounted together
-role_regards_stack_mount_mservice_granular_network_volume: "{{ group_workdir_network_allow_root }}"
+role_regards_stack_config_rabbitmq_erlang_cookie: "{{ (role_regards_stack_cots | default({})).get('rabbitmq', {}).get('erlang_cookie', rabbitmq_erlang_cookie_default) }}"
+
+role_regards_stack_public_url: "{{ group_docker_mservices.front.protocol }}:\\/\\/{{ group_docker_mservices.front.host }}:{{ group_docker_mservices.front.port }}"
 
 # Fluent conf
 # When true, all microservices write logs on the same network file system
 role_regards_stack_all_logs_inside_same_network_storage: "{{ group_workdir_network == group_workdir_local }}"
-
-# When true, COTS workspace are mounted together and the configuration of each COTS makes the right link
-role_regards_stack_cots_configuration_use_ungranular_workspace_on_workdir_network: "{{ group_docker_cots_configuration.use_ungranular_workspace_on_workdir_network | default(false) }}"
-role_regards_stack_attach_cots_to_specific_node: "{{ role_regards_stack_workspace_local != role_regards_stack_workspace_network and not role_regards_stack_cots_configuration_use_ungranular_workspace_on_workdir_network }}"

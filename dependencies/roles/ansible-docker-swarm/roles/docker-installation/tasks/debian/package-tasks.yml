@@ -13,21 +13,18 @@
 #
 ---
 - name: Add Docker’s official GPG key
-  become: yes
   apt_key:
     url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
     state: present
+  when: role_docker_install_enable_add_repo
 
 - name: "[DEBIAN] {{ ansible_facts['distribution'] }} Add Docker Repository"
-  become: yes
   apt_repository:
     repo: deb [arch=amd64] https://download.docker.com/linux/{{ ansible_os_family | lower }} {{ ansible_distribution_release | lower }} stable
     state: present
   when: role_docker_install_enable_add_repo
-  tags: docker
 
 - name: "[DEBIAN] Remove banned Packages (Debian)"
-  become: yes
   apt:
     name:
       - firewalld
@@ -42,14 +39,10 @@
       - docker-engine
     state: absent
     update_cache: no
-  when: ansible_facts['os_family'] == "Debian"
-  tags: docker
 
 - name: "[DEBIAN] Install Docker Dependencies"
-  become: yes
   apt:
     name:
-      - ca-certificates
       - curl
       - iptables
       - ufw
@@ -58,5 +51,3 @@
       - docker-ce
     state: latest
     update_cache: yes
-  when: ansible_facts['os_family'] == "Debian"
-  tags: docker

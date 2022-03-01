@@ -28,87 +28,49 @@
   when: ansible_facts['os_family'] == "Debian"
 
 - name: Create Docker directory
-  become: yes
   file:
     path: /etc/docker
     state: directory
     mode: '0775'
     owner: 'root'
     group: 'docker'
-  tags: docker
 
-- name: Configure systemctl default start options
-  become: yes
+- name: Remove fd:// from ExecStart to use linux sock protocol
   lineinfile:
     path: /lib/systemd/system/docker.service
     regexp: '^ExecStart='
-    line: ExecStart=/usr/bin/dockerd
-  tags: docker
-
-- name: Create docker group
-  become: yes
-  group:
-    name: docker
-    state: present
-    gid: "{{ docker_group_gid }}"
-  tags: docker
-
-- name: Create dockermap group for namespace
-  become: yes
-  group:
-    name: dockermapgid
-    state: present
-    gid: "{{ name_space_gid }}"
-  tags: docker
-
-- name: Create dockermap user for namespace
-  become: yes
-  user:
-    name: dockermapuid
-    comment: Docker namespace user
-    uid: "{{ name_space_uid }}"
-    group: dockermapgid
-  tags: docker
-
+    line: "ExecStart=/usr/bin/dockerd --containerd=/run/containerd/containerd.sock"
 
 - name: Load into kernel some modules required by Swarm
-  become: yes
   modprobe:
     name: "{{ item }}"
     state: present
   with_items :
     - ip_vs_rr
     - ip_vs
-  tags: docker
 
 - name: Check if we need to use the legacy nf_conntrack
   shell: find /lib/modules/$(uname -r) -type f -name "nf_conntrack_ipv4.ko*"
   register: use_legacy_nf_conntrack
 
 - name: Load into kernel the legacy conntrack_ipv4 - required by Swarm
-  become: yes
   modprobe:
     name: nf_conntrack_ipv4
     state: present
-  tags: docker
   when: use_legacy_nf_conntrack.stdout != ""
 
 - name: Load into kernel the latest conntrack - required by Swarm
-  become: yes
   modprobe:
     name: nf_conntrack
     state: present
-  tags: docker
   when: use_legacy_nf_conntrack.stdout == ""
 
 - name: Stop services to clean iptables before save them
-  become: yes
   systemd:
     name: "{{ item }}"
     state: stopped
   with_items :
     - "docker"
-  tags: docker
 
 - include_tasks: redhat/iptables-tasks.yml
   when: ansible_facts['os_family'] == "RedHat"
@@ -116,108 +78,37 @@
 - include_tasks: debian/iptables-tasks.yml
   when: ansible_facts['os_family'] == "Debian"
 
-- name: Create Docker Server Certicate repositories
-  become: yes
-  file:
-    path: "{{ item }}"
-    state: directory
-    mode: '0700'
-    owner: 'root'
-    group: 'root'
-  with_items:
-    - '/var/docker-server'
-  tags: docker
+- name: Active kernel tuning
+  sysctl:
+    name: '{{ item.key }}'
+    value: '{{ item.value }}'
+    state: present
+    reload: yes
+    sysctl_file: '/etc/sysctl.d/50-ansible-docker-swarm-tuning.conf'
+  with_dict: '{{ kernel_tuning_parameters }}'
+  when: kernel_tuning|bool == true
 
-- name: Create Docker Client Certicate repositories
-  become: yes
-  file:
-    path: "{{ item }}"
-    state: directory
-    mode: '0750'
-    owner: 'root'
-    group: 'docker'
-  with_items:
-    - '/var/docker-client'
-  tags: docker
+- name: Active RHEL kernel tuning
+  sysctl:
+    name: '{{ item.key }}'
+    value: '{{ item.value }}'
+    state: present
+    reload: yes
+    sysctl_file: '/etc/sysctl.d/50-ansible-docker-swarm-tuning.conf'
+  with_dict: '{{ kernel_rhel_tuning_parameters }}'
+  when: kernel_tuning|bool == true and ansible_facts['os_family'] == "RedHat"
 
-- name: Install Certicates for Docker server
-  become: yes
-  copy:
-    src: "{{ item }}"
-    dest: '/var/docker-server'
-    owner: 'root'
-    group: 'root'
-    mode: '0400'
-  with_fileglob:
-    - '{{ role_path }}/../../certificates/ca.pem'
-    - '{{ role_path }}/../../certificates/server-cert-{{ ansible_facts["fqdn"] }}.pem'
-    - '{{ role_path }}/../../certificates/server-key-{{ ansible_facts["fqdn"] }}.pem'
-  tags: docker
-
-- name: Install Certicates for Docker client
-  become: yes
-  copy:
-    src: "{{ item.src }}"
-    dest: "/var/docker-client/{{ item.dest }}"
-    owner: 'root'
-    group: 'docker'
-    mode: '0440'
-  with_items:
-    - { src: '{{ role_path }}/../../certificates/cert-client.pem', dest: 'cert.pem' }
-    - { src: '{{ role_path }}/../../certificates/key-client.pem', dest: 'key.pem' }
-    - { src: '{{ role_path }}/../../certificates/ca.pem', dest: 'ca.pem' }
-  tags: docker
-
-- include_tasks: redhat/usernamespace-tasks.yml
-  when: ansible_facts['os_family'] == "RedHat"
-
-- include_tasks: debian/usernamespace-tasks.yml
-  when: ansible_facts['os_family'] == "Debian"
-  
-- name: Add user.max_user_namespace to /etc/sysctl.conf
-  become: yes
-  lineinfile:
-    line: "user.max_user_namespaces={{ name_space_range }}"
-    dest: "/etc/sysctl.conf"
-  tags: docker
-
-- name: Reload sysctl settings
-  become: yes
-  shell: "sysctl -p"
-  tags: docker
-
-- name: Create /etc/subuid
-  become: yes
-  copy:
-    dest: '/etc/subuid'
-    owner: 'root'
-    group: 'root'
-    mode: '0600'
-    content: "dockermapuid:{{ name_space_uid }}:{{ name_space_range }}"
-  tags: docker
-
-- name: Create /etc/subgid
-  become: yes
-  copy:
-    dest: '/etc/subgid'
-    owner: 'root'
-    group: 'root'
-    mode: '0600'
-    content: "dockermapuid:{{ name_space_gid }}:{{ name_space_range }}"
-  tags: docker
+- include_tasks: docker-namespace.yml
 
 - name: Configure Docker client connexion
-  become: yes
-  copy:
+  template:
+    src: 'docker-client.sh.j2'
     dest: '/etc/profile.d/docker-client.sh'
     owner: 'root'
     group: 'docker'
     mode: '0640'
-    content: "#!/bin/false\nexport DOCKER_HOST=tcp://{{ hostvars[inventory_hostname]['ansible_fqdn'] }}:2376 DOCKER_TLS_VERIFY=1\nexport DOCKER_CERT_PATH=/var/docker-client\nexport GODEBUG=x509ignoreCN=0\n"
-  tags: docker
 
 - name: Create Docker system directory for proxy
-  become: yes
   file:
     path: /etc/systemd/system/docker.service.d
     state: directory
@@ -225,10 +116,8 @@
     owner: 'root'
     group: 'root'
   when: "'docker_http_proxy' in hostvars[inventory_hostname] and 'docker_no_proxy' in hostvars[inventory_hostname]"
-  tags: docker
 
 - name: Configure Docker proxy
-  become: yes
   template:
     src: "http-proxy.conf"
     dest: '/etc/systemd/system/docker.service.d/http-proxy.conf'
@@ -236,44 +125,21 @@
     group: 'root'
     mode: '0644'
   when: "'docker_http_proxy' in hostvars[inventory_hostname] and 'docker_no_proxy' in hostvars[inventory_hostname]"
-  tags: docker
 
 - name: Configure Docker Daemon
-  become: yes
   template:
-    src: "daemon.json"
+    src: 'daemon.json.j2'
     dest: '/etc/docker/daemon.json'
     owner: 'root'
     group: 'root'
     mode: '0600'
-  tags: docker
 
 - name: Restart docker daemon
-  become: yes
   systemd:
     name: docker
     daemon_reload: yes
     state: restarted
     enabled: yes
-  tags: docker
 
-- name: Set netmask for gwbridge docker network
-  become: yes
-  shell: >
-      . /etc/profile.d/docker-client.sh;
-      ip link set docker_gwbridge down;
-      ip link del dev docker_gwbridge;
-      docker network disconnect -f docker_gwbridge gateway_ingress-sbox	|| true;
-      printf 'Y' | docker network rm docker_gwbridge || true;
-      docker network create --subnet {{ docker_gwbridge_network }} --opt com.docker.network.bridge.name=docker_gwbridge --opt com.docker.network.bridge.enable_icc=false --opt com.docker.network.bridge.enable_ip_masquerade=true docker_gwbridge
+- include_tasks: overrideBridgeTask.yml
   when: "'docker_gwbridge_network' in hostvars[inventory_hostname]"
-  tags: docker
-  
-- name: Restart docker daemon
-  become: yes
-  systemd:
-    name: docker
-    daemon_reload: yes
-    state: restarted
-    enabled: yes
-  tags: docker

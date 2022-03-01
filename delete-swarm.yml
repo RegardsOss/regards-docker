@@ -13,7 +13,9 @@
 #
 ---
 - name: workers leave the swarm
-  hosts: swarm_workers
+  hosts: 
+    - swarm_workers
+    - swarm_alternative_managers
   roles:
     - ansible-docker-swarm/roles/docker-swarm-leave
 

@@ -11,4 +11,10 @@ services:
     ports:
       - "{{ role_regards_stack_cots.maildev.http }}:1080"
 {% endif %}
+{% if role_regards_stack_cots.maildev.node_label_placement_constraint is defined %}
+    deploy:
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_cots.maildev.node_label_placement_constraint.key }} == {{ role_regards_stack_cots.maildev.node_label_placement_constraint.value }}
+{% endif %}
 {% endif %}

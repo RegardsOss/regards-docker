@@ -1,3 +1,7 @@
 ---
   - include: "{{ role_path }}/tasks/init.yml"
+    when: role_regards_postgres_is_defined|bool
+
   - include: "{{ role_path }}/tasks/config.yml"
+    when: role_regards_postgres_is_defined|bool
+

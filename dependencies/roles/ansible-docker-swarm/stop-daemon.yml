@@ -1,0 +1,10 @@
+---
+- name: Stop services 
+  hosts: docker_nodes
+  tasks:
+  - name: Stop docker service
+    service:
+      name: docker
+      daemon_reload: true
+      state: "stopped"
+  become: yes

@@ -15,17 +15,40 @@
       - "{{ role_regards_init_master_cli }}"
     become: true
 
-  - name: Create docker network if not existing
-  # Requires shell module when it includes stream operations
-  # The current user shall be in the docker group
-    shell: > 
-      docker network inspect {{ role_regards_init_master_docker_network_name | quote }} >/dev/null 2>&1 ||
-      docker network create 
-      --driver overlay 
-      --subnet={{ role_regards_init_master_docker_network_subnet  | quote }} 
-      --gateway={{ role_regards_init_master_docker_network_gateway | quote }} 
-      {{ role_regards_init_master_docker_network_name | quote }}
+  - name: Get regards network info
+    docker_network_info:
+      name: "{{ role_regards_init_master_docker_network_name }}"
+    register: docker_network_name_info
+    become: yes
+    vars:
+      ansible_python_interpreter: "env python{{ python_version }}"
 
+  - name: Should recreate regards network network?
+    set_fact:
+      recreate_regards_network: "{{ docker_network_name_info.exists != true or docker_network_name_info.network.Driver != \"overlay\" or docker_network_name_info.network.Attachable != true or docker_network_name_info.network.IPAM.Config[0].Gateway != role_regards_init_master_docker_network_gateway or docker_network_name_info.network.IPAM.Config[0].Subnet != role_regards_init_master_docker_network_subnet }}"
+
+  - name: Remove regards network
+    docker_network:
+      name: "{{ role_regards_init_master_docker_network_name  }}"
+      state: absent
+    become: yes
+    when: recreate_regards_network|bool
+    run_once: true
+    ignore_errors: true
+    vars:
+      ansible_python_interpreter: "env python{{ python_version }}"
+
+  - name: Create regards network (fails if the REGARDS stack is deployed)
+    docker_network:
+      name: "{{ role_regards_init_master_docker_network_name }}"
+      attachable: true
+      driver: overlay
+      ipam_config:
+        - subnet: "{{ role_regards_init_master_docker_network_subnet }}"
+          gateway: "{{ role_regards_init_master_docker_network_gateway }}"
+    vars:
+      ansible_python_interpreter: "env python{{ python_version }}"
+    when: recreate_regards_network|bool
 
   - name: Add dev CLI (legacy)
     template:

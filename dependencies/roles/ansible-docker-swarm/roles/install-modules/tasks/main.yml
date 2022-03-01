@@ -17,3 +17,49 @@
 
 - include_tasks: debian/packages-tasks.yml
   when: ansible_facts['os_family'] == "Debian"
+
+- name: Install python3 dependencies using pip 
+  pip:
+    name: 
+      - docker>5.0.2
+      # Python Docker Swarm dependencies
+      # - pyyaml
+      # Update Ansible dep jinja2 (and markupsafe) to its last version
+      - jinja2~=2.11
+      - markupsafe~=1.0
+    state: latest
+    executable: "{{ role_install_pip_cli }}"
+    umask: "0022"
+  environment:
+    PIP_INDEX_URL: "{{ role_install_modules_pip_index_url }}"
+    PIP_TRUSTED_HOST: "{{ role_install_modules_pip_trusted_host }}"
+  when: python_version == 3
+
+- name: Install python2 dependencies using pip 
+  pip:
+    name: 
+      # Only version useable with python >=2.7
+      # See https://docs.ansible.com/ansible/latest/collections/community/docker/docsite/scenario_guide.html#ansible-collections-community-docker-docsite-scenario-guide
+      - docker==4.4.4
+      # Sometimes it installs an incompatible version (that uses python3 stuff)
+      - websocket-client==0.56.0
+      # Update Ansible dep jinja2 (and markupsafe) to its last version
+      - jinja2~=2.11
+      - markupsafe~=1.0
+    state: latest
+    executable: "{{ role_install_pip_cli }}"
+    umask: "0022"
+  environment:
+    PIP_INDEX_URL: "{{ role_install_modules_pip_index_url }}"
+    PIP_TRUSTED_HOST: "{{ role_install_modules_pip_trusted_host }}"
+  when: python_version == 2
+
+# We're stuck with pyc files not readable by everyone, even with umask defined.
+# Looks like pyc files are generated outside umask definition ????
+# So we decided to make them readeable by everyone using chmod
+- name: "Get the {{ role_install_pip_cli }} package path"
+  shell: "{{ role_install_pip_cli }} show docker | grep Location | cut -d ' ' -f 2"
+  register: python_package_path
+
+- name: "Ensure pyc files inside {{ python_package_path.stdout }} are x55"
+  command: find {{ python_package_path.stdout }} -type f -name "*.pyc" -exec chmod g+rx,o+rx {} \;

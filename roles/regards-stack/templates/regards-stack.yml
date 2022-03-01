@@ -7,6 +7,12 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-config
     read_only: true
+{% if role_regards_stack_mservices.config.node_label_placement_constraint is defined %}
+    deploy:
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.config.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.config.node_label_placement_constraint.value }}
+{% endif %}
     networks: 
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.config.http is defined %}
@@ -31,6 +37,12 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-registry
     read_only: true
+{% if role_regards_stack_mservices.registry.node_label_placement_constraint is defined %}
+    deploy:
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.registry.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.registry.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
     volumes:
@@ -66,7 +78,12 @@ services:
     hostname: rs-gateway
     read_only: true
     deploy:
-       replicas: {{ role_regards_stack_mservices.gateway.replicas | default(1) }}
+      replicas: {{ role_regards_stack_mservices.gateway.replicas | default(1) }}
+{% if role_regards_stack_mservices.gateway.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.gateway.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.gateway.node_label_placement_constraint.value }}
+{% endif %}
 {% if role_regards_stack_mservices.gateway.jdwp is defined %}
     environment: 
       - ACTIVE_DEBUG=true
@@ -108,6 +125,12 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-admin-instance
     read_only: true
+{% if role_regards_stack_mservices.admin_instance.node_label_placement_constraint is defined %}
+    deploy:
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.admin_instance.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.admin_instance.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.admin_instance.jdwp is defined %}
@@ -150,7 +173,12 @@ services:
     hostname: rs-admin
     read_only: true
     deploy:
-       replicas: {{ role_regards_stack_mservices.admin.replicas | default(1) }}
+      replicas: {{ role_regards_stack_mservices.admin.replicas | default(1) }}
+{% if role_regards_stack_mservices.admin.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.admin.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.admin.node_label_placement_constraint.value }}
+{% endif %}
 {% if role_regards_stack_mservices.admin.jdwp is defined %}
     environment: 
       - ACTIVE_DEBUG=true
@@ -193,7 +221,12 @@ services:
     hostname: rs-authentication
     read_only: true
     deploy:
-       replicas: {{ role_regards_stack_mservices.authentication.replicas | default(1) }}
+      replicas: {{ role_regards_stack_mservices.authentication.replicas | default(1) }}
+{% if role_regards_stack_mservices.authentication.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.authentication.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.authentication.node_label_placement_constraint.value }}
+{% endif %}
 {% if role_regards_stack_mservices.authentication.jdwp is defined %}
     environment: 
       - ACTIVE_DEBUG=true
@@ -237,7 +270,12 @@ services:
     hostname: rs-dam
     read_only: true
     deploy:
-       replicas: {{ role_regards_stack_mservices.dam.replicas | default(1) }}
+      replicas: {{ role_regards_stack_mservices.dam.replicas | default(1) }}
+{% if role_regards_stack_mservices.dam.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.dam.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.dam.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.dam.jdwp is defined %}
@@ -248,20 +286,16 @@ services:
       - ACTIVE_YOURKIT=true
 {% endif %}
     volumes:
-{% if role_regards_stack_mservices.volumes is defined %}
-{% for volume in role_regards_stack_mservices.volumes %}
+{% if role_regards_stack_mservices.dam.volumes is defined %}
+{% for volume in role_regards_stack_mservices.dam.volumes %}
       - {{ volume.source }}:{{ volume.destination }}
 {% endfor %}
 {% endif %}
       - {{ role_regards_stack_logback }}dam:/config:ro
       - {{ role_regards_stack_workspace_local }}regards/plugins/dam:/plugins:ro
       - {{ role_regards_stack_workspace_local }}regards/logs/dam:/logs
-{% if role_regards_stack_mount_mservice_granular_network_volume %}
       - {{ role_regards_stack_workspace_network }}regards/storage/dam:/storage
       - {{ role_regards_stack_workspace_network }}regards/workspace:/tmp/workspace
-{% else %}
-      - {{ role_regards_stack_workdir_network }}:/share
-{% endif %}
       - type: tmpfs
         target: /tmp
 {% if role_regards_stack_mservices.dam.http is defined or role_regards_stack_mservices.dam.jdwp is defined or role_regards_stack_mservices.dam.jmx is defined or role_regards_stack_mservices.dam.yourkit is defined %}
@@ -292,7 +326,12 @@ services:
     hostname: rs-notifier
     read_only: true
     deploy:
-       replicas: {{ role_regards_stack_mservices.notifier.replicas | default(1) }}
+      replicas: {{ role_regards_stack_mservices.notifier.replicas | default(1) }}
+{% if role_regards_stack_mservices.notifier.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.notifier.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.notifier.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.notifier.jdwp is defined %}
@@ -336,7 +375,12 @@ services:
     hostname: rs-fem
     read_only: true
     deploy:
-       replicas: {{ role_regards_stack_mservices.fem.replicas | default(1) }}
+      replicas: {{ role_regards_stack_mservices.fem.replicas | default(1) }}
+{% if role_regards_stack_mservices.fem.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.fem.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.fem.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.fem.jdwp is defined %}
@@ -355,12 +399,8 @@ services:
       - {{ role_regards_stack_logback }}fem:/config:ro
       - {{ role_regards_stack_workspace_local }}regards/logs/fem:/logs
       - {{ role_regards_stack_workspace_local }}regards/plugins/fem:/plugins:ro
-{% if role_regards_stack_mount_mservice_granular_network_volume %}
       - {{ role_regards_stack_workspace_network }}regards/workspace:/tmp/workspace
       - {{ role_regards_stack_workspace_network }}regards/input:/input
-{% else %}
-      - {{ role_regards_stack_workdir_network }}:/share
-{% endif %}
       - type: tmpfs
         target: /tmp
 {% if role_regards_stack_mservices.fem.http is defined or role_regards_stack_mservices.fem.jdwp is defined or role_regards_stack_mservices.fem.jmx is defined or role_regards_stack_mservices.fem.yourkit is defined %}
@@ -391,7 +431,12 @@ services:
     hostname: rs-catalog
     read_only: true
     deploy:
-       replicas: {{ role_regards_stack_mservices.catalog.replicas | default(1) }}
+      replicas: {{ role_regards_stack_mservices.catalog.replicas | default(1) }}
+{% if role_regards_stack_mservices.catalog.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.catalog.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.catalog.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.catalog.jdwp is defined %}
@@ -405,11 +450,7 @@ services:
       - {{ role_regards_stack_logback }}catalog:/config:ro
       - {{ role_regards_stack_workspace_local }}regards/logs/catalog:/logs
       - {{ role_regards_stack_workspace_local }}regards/plugins/catalog:/plugins:ro
-{% if role_regards_stack_mount_mservice_granular_network_volume %}
       - {{ role_regards_stack_workspace_network }}regards/workspace:/tmp/workspace
-{% else %}
-      - {{ role_regards_stack_workdir_network }}:/share
-{% endif %}
       - type: tmpfs
         target: /tmp
 {% if role_regards_stack_mservices.catalog.http is defined or role_regards_stack_mservices.catalog.jdwp is defined or role_regards_stack_mservices.catalog.jmx is defined or role_regards_stack_mservices.catalog.yourkit is defined %}
@@ -435,10 +476,16 @@ services:
 
 {% if role_regards_stack_mservices.access_instance is defined %}
   rs-access-instance:
-    image: {{ role_regards_stack_registry }}/rs-access-instance:{{ role_regards_stack_mservices.access_instance.tag }}
+    image: {{ role_regards_stack_registry }}/{{ role_regards_stack_mservices_access_instance_image_name }}:{{ role_regards_stack_mservices.access_instance.tag }}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-access-instance
     read_only: true
+{% if role_regards_stack_mservices.access_instance.node_label_placement_constraint is defined %}
+    deploy:
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.access_instance.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.access_instance.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.access_instance.jdwp is defined %}
@@ -481,7 +528,12 @@ services:
     hostname: rs-access-project
     read_only: true
     deploy:
-       replicas: {{ role_regards_stack_mservices.access.replicas | default(1) }}
+      replicas: {{ role_regards_stack_mservices.access_project.replicas | default(1) }}
+{% if role_regards_stack_mservices.access_project.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.access_project.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.access_project.node_label_placement_constraint.value }}
+{% endif %}
 {% if role_regards_stack_mservices.access_project.jdwp is defined %}
     environment: 
       - ACTIVE_DEBUG=true
@@ -524,7 +576,12 @@ services:
     hostname: rs-front
     read_only: true
     deploy:
-       replicas: {{ role_regards_stack_mservices.front.replicas | default(1) }}
+      replicas: {{ role_regards_stack_mservices.front.replicas | default(1) }}
+{% if role_regards_stack_mservices.front.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.front.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.front.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
@@ -534,15 +591,13 @@ services:
       - "{{ role_regards_stack_mservices.front.port }}:8080"
 {% endif %}
     volumes:
-{% if role_regards_stack_mount_front_volume %}
       - "{{ role_regards_stack_workspace_network }}regards/front:/var/www/public/:ro"
-{% endif %}
-      - {{ role_regards_stack_workspace_local }}regards/logs/front:/var/log/nginx
+      - "{{ role_regards_stack_workspace_local }}regards/logs/front:/var/log/nginx"
       - "{{ role_regards_stack_config }}regards/nginx/nginx.conf:/etc/nginx/nginx.conf:ro"
       - type: tmpfs
         target: /var/cache/nginx
       - type: tmpfs
-        target: /run
+        target: /tmp
       - type: tmpfs
         target: /var/www/conf
     logging:
@@ -558,7 +613,12 @@ services:
     hostname: rs-storage
     read_only: true
     deploy:
-       replicas: {{ role_regards_stack_mservices.storage.replicas | default(1) }}
+      replicas: {{ role_regards_stack_mservices.storage.replicas | default(1) }}
+{% if role_regards_stack_mservices.storage.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.storage.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.storage.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.storage.jdwp is defined %}
@@ -592,14 +652,10 @@ services:
       - {{ role_regards_stack_logback }}storage:/config
       - {{ role_regards_stack_workspace_local }}regards/logs/storage:/logs
       - {{ role_regards_stack_workspace_local }}regards/plugins/storage:/plugins
-{% if role_regards_stack_mount_mservice_granular_network_volume %}
       - {{ role_regards_stack_workspace_network }}regards/storage/onlines:/storages
       - {{ role_regards_stack_workspace_network }}regards/storage/cache:/cache
       - {{ role_regards_stack_workspace_network }}regards/input:/input
       - {{ role_regards_stack_workspace_network }}regards/workspace:/tmp/workspace
-{% else %}
-      - {{ role_regards_stack_workdir_network }}:/share
-{% endif %}
       - type: tmpfs
         target: /tmp
     logging:
@@ -615,7 +671,12 @@ services:
     hostname: rs-order
     read_only: true
     deploy:
-       replicas: {{ role_regards_stack_mservices.order.replicas | default(1) }}
+      replicas: {{ role_regards_stack_mservices.order.replicas | default(1) }}
+{% if role_regards_stack_mservices.order.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.order.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.order.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.order.jdwp is defined %}
@@ -648,12 +709,8 @@ services:
 {% endif %}
       - {{ role_regards_stack_logback }}order:/config:ro
       - {{ role_regards_stack_workspace_local }}regards/logs/order:/logs
-{% if role_regards_stack_mount_mservice_granular_network_volume %}
       - {{ role_regards_stack_workspace_network }}regards/workspace:/tmp/workspace
       - {{ role_regards_stack_workspace_network }}regards/processing:/processing
-{% else %}
-      - {{ role_regards_stack_workdir_network }}:/share
-{% endif %}
 {% if role_regards_stack_mservices.order.yourkit is defined %}
       - {{ role_regards_stack_workspace_local }}regards/yourkitSnap:/?/Snapshots
 {% endif %}
@@ -672,7 +729,12 @@ services:
     hostname: rs-processing
     read_only: true
     deploy:
-       replicas: {{ role_regards_stack_mservices.processing.replicas | default(1) }}
+      replicas: {{ role_regards_stack_mservices.processing.replicas | default(1) }}
+{% if role_regards_stack_mservices.processing.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.processing.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.processing.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.processing.jdwp is defined %}
@@ -707,12 +769,9 @@ services:
 {% endif %}
       - {{ role_regards_stack_logback }}processing:/config:ro
       - {{ role_regards_stack_workspace_local }}regards/logs/processing:/logs
-{% if role_regards_stack_mount_mservice_granular_network_volume %}
+      - {{ role_regards_stack_workspace_local }}regards/plugins/processing:/plugins
       - {{ role_regards_stack_workspace_network }}regards/processing:/processing
       - {{ role_regards_stack_workspace_network }}regards/input:/input
-{% else %}
-      - {{ role_regards_stack_workdir_network }}:/share
-{% endif %}
       - type: tmpfs
         target: /tmp
     logging:
@@ -728,7 +787,12 @@ services:
     hostname: rs-ingest
     read_only: true
     deploy:
-       replicas: {{ role_regards_stack_mservices.ingest.replicas | default(1) }}
+      replicas: {{ role_regards_stack_mservices.ingest.replicas | default(1) }}
+{% if role_regards_stack_mservices.ingest.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.ingest.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.ingest.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.ingest.jdwp is defined %}
@@ -762,12 +826,8 @@ services:
       - {{ role_regards_stack_logback }}ingest:/config:ro
       - {{ role_regards_stack_workspace_local }}regards/logs/ingest:/logs
       - {{ role_regards_stack_workspace_local }}regards/plugins/ingest:/plugins
-{% if role_regards_stack_mount_mservice_granular_network_volume %}
       - {{ role_regards_stack_workspace_network }}regards/input:/input
       - {{ role_regards_stack_workspace_network }}regards/workspace:/tmp/workspace
-{% else %}
-      - {{ role_regards_stack_workdir_network }}:/share
-{% endif %}
       - type: tmpfs
         target: /tmp
     logging:
@@ -783,7 +843,12 @@ services:
     hostname: rs-dataprovider
     read_only: true
     deploy:
-       replicas: {{ role_regards_stack_mservices.dataprovider.replicas | default(1) }}
+      replicas: {{ role_regards_stack_mservices.dataprovider.replicas | default(1) }}
+{% if role_regards_stack_mservices.dataprovider.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.dataprovider.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.dataprovider.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.dataprovider.jdwp is defined %}
@@ -817,12 +882,8 @@ services:
       - {{ role_regards_stack_logback }}dataprovider:/config:ro
       - {{ role_regards_stack_workspace_local }}regards/logs/dataprovider:/logs
       - {{ role_regards_stack_workspace_local }}regards/plugins/dataprovider:/plugins
-{% if role_regards_stack_mount_mservice_granular_network_volume %}
       - {{ role_regards_stack_workspace_network }}regards/input:/input
       - {{ role_regards_stack_workspace_network }}regards/workspace:/tmp/workspace
-{% else %}
-      - {{ role_regards_stack_workdir_network }}:/share
-{% endif %}
       - type: tmpfs
         target: /tmp
     logging:
@@ -838,7 +899,12 @@ services:
     hostname: rs-worker-manager
     read_only: true
     deploy:
-       replicas: {{ role_regards_stack_mservices.worker_manager.replicas | default(1) }}
+      replicas: {{ role_regards_stack_mservices.worker_manager.replicas | default(1) }}
+{% if role_regards_stack_mservices.worker_manager.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.worker_manager.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.worker_manager.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.worker_manager.jdwp is defined %}
@@ -864,7 +930,7 @@ services:
 {% endif %}
 {% endif %}
     volumes:
-{% if role_regards_stack_mservices.order.worker_manager is defined %}
+{% if role_regards_stack_mservices.worker_manager.volumes is defined %}
 {% for volume in role_regards_stack_mservices.worker_manager.volumes %}
       - {{ volume.source }}:{{ volume.destination }}
 {% endfor %}

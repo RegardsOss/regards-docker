@@ -1,11 +1,10 @@
-- name: Create regards admin group
+- name: Create regards admin group. When this task fails, it can means you should not create by yourself the group and set group_enable_setup_regards_users to false
   become: yes
   group:
     name: "{{ role_setup_container_root_group }}"
     state: present
     gid: 1040
     #FIXME
-  tags: docker
 
 - name: Create regards user group
   become: yes
@@ -13,7 +12,6 @@
     name: "{{ role_setup_container_run_group }}"
     state: present
     gid: "{{ role_setup_regards_user_gid }}"
-  tags: docker
 
 - name: Create regards user
   become: yes
@@ -21,4 +19,3 @@
     name: "{{ role_setup_container_run_user }}"
     uid: "{{ role_setup_regards_user_uid }}"
     group: "{{ role_setup_container_run_group }}"
-  tags: docker

@@ -12,9 +12,10 @@
 # limitations under the License.
 #
 ---
-- name: Nodes Leaving the Swarm
+- name: "Leaving the Swarm"
+  docker_swarm:
+    state: absent
+    force: true
   become: yes
-  shell: >
-    . /etc/profile.d/docker-client.sh;
-    docker swarm leave -f
-  ignore_errors: true
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"

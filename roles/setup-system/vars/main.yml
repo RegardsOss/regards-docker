@@ -7,3 +7,5 @@ role_setup_container_run_user : "{{ group_container_run_user }}"
 
 role_setup_regards_user_uid: "{{ name_space_uid + group_container_run_uid }}"
 role_setup_regards_user_gid: "{{ name_space_gid + group_container_run_gid }}"
+
+role_setup_external_users_allowed_to_use_docker_cli : "{{ users_allowed_to_use_docker_cli | default([]) }}"

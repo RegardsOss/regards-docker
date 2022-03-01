@@ -7,20 +7,19 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-postgres
     read_only: true
+{% if role_regards_stack_cots.postgres.node_label_placement_constraint is defined %}
+    deploy:
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_cots.postgres.node_label_placement_constraint.key }} == {{ role_regards_stack_cots.postgres.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
       - POSTGRES_PASSWORD={{ role_regards_stack_config_postgres.password }}
       - POSTGRES_USER={{ role_regards_stack_config_postgres.user }}
-{% if role_regards_stack_cots_configuration_use_ungranular_workspace_on_workdir_network %}
-      - PGDATA=/share/{{ role_regards_stack_stack_name }}/workspace/postgres
-{% endif %}
     volumes:
-{% if role_regards_stack_cots_configuration_use_ungranular_workspace_on_workdir_network %}
-      - {{ role_regards_stack_workdir_network }}:/share
-{% else %}
       - {{ role_regards_stack_workspace_local }}postgresql:/var/lib/postgresql/data
-{% endif %}
       - {{ role_regards_stack_config }}postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
       - {{ role_regards_stack_config }}postgres/postgresql.conf:/etc/postgresql.conf:ro
       - type: tmpfs
@@ -35,12 +34,6 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
-{% if role_regards_stack_attach_cots_to_specific_node|bool %}
-    deploy:
-      replicas: 1
-      placement:
-        constraints: [node.hostname == {{ hostvars[groups.postgres[0]].ansible_host }}]
-{% endif %}
 {% endif %}
 
 {% if role_regards_stack_cots.phppgadmin is defined %}
@@ -49,6 +42,12 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-phppgadmin
     read_only: true
+{% if role_regards_stack_cots.phppgadmin.node_label_placement_constraint is defined %}
+    deploy:
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_cots.phppgadmin.node_label_placement_constraint.key }} == {{ role_regards_stack_cots.phppgadmin.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_cots.phppgadmin.http is defined %}

@@ -1,25 +1,40 @@
 ---
-- name: "[ON ANSIBLE HOST] Create Docker certificates for inventory>docker_nodes"
-  hosts: ansible_host
-  connection: local
-  roles:
-    - ansible-docker-swarm/roles/gen-certificates
-
 - name: Setup Docker and Docker Swarm
   hosts: docker_nodes
+  become: true
   roles:
     - ansible-docker-swarm/roles/install-modules
     - ansible-docker-swarm/roles/docker-installation
 
 - name: Initialize Docker Swarm
   hosts: swarm_manager
+  become: yes
   roles:
     - ansible-docker-swarm/roles/docker-swarm-init
 
-- name: Add workers to the Swarm
+- name: Connect workers to the Swarm
   hosts: swarm_workers
+  become: yes
   roles:
     - ansible-docker-swarm/roles/docker-swarm-add-worker
+
+- name: Connect others managers to the Swarm
+  hosts: swarm_alternative_managers
+  become: yes
+  roles:
+    - ansible-docker-swarm/roles/docker-swarm-add-manager
+
+- name: Setup REGARDS docker nodes labels
+  hosts: swarm_manager
+  become: yes
+  roles:
+    - ansible-docker-swarm/roles/docker-swarm-add-nodes-label
+
+- name: Drain manager nodes to make them unavailable as worker nodes
+  hosts: swarm_manager
+  become: yes
+  roles:
+    - ansible-docker-swarm/roles/docker-swarm-manager-only
 
 - name: Setup Regards pre-requisites
   hosts: docker_nodes

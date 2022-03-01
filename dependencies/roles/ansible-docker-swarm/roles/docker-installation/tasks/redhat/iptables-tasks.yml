@@ -12,18 +12,15 @@
 # limitations under the License.
 #
 ---
-- name: "[REDHAT]Restart iptables service"
-  become: yes
+- name: "[REDHAT] Restart iptables service"
   systemd:
     name: "{{ item }}"
     state: restarted
     enabled: yes
   with_items :
     - "iptables"
-  tags: docker
   
 - name: "[REDHAT] Allow new incoming packets on TCP ports"
-  become: yes
   iptables:
     action: insert
     chain: INPUT
@@ -31,18 +28,17 @@
     jump: ACCEPT
     destination_port: "{{ item.port }}"
   with_items :
-    - { port: '2376', protocol: 'tcp' }
+    # Inbound swarm manager traffic
     - { port: '2377', protocol: 'tcp' }
+    # TCP/UDP for container network discovery.
     - { port: '7946', protocol: 'tcp' }
     - { port: '7946', protocol: 'udp' }
+    # UDP for the container ingress network.
     - { port: '4789', protocol: 'udp' }
-  tags: docker
 
 - name: "[REDHAT] Save iptables"
-  become: yes
   vars:
     iptablesFiles: "/etc/sysconfig/iptables"
   shell: >
         cp {{ iptablesFiles }} {{ iptablesFiles }}-$(date -u '+%FT%X.%N').sav;
         iptables-save -t filter > {{ iptablesFiles }}
-  tags: docker

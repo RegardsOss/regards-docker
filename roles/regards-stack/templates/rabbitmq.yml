@@ -5,21 +5,21 @@ services:
   rs-rabbitmq:
     image: {{ role_regards_stack_registry }}/regards-messaging:{{ role_regards_stack_cots.rabbitmq.tag | default("latest") }}
     user: "{{role_regards_stack_container_run_uid}}:{{role_regards_stack_container_run_gid}}"
-    hostname: rs-rabbitmq
-    volumes:
-{% if role_regards_stack_cots_configuration_use_ungranular_workspace_on_workdir_network %}
-      - {{ role_regards_stack_workdir_network }}:/share
+{% if role_regards_stack_cots.rabbitmq.global_service is defined %}
+    hostname: "rs-rabbitmq-{{ '{{' }}.Node.Hostname{{ '}}' }}"
 {% else %}
-      - {{ role_regards_stack_workspace_local }}rabbitmq:/var/lib/rabbitmq/mnesia/
+    hostname: rs-rabbitmq
 {% endif %}
+    read_only: true
+    volumes:
+      - {{ role_regards_stack_workspace_local }}rabbitmq:/var/lib/rabbitmq/mnesia/
       - {{ role_regards_stack_config }}rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - {{ role_regards_stack_config }}rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - type: tmpfs
+        target: /var/log/rabbitmq/log/
     networks:
       - {{ role_regards_stack_docker_network_name }}
-{% if role_regards_stack_cots_configuration_use_ungranular_workspace_on_workdir_network %}
-    environment:
-      - RABBITMQ_MNESIA_DIR=/share/{{ role_regards_stack_stack_name }}/workspace/rabbitmq/$RABBITMQ_NODENAME
-{% endif %}
-{% if role_regards_stack_cots.rabbitmq.http is defined or role_regards_stack_cots.rabbitmq.client is defined %}
+{% if role_regards_stack_cots.rabbitmq.http is defined or role_regards_stack_cots.rabbitmq.client is defined and role_regards_stack_cots.rabbitmq.global_service is defined == false %}
     ports:
 {% if role_regards_stack_cots.rabbitmq.client is defined %}
       - "{{ role_regards_stack_cots.rabbitmq.client }}:5672"
@@ -28,10 +28,20 @@ services:
       - "{{ role_regards_stack_cots.rabbitmq.http }}:15672"
 {% endif %}
 {% endif %}
-{% if role_regards_stack_attach_cots_to_specific_node|bool %}
+{% if role_regards_stack_cots.rabbitmq.node_label_placement_constraint is defined or role_regards_stack_cots.rabbitmq.global_service is defined %}
     deploy:
-      replicas: 1
+{% if role_regards_stack_cots.rabbitmq.global_service is defined %}
+      mode: global
+{% endif %}
+{% if role_regards_stack_cots.rabbitmq.node_label_placement_constraint is defined %}
       placement:
-        constraints: [node.hostname == {{ hostvars[groups.rabbitmq[0]].ansible_host }}]
+        constraints:
+          - node.labels.{{ role_regards_stack_cots.rabbitmq.node_label_placement_constraint.key }} == {{ role_regards_stack_cots.rabbitmq.node_label_placement_constraint.value }}
+{% endif %}
+{% endif %}
+{% if role_regards_stack_cots.rabbitmq.global_service is defined %}
+    environment:
+      - RABBITMQ_USE_LONGNAME=true
+      - RABBITMQ_ERLANG_COOKIE={{ role_regards_stack_config_rabbitmq_erlang_cookie }}
 {% endif %}
 {% endif %}

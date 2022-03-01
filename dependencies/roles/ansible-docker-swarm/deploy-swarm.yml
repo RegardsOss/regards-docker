@@ -12,22 +12,28 @@
 # limitations under the License.
 #
 ---
-- name: setup pre-requisites
+- name: Setup Docker and Docker Swarm
   hosts: docker_nodes
-  roles:
+  become: true
     - install-modules
-
-- name: install docker
-  hosts: docker_nodes
-  roles:
     - docker-installation
 
-- name: initialize docker swarm
+- name: Initialize Docker Swarm
   hosts: swarm_manager
   roles:
     - docker-swarm-init
 
-- name: add workers to the swarm
+- name: Connect workers to the Swarm
   hosts: swarm_workers
   roles:
     - docker-swarm-add-worker
+
+- name: Connect others managers to the Swarm
+  hosts: swarm_alternative_managers
+  roles:
+    - docker-swarm-add-manager
+
+- name: Drain manager nodes to make them unavailable as worker nodes
+  hosts: swarm_manager
+  roles:
+    - docker-swarm-manager-only

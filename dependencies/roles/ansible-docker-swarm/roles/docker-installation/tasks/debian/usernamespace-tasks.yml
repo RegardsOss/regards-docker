@@ -13,12 +13,9 @@
 #
 ---
 - name: "[DEBIAN] Configure Docker with namespaces and TLS"
-  become: yes
   shell: "echo 'kernel.unprivileged_userns_clone=1' > /etc/sysctl.d/00-local-userns.conf"
-  tags: docker
 
 - name: "[DEBIAN] Restart service procps, in all cases"
-  become: yes
   service:
     name: procps
     state: restarted

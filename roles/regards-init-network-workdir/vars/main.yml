@@ -12,4 +12,3 @@ role_regards_init_network_workdir_seuser: "{{ group_seuser }}"
 
 
 role_regards_init_network_workdir_network_allow_root: "{{ group_workdir_network_allow_root }}"
-role_regards_init_network_workdir_cots_configuration_use_ungranular_workspace_on_workdir_network: "{{ group_docker_cots_configuration.use_ungranular_workspace_on_workdir_network | default(false) }}"

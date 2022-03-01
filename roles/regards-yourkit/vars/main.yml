@@ -1,9 +1,0 @@
----
-role_regards_init_network_workdir_workspace_network: "{{ group_workdir_network }}{{ group_stack_name }}/workspace/"
-
-role_regards_init_network_workdir_container_run_user: "{{ group_container_run_user }}"
-role_regards_init_network_workdir_container_run_group: "{{ group_container_run_group }}"
-role_regards_init_network_workdir_setype: "{{ group_setype }}"
-role_regards_init_network_workdir_seuser: "{{ group_seuser }}"
-
-role_regards_init_network_workdir_network_allow_root: "{{ group_workdir_network_allow_root }}"

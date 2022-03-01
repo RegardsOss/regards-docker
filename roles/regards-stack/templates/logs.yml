@@ -5,18 +5,35 @@ services:
   rs-logs-elasticsearch:
     image: {{role_regards_stack_registry}}/regards-elasticsearch:{{ role_regards_stack_cots.elasticsearch_logs.tag | default("latest") }}
     user: "{{role_regards_stack_container_run_uid}}:{{role_regards_stack_container_run_gid}}"
+{% if role_regards_stack_cots.rabbitmq.global_service is defined %}
+    hostname: "rs-logs-elasticsearch-{{ '{{' }}.Node.Hostname{{ '}}' }}"
+{% else %}
     hostname: rs-logs-elasticsearch
+{% endif %}
     read_only: true
+{% if role_regards_stack_cots.elasticsearch_logs.node_label_placement_constraint is defined or role_regards_stack_cots.elasticsearch_logs.global_service is defined %}
+    deploy:
+{% if role_regards_stack_cots.elasticsearch_logs.global_service is defined %}
+      mode: global
+      endpoint_mode: dnsrr
+{% endif %}
+{% if role_regards_stack_cots.elasticsearch_logs.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_cots.elasticsearch_logs.node_label_placement_constraint.key }} == {{ role_regards_stack_cots.elasticsearch_logs.node_label_placement_constraint.value }}
+{% endif %}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
     volumes:
-{% if role_regards_stack_cots_configuration_use_ungranular_workspace_on_workdir_network %}
-      - {{ role_regards_stack_workdir_network }}:/share
+{% if role_regards_stack_cots.elasticsearch_logs.global_service is defined %}
+      - {{ role_regards_stack_workspace_local }}elasticsearch/data-logs:/usr/share/elasticsearch/data
+      - {{ role_regards_stack_workspace_local }}elasticsearch/backup-logs:/usr/share/elasticsearch/backup
 {% else %}
-      - {{role_regards_stack_workspace_local}}elasticsearch/data-logs:/usr/share/elasticsearch/data
-      - {{role_regards_stack_workspace_local}}elasticsearch/backup-logs:/usr/share/elasticsearch/backup
+      - {{ role_regards_stack_workspace_network }}elasticsearch/data-logs:/usr/share/elasticsearch/data
+      - {{ role_regards_stack_workspace_network }}elasticsearch/backup-logs:/usr/share/elasticsearch/backup
 {% endif %}
-      - {{role_regards_stack_workspace_local}}elasticsearch/tmpjna-logs:/tmpjna
+      - {{ role_regards_stack_workspace_local }}elasticsearch/tmpjna-logs:/tmpjna
       - {{ role_regards_stack_config }}elasticsearch/elasticsearch-logs.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
       - type: tmpfs
         target: /tmp
@@ -32,19 +49,14 @@ services:
 {% endif %}
 {% endif %}
     environment:
+      - "node.name=rs-logs-elasticsearch-{{ '{{' }}.Node.Hostname{{ '}}' }}"
       - cluster.name={{ role_regards_stack_cots_configuration.elasticsearch_logs.cluster_name }}
       - bootstrap.memory_lock=false
-      - "ES_JAVA_OPTS=-Xms500m -Xmx500m -Djna.tmpdir=/tmpjna"
+      - "ES_JAVA_OPTS=-Xms{{ role_regards_stack_cots.elasticsearch_logs.memoryLimit | default("500m") }} -Xmx{{ role_regards_stack_cots.elasticsearch_logs.memoryLimit | default("500m") }} -Djna.tmpdir=/tmpjna"
     logging:
       options:
         max-size: "10m"
         max-file: "10"
-{% if role_regards_stack_attach_cots_to_specific_node|bool %}
-    deploy:
-      replicas: 1
-      placement:
-        constraints: [node.hostname == {{ hostvars[groups.elasticsearch[0]].ansible_host }}]
-{% endif %}
 {% endif %}
 
 {% if role_regards_stack_cots.fluent is defined %}
@@ -53,6 +65,17 @@ services:
     user: "{{role_regards_stack_container_run_uid}}:{{role_regards_stack_container_run_gid}}"
     hostname: rs-fluent
     read_only: true
+{% if not role_regards_stack_all_logs_inside_same_network_storage|bool or role_regards_stack_cots.fluent.node_label_placement_constraint is defined %}
+    deploy:
+{% if not role_regards_stack_all_logs_inside_same_network_storage|bool %}
+      mode: global
+{% endif %}
+{% if role_regards_stack_cots.fluent.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_cots.fluent.node_label_placement_constraint.key }} {{ role_regards_stack_cots.fluent.node_label_placement_constraint.equality_operator | default('==') }} {{ role_regards_stack_cots.fluent.node_label_placement_constraint.value }}
+{% endif %}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
     volumes:
@@ -82,10 +105,6 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
-{% if not role_regards_stack_all_logs_inside_same_network_storage|bool %}
-    deploy:
-      mode: global
-{% endif %}
 {% endif %}
 
 
@@ -96,11 +115,22 @@ services:
     user: "{{role_regards_stack_container_run_uid}}:{{role_regards_stack_container_run_gid}}"
     hostname: rs-logs-kibana
     read_only: true
+{% if role_regards_stack_cots.kibana_logs.node_label_placement_constraint is defined %}
+    deploy:
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_cots.kibana_logs.node_label_placement_constraint.key }} == {{ role_regards_stack_cots.kibana_logs.node_label_placement_constraint.value }}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
     volumes:
+{% if role_regards_stack_cots.elasticsearch_logs.get("legacy", false) == false %}
+      - type: tmpfs
+        target: /usr/share/kibana/data/
+{% else %}
       - type: tmpfs
         target: /usr/share/kibana/optimize/
+{% endif %}
     environment:
       - ELASTICSEARCH_URL=http://rs-logs-elasticsearch:9200
 {% if role_regards_stack_cots.kibana_logs.http is defined %}

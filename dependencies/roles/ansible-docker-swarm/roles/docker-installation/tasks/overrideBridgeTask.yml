@@ -1,0 +1,44 @@
+#
+# Copyright 2018-2020, CS GROUP – France, http://www.c-s.fr
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+
+- name: Get bridge network info
+  docker_network_info:
+    name: docker_gwbridge
+  register: bridge_info
+  become: yes
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"
+
+- name: Should recreate bridge network?
+  set_fact:
+    recreate_gwbridge: bridge_info.network.Options["com.docker.network.bridge.name"] != "docker_gwbridge" or bridge_info.network.Options["com.docker.network.bridge.enable_icc"] != "false" or bridge_info.network.Options["com.docker.network.bridge.enable_ip_masquerade"] != "true" or bridge_info.network.IPAM.Config[0].Subnet != "{{ docker_gwbridge_network }}"
+
+- name: Set netmask for gwbridge docker network
+  shell: >
+      . /etc/profile.d/docker-client.sh;
+      ip link set docker_gwbridge down;
+      ip link del dev docker_gwbridge;
+      docker network disconnect -f docker_gwbridge gateway_ingress-sbox	|| true;
+      printf 'Y' | docker network rm docker_gwbridge || true;
+      docker network create --subnet {{ docker_gwbridge_network }} --opt com.docker.network.bridge.name=docker_gwbridge --opt com.docker.network.bridge.enable_icc=false --opt com.docker.network.bridge.enable_ip_masquerade=true docker_gwbridge
+  when: recreate_gwbridge|bool
+  
+- name: Restart docker daemon
+  systemd:
+    name: docker
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+  when: recreate_gwbridge|bool

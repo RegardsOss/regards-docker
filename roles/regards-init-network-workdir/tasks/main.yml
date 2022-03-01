@@ -14,45 +14,6 @@
     when: role_regards_init_network_workdir_network_allow_root
     become: true
 
-  # When we cannot run command as root in that folder
-  # the network_workdir must exists and folders with be created with the here under command only with run_user:run_group
-  - name: Create REGARDS folders mounted inside containers on the network workspace
-    file:
-      path: "{{ item }}"
-      state: directory
-      mode: '2750'
-      group: "{{ role_regards_init_network_workdir_container_run_group }}"
-      setype: "{{ role_regards_init_network_workdir_setype }}"
-      seuser: "{{ role_regards_init_network_workdir_seuser }}"
-    with_items:
-      - "{{ role_regards_init_network_workdir_workspace_network }}regards/storage/dam" # For DAM documents
-      - "{{ role_regards_init_network_workdir_workspace_network }}regards/storage/onlines" # For online  local storages
-      - "{{ role_regards_init_network_workdir_workspace_network }}regards/storage/cache" # For STORAGE cache
-      - "{{ role_regards_init_network_workdir_workspace_network }}regards/input" # Common input folder for dataprovider, fem, ingest and storage
-      - "{{ role_regards_init_network_workdir_workspace_network }}regards/front"
-      - "{{ role_regards_init_network_workdir_workspace_network }}regards/workspace" # Common microservices workspace directory
-      - "{{ role_regards_init_network_workdir_workspace_network }}regards/processing/" # Processing global workspace
-      - "{{ role_regards_init_network_workdir_workspace_network }}regards/processing/jna-tmp" # Processing jna tmp directory. Used to override noexec /tmp in docker containers.
-    become: true
-    become_user: "{{ role_regards_init_network_workdir_container_run_user }}"
-    when: not role_regards_init_network_workdir_network_allow_root
-
-  - name: Create REGARDS COTS workspaces on the network workspace, if required
-    file:
-      path: "{{ item }}"
-      state: directory
-      mode: '2750'
-      group: "{{ role_regards_init_network_workdir_container_run_group }}"
-      setype: "{{ role_regards_init_network_workdir_setype }}"
-      seuser: "{{ role_regards_init_network_workdir_seuser }}"
-    with_items:
-      - "{{ role_regards_init_network_workdir_workspace_network }}postgres" # For Postgres
-      - "{{ role_regards_init_network_workdir_workspace_network }}rabbitmq" # For RabbitMQ
-      - "{{ role_regards_init_network_workdir_workspace_network }}elasticsearch" # For elasticsearch
-    become: true
-    become_user: "{{ role_regards_init_network_workdir_container_run_user }}"
-    when: role_regards_init_network_workdir_cots_configuration_use_ungranular_workspace_on_workdir_network
-
   - name: Create REGARDS folders mounted inside containers on the network workspace
     file:
       path: "{{ item }}"
