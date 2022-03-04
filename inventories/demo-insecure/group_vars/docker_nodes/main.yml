@@ -24,3 +24,5 @@ environment_http_proxy: "{{ global_proxy.url | default(None) }}"
 environment_https_proxy: "{{ global_proxy.url | default(None) }}"
 environment_no_proxy: "{{ global_proxy.no_proxy | default(None) }}"
 yum_proxy: "{{ global_proxy.url | default(None) }}"
+
+python_version: 3
