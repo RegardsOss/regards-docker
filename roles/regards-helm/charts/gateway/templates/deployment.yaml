@@ -1,7 +1,7 @@
 {{- template "regards-common.deployment" . -}}
 {{/*
 # {% if role_regards_stack_mservices.gateway is defined %}
-#   # Zuul
+#   # Spring cloud gateway
 #   rs-gateway:
 #     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
 #     hostname: rs-gateway
@@ -17,7 +17,7 @@
 # {% endif %}
 
 
-#   # Zuul
+#   # Spring cloud gateway
 #   rs-gateway:
 #     user: "1403050:1401050"
 #     hostname: rs-gateway

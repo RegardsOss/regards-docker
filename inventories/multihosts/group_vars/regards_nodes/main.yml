@@ -128,6 +128,7 @@ group_docker_cots:
   phppgadmin:
     tag: "{{ group_docker_tags.cots }}"
     http: 5080
+    legacy: true
   rabbitmq:
     tag: "{{ group_docker_tags.cots }}"
     http: 16672
@@ -143,6 +144,7 @@ group_docker_cots_configuration:
 
 
 group_config_mservices:
+  legacy_spring: true
   init_project: "{{ global_regards.project_name }}"
   access_token_validity: 2592000
   instance_admin:

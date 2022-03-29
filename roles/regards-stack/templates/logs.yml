@@ -97,6 +97,9 @@ services:
       - {{ role_regards_stack_workspace_local }}regards/logs/order:/logs/order
       - {{ role_regards_stack_workspace_local }}regards/logs/ingest:/logs/ingest
       - {{ role_regards_stack_workspace_local }}regards/logs/dataprovider:/logs/dataprovider
+{% for worker in role_regards_stack_workers %}
+      - {{ role_regards_stack_workspace_local }}regards/workers/{{ worker.name }}/logs:/logs/{{ worker.name }}
+{% endfor %}
       - type: tmpfs
         target: /tmp
       - type: tmpfs

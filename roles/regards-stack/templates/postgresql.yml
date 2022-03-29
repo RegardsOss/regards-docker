@@ -50,11 +50,40 @@ services:
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
+{% if role_regards_stack_cots.phppgadmin.db is defined or role_regards_stack_cots.phppgadmin.setting_owned_only is defined or role_regards_stack_cots.phppgadmin.setting_raw_rows is defined or role_regards_stack_cots.phppgadmin.setting_raw_chars is defined or role_regards_stack_cots.phppgadmin.setting_main_theme is defined or role_regards_stack_cots.phppgadmin.setting_sidebar_left_width is defined %}
+    environment:
+{% if role_regards_stack_cots.phppgadmin.db is defined %}
+      - 'DB_CONFIG={{ role_regards_stack_cots.phppgadmin.db | to_json }}'
+{% endif %}
+{% if role_regards_stack_cots.phppgadmin.setting_owned_only is defined %}
+      - OWNED_ONLY={{ role_regards_stack_cots.phppgadmin.setting_owned_only }}
+{% endif %}
+{% if role_regards_stack_cots.phppgadmin.setting_raw_rows is defined %}
+      - MAX_ROWS={{ role_regards_stack_cots.phppgadmin.setting_raw_rows }}
+{% endif %}
+{% if role_regards_stack_cots.phppgadmin.setting_raw_chars is defined %}
+      - MAX_CHARS={{ role_regards_stack_cots.phppgadmin.setting_raw_chars }}
+{% endif %}
+{% if role_regards_stack_cots.phppgadmin.setting_main_theme is defined %}
+      - MAIN_THEME={{ role_regards_stack_cots.phppgadmin.setting_main_theme }}
+{% endif %}
+{% if role_regards_stack_cots.phppgadmin.setting_sidebar_left_width is defined %}
+      - SIDEBAR_LEFT_WIDTH={{ role_regards_stack_cots.phppgadmin.setting_sidebar_left_width }}
+{% endif %}
+{% endif %}
 {% if role_regards_stack_cots.phppgadmin.http is defined %}
     ports:
       - "{{ role_regards_stack_cots.phppgadmin.http }}:8080"
 {% endif %}
     volumes:
+{% if role_regards_stack_cots.phppgadmin.get("legacy", false) == false %}
+      - type: tmpfs
+        target: /tmp
+      - type: tmpfs
+        target: /run
+      - type: tmpfs
+        target: /var/lib/nginx/logs/
+{% else %}
       - type: tmpfs
         target: /run/lock/apache2/
       - type: tmpfs
@@ -63,4 +92,5 @@ services:
         target: /tmp
       - type: tmpfs
         target: /var/lib/php5/sessions/
+{% endif %}
 {% endif %}

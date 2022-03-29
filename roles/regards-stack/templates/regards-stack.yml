@@ -71,7 +71,7 @@ services:
 {% endif %}
 
 {% if role_regards_stack_mservices.gateway is defined %}
-  # Zuul
+  # Spring cloud gateway
   rs-gateway:
     image: {{ role_regards_stack_registry }}/rs-gateway:{{ role_regards_stack_mservices.gateway.tag }}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"

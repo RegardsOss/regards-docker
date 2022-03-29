@@ -221,3 +221,5 @@
 
   role_regards_mconfig_ssl:
     allow_insecure: "{{ (group_config_mservices.ssl | default({})).get('allow_insecure', false)}}"
+
+  role_regards_mconfig_legacy_spring: "{{ group_config_mservices.get('legacy_spring', false) }}"

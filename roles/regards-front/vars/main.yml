@@ -23,3 +23,6 @@ gateway_default:
   http: 9030
 role_regards_gateway_uri: "{{ group_docker_mservices.gateway.host | default(gateway_default.host) }}:{{ group_docker_mservices.gateway.http | default(gateway_default.http) }}"
 role_regards_dns_resolver: "127.0.0.11"
+
+role_regards_front_zuul_legacy_regex: "{{ (group_config_mservices.get('legacy_spring', false) == true) | ternary('(/zuul)?', '') }}"
+role_regards_front_zuul_legacy_path: "{{ (group_config_mservices.get('legacy_spring', false) == true) | ternary('/zuul', '') }}"

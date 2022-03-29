@@ -66,6 +66,7 @@
       - exec.sh
       - health.sh
       - shutdown.sh
+      - regenerate-ca.sh
     become: true
 
   - name: Create REGARDS basic structure
@@ -95,4 +96,5 @@
       - exec.sh
       - health.sh
       - shutdown.sh
+      - regenerate-ca.sh
     become: true
