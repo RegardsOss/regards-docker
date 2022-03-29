@@ -13,15 +13,6 @@
      - regards-oss-backend
      - regards-workers
 
-  - name: Generate a config file used by all services with label=regards-oss-backend  (LEGACY)
-    template:
-      src: "application.properties"
-      dest: "{{ role_regards_mconfig_workdir }}"
-      mode: '0700'
-      owner: "{{ role_regards_mconfig_container_run_user }}"
-      group: "{{ role_regards_mconfig_container_run_group }}"
-    when: role_regards_mconfig_workdir_legacy|bool == true
-
   - name: Generate a config file used by all services with label=regards-oss-backend 
     template:
       src: "application.properties"
@@ -29,17 +20,6 @@
       mode: '0700'
       owner: "{{ role_regards_mconfig_container_run_user }}"
       group: "{{ role_regards_mconfig_container_run_group }}"
-    when: role_regards_mconfig_workdir_legacy|bool == false
-
-  - name: Generate microservices config files (LEGACY)
-    template:
-      src: "rs-{{ item.key | replace('_', '-') }}.properties"
-      dest: "{{ role_regards_mconfig_workdir }}"
-      mode: '0700'
-      owner: "{{ role_regards_mconfig_container_run_user }}"
-      group: "{{ role_regards_mconfig_container_run_group }}"
-    when: "(item.key != 'config') and (item.key != 'front') and (role_regards_mconfig_workdir_legacy|bool == true)"
-    with_dict: "{{ role_regards_mconfig_mservices }}"
 
   - name: Generate microservices config files
     template:
@@ -48,7 +28,7 @@
       mode: '0700'
       owner: "{{ role_regards_mconfig_container_run_user }}"
       group: "{{ role_regards_mconfig_container_run_group }}"
-    when: "(item.key != 'config') and (item.key != 'front')  and (role_regards_mconfig_workdir_legacy|bool == false)"
+    when: "(item.key != 'config') and (item.key != 'front')"
     with_dict: "{{ role_regards_mconfig_mservices }}"
 
   - name: Generate a config file used by all services with label=regards-workers 

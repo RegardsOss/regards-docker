@@ -38,8 +38,6 @@ group_docker_tags:
   back: '{{ global_regards.version }}'
   front: '{{ global_regards.version }}'
 
-group_workdir_local_legacy: true
-
 # Plugins
 group_docker_plugins:
   - image: rs-plugins

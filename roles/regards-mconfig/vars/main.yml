@@ -2,7 +2,6 @@
 
   # Workspace
   role_regards_mconfig_workdir: "{{ group_workdir_local }}{{ group_stack_name }}/config/regards/config/"
-  role_regards_mconfig_workdir_legacy: "{{ group_workdir_local_legacy|default(false) }}"
 
   # Docker users
   role_regards_mconfig_container_run_group: "{{ group_container_run_group }}"

@@ -13,7 +13,7 @@ global_stack:
 # Regards basic configuration
 global_regards:
   # Version to deploy
-  version: 1.7.1
+  version: 1.8.0
   # Name of the first initialized project
   project_name: demo
   # Files owner
@@ -26,9 +26,6 @@ global_regards:
     
 # Allow install new repository for docker installation
 group_enable_add_repo: true
-
-# Enable workdir configuration for legacy regards version < 1.8.0
-group_workdir_local_legacy: true
 
 global_proxy:
 #  url: http://proxy.exemple.fr:1234
