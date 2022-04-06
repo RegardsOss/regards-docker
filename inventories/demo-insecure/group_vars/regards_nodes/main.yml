@@ -38,11 +38,34 @@ group_docker_tags:
   cots: '{{ global_regards.version }}'
   back: '{{ global_regards.version }}'
   front: '{{ global_regards.version }}'
+  plugins: '{{ global_regards.version }}'
 
 # Plugins
 group_docker_plugins:
-  - image: rs-plugins
-    tag: "{{ group_docker_tags.back }}"
+  - image: rs-download-metalink-plugin
+    tag: "{{ group_docker_tags.plugins }}"
+  - image: rs-download-plugin
+    tag: "{{ group_docker_tags.plugins }}"
+  - image: rs-fem-driver-plugin
+    tag: "{{ group_docker_tags.plugins }}"
+  - image: rs-stac-plugin
+    tag: "{{ group_docker_tags.plugins }}"
+  - image: rs-custom-command-file-validation-plugin
+    tag: "{{ group_docker_tags.plugins }}"
+  - image: rs-aip-datasource-plugin
+    tag: "{{ group_docker_tags.plugins }}"
+  - image: rs-postgresql-datasource-plugin
+    tag: "{{ group_docker_tags.plugins }}"
+  - image: rs-feature-datasource-plugin
+    tag: "{{ group_docker_tags.plugins }}"
+  - image: rs-webservice-datasource-plugin
+    tag: "{{ group_docker_tags.plugins }}"
+  - image: rs-local-storage-location
+    tag: "{{ group_docker_tags.plugins }}"
+  - image: rs-enhanced-descriptive-aip-generation-plugin
+    tag: "{{ group_docker_tags.plugins }}"
+  - image: rs-rabbitmq-sender-plugin
+    tag: "{{ group_docker_tags.plugins }}"
 
 # Stack
 group_docker_mservices:
@@ -97,11 +120,17 @@ group_docker_mservices:
   processing:
     # jdwp: 19046
     tag: "{{ group_docker_tags.back }}"
+  worker_manager:
+    # jdwp: 19047
+    tag: "{{ group_docker_tags.back }}"
   front:
     protocol: http
     host: "{{ global_stack.master_node_host_name }}"
     port: 80
     tag: "{{ group_docker_tags.front }}"
+
+# WORKERS
+group_docker_workers:
 
 # COTS
 group_docker_cots:
