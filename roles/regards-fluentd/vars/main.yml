@@ -35,4 +35,4 @@ role_regards_fluentd_logs_directory:
 
 role_regards_fluentd_workers: "{{ group_docker_workers | default([]) }}"
 
-role_regards_fluentd_new_logging_regex: "{{ group_config_mservices.get('legacy_spring', false) }}"
+role_regards_fluentd_old_logging_regex: "{{ group_config_mservices.get('legacy_spring', false) }}"

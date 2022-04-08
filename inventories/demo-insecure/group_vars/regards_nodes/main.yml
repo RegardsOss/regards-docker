@@ -130,7 +130,7 @@ group_docker_mservices:
     tag: "{{ group_docker_tags.front }}"
 
 # WORKERS
-group_docker_workers:
+group_docker_workers: []
 
 # COTS
 group_docker_cots:
