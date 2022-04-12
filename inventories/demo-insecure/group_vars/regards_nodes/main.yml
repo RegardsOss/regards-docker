@@ -156,7 +156,6 @@ group_docker_cots:
   phppgadmin:
     tag: "{{ group_docker_tags.cots }}"
     http: 5080
-    legacy: true
   rabbitmq:
     tag: "{{ group_docker_tags.cots }}"
     http: 16672
