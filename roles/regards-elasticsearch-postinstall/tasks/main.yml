@@ -10,7 +10,7 @@
   become: true
 
 - name: Run container to updates ES settings 
-  community.docker.docker_container:
+  docker_container:
     name: "postinstall-elasticsearch"
     image: "{{ role_regards_elasticsearch_sidecar_registry }}/regards-bash"
     pull: true

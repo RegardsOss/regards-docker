@@ -10,7 +10,7 @@
     seuser: "{{ role_regards_postgres_seuser }}"
 
 - name: Set kernel.shmmax to sysctl for Ref
-  ansible.posix.sysctl:
+  sysctl:
     name: kernel.shmmax
     value: "100663296"
     sysctl_file: /etc/sysctl.d/56-regards-ref.conf

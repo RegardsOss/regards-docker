@@ -16,7 +16,7 @@
   become: true
 
 - name: Get regards network info
-  community.docker.docker_network_info:
+  docker_network_info:
     name: "{{ role_regards_init_master_docker_network_name }}"
   register: docker_network_name_info
   become: true
@@ -28,7 +28,7 @@
     recreate_regards_network: "{{ docker_network_name_info.exists != true or docker_network_name_info.network.Driver != \"overlay\" or docker_network_name_info.network.Attachable != true or docker_network_name_info.network.IPAM.Config[0].Gateway != role_regards_init_master_docker_network_gateway or docker_network_name_info.network.IPAM.Config[0].Subnet != role_regards_init_master_docker_network_subnet }}"
 
 - name: Remove regards network
-  community.docker.docker_network:
+  docker_network:
     name: "{{ role_regards_init_master_docker_network_name  }}"
     state: absent
   become: true
@@ -38,7 +38,7 @@
     ansible_python_interpreter: "env python{{ python_version }}"
 
 - name: Create regards network (fails if the REGARDS stack is deployed)
-  community.docker.docker_network:
+  docker_network:
     name: "{{ role_regards_init_master_docker_network_name }}"
     attachable: true
     driver: overlay

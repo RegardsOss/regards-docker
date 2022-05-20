@@ -59,7 +59,7 @@
   when: role_regards_elasticsearch_config_elasticsearch_logs_defined
 
 - name: Set vm.max_map_count to sysctl for Ref
-  ansible.posix.sysctl:
+  sysctl:
     name: vm.max_map_count
     value: "262144"
     sysctl_file: /etc/sysctl.d/55-regards-ref.conf

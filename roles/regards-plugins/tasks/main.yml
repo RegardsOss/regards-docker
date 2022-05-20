@@ -30,7 +30,7 @@
   become: true
 
 - name: Run plugins container
-  community.docker.docker_container:
+  docker_container:
     name: "{{ item.image }}"
     image: "{{ role_regards_plugins_docker_registry }}/{{ item.image }}:{{ item.tag }}"
     pull: true
