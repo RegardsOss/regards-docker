@@ -4,6 +4,12 @@ services:
 {% if role_regards_stack_cots.maildev is defined %}
   rs-maildev:
     image: {{role_regards_stack_registry}}/regards-maildev:{{ role_regards_stack_cots.maildev.tag | default("latest") }}
+{%if (role_regards_stack_cots.maildev.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_cots.maildev.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{role_regards_stack_container_run_uid}}:{{role_regards_stack_container_run_gid}}"
     networks:
       - {{role_regards_stack_docker_network_name}}

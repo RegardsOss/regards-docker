@@ -1,53 +1,53 @@
 ---
 
-  - name: Create config folder
-    file:
-      dest: "{{ role_regards_mconfig_workdir }}{{ item }}/"
-      state: directory
-      mode: '0700'
-      owner: "{{ role_regards_mconfig_container_run_user }}"
-      group: "{{ role_regards_mconfig_container_run_group }}"
-      setype: "{{ role_regards_mconfig_setype }}"
-      seuser: "{{ role_regards_mconfig_seuser }}"
-    with_items:
-     - regards-oss-backend
-     - regards-workers
+- name: Create config folder
+  ansible.builtin.file:
+    dest: "{{ role_regards_mconfig_workdir }}{{ item }}/"
+    state: directory
+    mode: '0700'
+    owner: "{{ role_regards_mconfig_container_run_user }}"
+    group: "{{ role_regards_mconfig_container_run_group }}"
+    setype: "{{ role_regards_mconfig_setype }}"
+    seuser: "{{ role_regards_mconfig_seuser }}"
+  with_items:
+    - regards-oss-backend
+    - regards-workers
 
-  - name: Generate a config file used by all services with label=regards-oss-backend 
-    template:
-      src: "application.properties"
-      dest: "{{ role_regards_mconfig_workdir }}regards-oss-backend/"
-      mode: '0700'
-      owner: "{{ role_regards_mconfig_container_run_user }}"
-      group: "{{ role_regards_mconfig_container_run_group }}"
+- name: Generate a config file used by all services with label=regards-oss-backend
+  ansible.builtin.template:
+    src: "application.properties"
+    dest: "{{ role_regards_mconfig_workdir }}regards-oss-backend/"
+    mode: '0700'
+    owner: "{{ role_regards_mconfig_container_run_user }}"
+    group: "{{ role_regards_mconfig_container_run_group }}"
 
-  - name: Generate microservices config files
-    template:
-      src: "rs-{{ item.key | replace('_', '-') }}.properties"
-      dest: "{{ role_regards_mconfig_workdir }}regards-oss-backend/"
-      mode: '0700'
-      owner: "{{ role_regards_mconfig_container_run_user }}"
-      group: "{{ role_regards_mconfig_container_run_group }}"
-    when: "(item.key != 'config') and (item.key != 'front')"
-    with_dict: "{{ role_regards_mconfig_mservices }}"
+- name: Generate microservices config files
+  ansible.builtin.template:
+    src: "rs-{{ item.key | replace('_', '-') }}.properties"
+    dest: "{{ role_regards_mconfig_workdir }}regards-oss-backend/"
+    mode: '0700'
+    owner: "{{ role_regards_mconfig_container_run_user }}"
+    group: "{{ role_regards_mconfig_container_run_group }}"
+  when: "(item.key != 'config') and (item.key != 'front')"
+  with_dict: "{{ role_regards_mconfig_mservices }}"
 
-  - name: Generate a config file used by all services with label=regards-workers 
-    template:
-      src: "application.yml"
-      dest: "{{ role_regards_mconfig_workdir }}/regards-workers/"
-      mode: '0700'
-      owner: "{{ role_regards_mconfig_container_run_user }}"
-      group: "{{ role_regards_mconfig_container_run_group }}"
-    when: role_regards_mconfig_workers|length > 0
+- name: Generate a config file used by all services with label=regards-workers
+  ansible.builtin.template:
+    src: "application.yml"
+    dest: "{{ role_regards_mconfig_workdir }}/regards-workers/"
+    mode: '0700'
+    owner: "{{ role_regards_mconfig_container_run_user }}"
+    group: "{{ role_regards_mconfig_container_run_group }}"
+  when: role_regards_mconfig_workers|length > 0
 
-  - name: Generate regards-workers config files
-    copy:
-      content: "{{ item.config | to_nice_yaml }}"
-      dest: "{{ role_regards_mconfig_workdir }}regards-workers/{{ item.name }}.yml"
-      mode: '0700'
-      owner: "{{ role_regards_mconfig_container_run_user }}"
-      group: "{{ role_regards_mconfig_container_run_group }}"
-      setype: "{{ role_regards_mconfig_setype }}"
-      seuser: "{{ role_regards_mconfig_seuser }}"
-    loop: "{{ role_regards_mconfig_workers }}"
-    when: item.config is defined
+- name: Generate regards-workers config files
+  ansible.builtin.copy:
+    content: "{{ item.config | to_nice_yaml }}"
+    dest: "{{ role_regards_mconfig_workdir }}regards-workers/{{ item.name }}.yml"
+    mode: '0700'
+    owner: "{{ role_regards_mconfig_container_run_user }}"
+    group: "{{ role_regards_mconfig_container_run_group }}"
+    setype: "{{ role_regards_mconfig_setype }}"
+    seuser: "{{ role_regards_mconfig_seuser }}"
+  loop: "{{ role_regards_mconfig_workers }}"
+  when: item.config is defined

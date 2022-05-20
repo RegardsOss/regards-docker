@@ -1,9 +1,9 @@
 ---
 
-  - name: Copy configuraton
-    template:
-      src: fluent.conf
-      dest: "{{ role_regards_fluentd_conf_local }}"
-      mode: '0555'
-      owner: "{{ role_regards_fluentd_container_run_user }}"
-      group: "{{ role_regards_fluentd_container_run_group }}"
+- name: Copy configuraton
+  ansible.builtin.template:
+    src: fluent.conf
+    dest: "{{ role_regards_fluentd_conf_local }}"
+    mode: '0555'
+    owner: "{{ role_regards_fluentd_container_run_user }}"
+    group: "{{ role_regards_fluentd_container_run_group }}"

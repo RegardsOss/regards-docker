@@ -1,17 +1,17 @@
 ---
-  - name: Refresh the REGARDS with all the conf within the Ansible project
-    hosts: regards_nodes
-    become: true
-  
-    roles:
-      - regards-logback
-      - regards-fluentd
-      - regards-mconfig
-      - regards-front
+- name: Refresh the REGARDS with all the conf within the Ansible project
+  hosts: regards_nodes
+  become: true
+
+  roles:
+    - regards-logback
+    - regards-fluentd
+    - regards-mconfig
+    - regards-front
 
 
-  - name: Launch stack
-    hosts: master
+- name: Launch stack
+  hosts: master
 
-    roles:
-      - regards-stack
+  roles:
+    - regards-stack

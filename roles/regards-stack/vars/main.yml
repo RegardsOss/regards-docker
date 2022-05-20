@@ -37,7 +37,7 @@ postgres_default:
   user: azertyuiop123456789
   password: azertyuiop123456789
 
-role_regards_stack_config_postgres: 
+role_regards_stack_config_postgres:
   user: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('user', postgres_default.user) }}"
   password: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('user', postgres_default.password) }}"
 
@@ -50,3 +50,6 @@ role_regards_stack_public_url: "{{ group_docker_mservices.front.protocol }}:\\/\
 # Fluent conf
 # When true, all microservices write logs on the same network file system
 role_regards_stack_all_logs_inside_same_network_storage: "{{ group_workdir_network == group_workdir_local }}"
+
+# Minio
+role_regards_stack_minio_public_url: "http://{{ group_docker_mservices.front.host }}"

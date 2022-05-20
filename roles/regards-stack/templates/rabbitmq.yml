@@ -4,6 +4,12 @@ services:
 {% if role_regards_stack_cots.rabbitmq is defined %}
   rs-rabbitmq:
     image: {{ role_regards_stack_registry }}/regards-messaging:{{ role_regards_stack_cots.rabbitmq.tag | default("latest") }}
+{%if (role_regards_stack_cots.rabbitmq.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_cots.rabbitmq.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{role_regards_stack_container_run_uid}}:{{role_regards_stack_container_run_gid}}"
 {% if role_regards_stack_cots.rabbitmq.global_service is defined %}
     hostname: "rs-rabbitmq-{{ '{{' }}.Node.Hostname{{ '}}' }}"

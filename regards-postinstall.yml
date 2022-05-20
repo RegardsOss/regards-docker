@@ -1,6 +1,6 @@
 ---
-  - name: Run postinstall scripts to update CoTS configuration
-    hosts: master
-    roles:
-      - regards-elasticsearch-postinstall
-      # - regards-kibana-logs-postinstall
+- name: Run postinstall scripts to update CoTS configuration
+  hosts: master
+  roles:
+    - regards-elasticsearch-postinstall
+    # - regards-kibana-logs-postinstall

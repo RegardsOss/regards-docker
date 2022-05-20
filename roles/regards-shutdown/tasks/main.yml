@@ -1,3 +1,3 @@
 ---
   - name: Shutdown REGARDS
-    command: "docker stack rm {{ role_regards_erase_stack_name }}"
+    ansible.builtin.command: "docker stack rm {{ role_regards_erase_stack_name }}"

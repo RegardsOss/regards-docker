@@ -1,4 +1,4 @@
-- include_tasks: setup-users.yml
+- ansible.builtin.include_tasks: setup-users.yml
   when: role_setup_enable_setup_regards_users
 
 - name: Reload sysctl settings
@@ -6,7 +6,7 @@
   shell: "sysctl -p"
 
 - name: Get the username running the deploy on the target server
-  command: whoami
+  ansible.builtin.command: whoami
   changed_when: false
   become: false
   register: role_setup_ansible_user

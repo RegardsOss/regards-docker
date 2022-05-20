@@ -3,4 +3,4 @@
     pause: prompt='Please confirm you want to exterminate REGARDS and all related files! Press return to continue. Press Ctrl+c and then "a" to abort'
 
   - name: Shutdown REGARDS
-    command: "docker stack rm {{ role_regards_erase_stack_name }}"
+    ansible.builtin.command: "docker stack rm {{ role_regards_erase_stack_name }}"

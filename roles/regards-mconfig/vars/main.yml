@@ -1,224 +1,224 @@
 ---
 
-  # Workspace
-  role_regards_mconfig_workdir: "{{ group_workdir_local }}{{ group_stack_name }}/config/regards/config/"
+# Workspace
+role_regards_mconfig_workdir: "{{ group_workdir_local }}{{ group_stack_name }}/config/regards/config/"
 
-  # Docker users
-  role_regards_mconfig_container_run_group: "{{ group_container_run_group }}"
-  role_regards_mconfig_container_run_user: "{{ group_container_run_user }}"
+# Docker users
+role_regards_mconfig_container_run_group: "{{ group_container_run_group }}"
+role_regards_mconfig_container_run_user: "{{ group_container_run_user }}"
 
-  # Global config used by µservices
-  role_regards_mconfig_config_mservices: "{{ group_config_mservices }}"
+# Global config used by µservices
+role_regards_mconfig_config_mservices: "{{ group_config_mservices }}"
 
-  role_regards_mconfig_mservice_jwt_secret: "{{ role_regards_mconfig_config_mservices.jwt_secret | default('!!!!!==========abcdefghijklmnopqrstuvwxyz0123456789==========!!!!!') }}"
-  role_regards_mconfig_mservice_access_token_validity: "{{ role_regards_mconfig_config_mservices.access_token_validity | default('3600') }}"
-  role_regards_mconfig_mservice_cipher_iv: "{{ role_regards_mconfig_config_mservices.cipher_iv | default('1234567812345678') }}"
-  role_regards_mconfig_mservice_order_jwt_secret: "{{ role_regards_mconfig_config_mservices.order_jwt_secret | default('~~~~~!!!!!!!!!!!0123456789abcdefghijklmnopqrstuvwxyz!!!!!!!!!!!~~~~~') }}"
-  
-
-  role_regards_mconfig_setype: "{{ group_setype }}"
-  role_regards_mconfig_seuser: "{{ group_seuser }}"
-
-  # ----------------------------------
-  # Admin configuration
-  # ----------------------------------
-
-  instance_admin_default:
-    username: regards-admin@c-s.fr
-    password: root_admin
-
-  role_regards_mconfig_instance_admin:
-    username: "{{ (group_config_mservices.instance_admin | default({})).get('username', instance_admin_default.username) }}"
-    password: "{{ (group_config_mservices.instance_admin | default({})).get('password', instance_admin_default.password) }}"
-
-  # ----------------------------------
-  # Storage configuration
-  # ----------------------------------
-
-  storage_default:
-    rate_expiration_tick: 120
-    quota_sync_tick: 30
-    quota_error_report_tick: 30
-
-  role_regards_mconfig_storage:
-    rate_expiration_tick: "{{ (group_config_mservices.storage | default({})).get('rate_expiration_tick', storage_default.rate_expiration_tick) }}"
-    quota_sync_tick: "{{ (group_config_mservices.storage | default({})).get('quota_sync_tick', storage_default.quota_sync_tick) }}"
-    quota_error_report_tick: "{{ (group_config_mservices.storage | default({})).get('quota_error_report_tick', storage_default.quota_error_report_tick) }}"
-
-  # ----------------------------------
-  # Mail configuration
-  # ----------------------------------
-
-  mail_default:
-    host: rs-maildev
-    port: 1025
-    username: 
-    password: 
-    noreply: regards@noreply.fr
-
-  role_regards_mconfig_mail:
-    host: "{{ (group_config_mservices.mail | default({})).get('host', mail_default.host) }}"
-    port: "{{ (group_config_mservices.mail | default({})).get('port', mail_default.port) }}"
-    username: "{{ (group_config_mservices.mail | default({})).get('username', mail_default.username) }}"
-    password: "{{ (group_config_mservices.mail | default({})).get('password', mail_default.password) }}"
-    noreply: "{{ (group_config_mservices.mail | default({})).get('noreply', mail_default.noreply) }}"
-
-  # ----------------------------------
-  # Eureka configuration
-  # ----------------------------------
-
-  eureka_default:
-    host: rs-registry
-    port: 9032
-  
-  role_regards_mconfig_eureka:
-    host: "{{ (group_config_mservices.eureka | default({})).get('host', eureka_default.host) }}"
-    port: "{{ (group_config_mservices.eureka | default({})).get('port', eureka_default.port) }}"
-
-  # ----------------------------------
-  # Elastic configuration
-  # ----------------------------------
-
-  elastic_default:
-    host: rs-elasticsearch
-    cluster: regards
-    port: 9200
-  
-  role_regards_mconfig_elastic:
-    host: "{{ (group_config_mservices.elastic | default({})).get('host', elastic_default.host) }}"
-    cluster: "{{ (group_config_mservices.elastic | default({})).get('cluster', elastic_default.cluster) }}"
-    port: "{{ (group_config_mservices.elastic | default({})).get('port', elastic_default.port) }}"
+role_regards_mconfig_mservice_jwt_secret: "{{ role_regards_mconfig_config_mservices.jwt_secret | default('!!!!!==========abcdefghijklmnopqrstuvwxyz0123456789==========!!!!!') }}"
+role_regards_mconfig_mservice_access_token_validity: "{{ role_regards_mconfig_config_mservices.access_token_validity | default('3600') }}"
+role_regards_mconfig_mservice_cipher_iv: "{{ role_regards_mconfig_config_mservices.cipher_iv | default('1234567812345678') }}"
+role_regards_mconfig_mservice_order_jwt_secret: "{{ role_regards_mconfig_config_mservices.order_jwt_secret | default('~~~~~!!!!!!!!!!!0123456789abcdefghijklmnopqrstuvwxyz!!!!!!!!!!!~~~~~') }}"
 
 
-  # ----------------------------------
-  # RabbitMQ configuration
-  # ----------------------------------
-  amqp_default:
-    host: rs-rabbitmq
-    client: 5672
-    http: 15672
-    user: guest
-    password: guest
+role_regards_mconfig_setype: "{{ group_setype }}"
+role_regards_mconfig_seuser: "{{ group_seuser }}"
 
-  role_regards_mconfig_amqp:
-    host: "{{ (group_config_mservices.amqp | default({})).get('host', amqp_default.host )}}"
-    client: "{{ (group_config_mservices.amqp | default({})).get('client', amqp_default.client )}}"
-    http: "{{ (group_config_mservices.amqp | default({})).get('http', amqp_default.http )}}"
-    user: "{{ (group_config_mservices.amqp | default({})).get('user', amqp_default.user )}}"
-    password: "{{ (group_config_mservices.amqp | default({})).get('password', amqp_default.password )}}"
+# ----------------------------------
+# Admin configuration
+# ----------------------------------
 
-  # ----------------------------------
-  # PostgreSQL configuration
-  # ----------------------------------
-  postgres_default:
-    user: azertyuiop123456789
-    password: azertyuiop123456789
-    host: rs-postgres
-    port: 5432
-    instance_db_name: rs_instance
-    project_db_name: "{{ group_config_mservices.init_project }}"
+instance_admin_default:
+  username: regards-admin@c-s.fr
+  password: root_admin
 
-  role_regards_mconfig_postgres:
-    # first project configuration
-    project:
-      host: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('host', postgres_default.host )}}"
-      port: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('port', postgres_default.port )}}"
-      db: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('db', postgres_default.project_db_name )}}"
-      user: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('user', postgres_default.user )}}"
-      password: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('password', postgres_default.password )}}"
-    # Instance db connection
-    instance_db:
-      host: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('host', postgres_default.host )}}"
-      port: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('port', postgres_default.port )}}"
-      db: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('db', postgres_default.instance_db_name )}}"
-      user: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('user', postgres_default.user )}}"
-      password: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('password', postgres_default.password )}}"
-        
-  role_regards_mconfig_public_url: "{{ group_docker_mservices.front.protocol }}://{{ group_docker_mservices.front.host }}:{{ group_docker_mservices.front.port }}"
+role_regards_mconfig_instance_admin:
+  username: "{{ (group_config_mservices.instance_admin | default({})).get('username', instance_admin_default.username) }}"
+  password: "{{ (group_config_mservices.instance_admin | default({})).get('password', instance_admin_default.password) }}"
 
-  # ----------------------------------
-  # Microservice list
-  # ----------------------------------
-  role_regards_mconfig_mservices: "{{ group_docker_mservices }}"
+# ----------------------------------
+# Storage configuration
+# ----------------------------------
 
-  role_regards_mconfig_workers: "{{ group_docker_workers|default([]) }}"
+storage_default:
+  rate_expiration_tick: 120
+  quota_sync_tick: 30
+  quota_error_report_tick: 30
 
-  # ----------------------------------
-  # Swagger config
-  # ----------------------------------
-  role_regards_mconfig_swagger:
-    admin_instance:
-      name: Admin instance
-      title: MICROSERVICE ADMIN INSTANCE
-      description: System management and configuration
-    admin:
-      name: Admin
-      title: MICROSERVICE ADMIN
-      description: System management and configuration
-    authentication:
-      name: Authentication
-      title: MICROSERVICE AUTHENTICATION
-      description: System authentication management
-    dam:
-      name: DAM
-      title: MICROSERVICE DAM
-      description: Data management API
-    notifier:
-      name: Notifier
-      title: MICROSERVICE NOTIFIER
-      description: Notification management API
-    fem:
-      name: FEM
-      title: MICROSERVICE FEM
-      description: Feature management API
-    catalog:
-      name: Catalog
-      title: MICROSERVICE CATALOG
-      description: Search API
-    access_project:
-      name: Access project
-      title: MICROSERVICE ACCESS
-      description: Configuration for project GUI
-    access_instance:
-      name: Access instance
-      title: MICROSERVICE ACCESS INSTANCE
-      description: Configuration for portal and instance admin GUI
-    storage:
-      name: Storage
-      title: MICROSERVICE STORAGE
-      description: Files storage management
-    order:
-      name: Order
-      title: MICROSERVICE ORDER
-      description: Order API
-    ingest:
-      name: Ingest
-      title: MICROSERVICE INGEST
-      description: Ingest API
-    dataprovider:
-      name: Data Provider
-      title: MICROSERVICE DATAPROVIDER
-      description: Data Provider API
-    processing:
-      name: Processing
-      title: MICROSERVICE PROCESSING
-      description: Processing API
-    worker_manager:
-      name: Worker manager
-      title: MICROSERVICE WORKER MANAGER
-      description: Worker Manager API
-  role_regards_mconfig_swagger_license: GPL-3.0
-  
-  # ----------------------------------
-  # Proxy configuration
-  # ----------------------------------
-  default_no_proxy: "rs-admin-instance,rs-admin,rs-authentication,rs-dam,rs-catalog,rs-storage,rs-order,rs-ingest,rs-dataprovider,rs-processing,rs-access-project,rs-access-instance,rs-front,{{ group_docker_network_ip_network }}0,{{ group_docker_network_ip_network }}1,{{ group_docker_network_ip_network }}2,{{ group_docker_network_ip_network }}3,{{ group_docker_network_ip_network }}4,{{ group_docker_network_ip_network }}5,{{ group_docker_network_ip_network }}6,{{ group_docker_network_ip_network }}7,{{ group_docker_network_ip_network }}8,{{ group_docker_network_ip_network }}9,{{ group_docker_network_ip_network }}10,{{ group_docker_network_ip_network }}11,{{ group_docker_network_ip_network }}12,{{ group_docker_network_ip_network }}13,{{ group_docker_network_ip_network }}14,{{ group_docker_network_ip_network }}15,{{ group_docker_network_ip_network }}16,{{ group_docker_network_ip_network }}17,{{ group_docker_network_ip_network }}18,{{ group_docker_network_ip_network }}19,{{ group_docker_network_ip_network }}20,{{ group_docker_network_ip_network }}21,{{ group_docker_network_ip_network }}22,{{ group_docker_network_ip_network }}23,{{ group_docker_network_ip_network }}24,{{ group_docker_network_ip_network }}25,{{ group_docker_network_ip_network }}26,{{ group_docker_network_ip_network }}27,{{ group_docker_network_ip_network }}28,{{ group_docker_network_ip_network }}29,{{ group_docker_network_ip_network }}30,{{ group_docker_network_ip_network }}31,{{ group_docker_network_ip_network }}32,{{ group_docker_network_ip_network }}33,{{ group_docker_network_ip_network }}34,{{ group_docker_network_ip_network }}35,{{ group_docker_network_ip_network }}36,{{ group_docker_network_ip_network }}37,{{ group_docker_network_ip_network }}38,{{ group_docker_network_ip_network }}39,{{ group_docker_network_ip_network }}40,{{ group_docker_network_ip_network }}41,{{ group_docker_network_ip_network }}42,{{ group_docker_network_ip_network }}43,{{ group_docker_network_ip_network }}44,{{ group_docker_network_ip_network }}45,{{ group_docker_network_ip_network }}46,{{ group_docker_network_ip_network }}47,{{ group_docker_network_ip_network }}48,{{ group_docker_network_ip_network }}49,{{ group_docker_network_ip_network }}50,{{ group_docker_network_ip_network }}51,{{ group_docker_network_ip_network }}52,{{ group_docker_network_ip_network }}53,{{ group_docker_network_ip_network }}54,{{ group_docker_network_ip_network }}55,{{ group_docker_network_ip_network }}56,{{ group_docker_network_ip_network }}57,{{ group_docker_network_ip_network }}58,{{ group_docker_network_ip_network }}59,{{ group_docker_network_ip_network }}60,{{ group_docker_network_ip_network }}61,{{ group_docker_network_ip_network }}62,{{ group_docker_network_ip_network }}63,{{ group_docker_network_ip_network }}64,{{ group_docker_network_ip_network }}65,{{ group_docker_network_ip_network }}66,{{ group_docker_network_ip_network }}67,{{ group_docker_network_ip_network }}68,{{ group_docker_network_ip_network }}69,{{ group_docker_network_ip_network }}70,{{ group_docker_network_ip_network }}71,{{ group_docker_network_ip_network }}72,{{ group_docker_network_ip_network }}73,{{ group_docker_network_ip_network }}74,{{ group_docker_network_ip_network }}75,{{ group_docker_network_ip_network }}76,{{ group_docker_network_ip_network }}77,{{ group_docker_network_ip_network }}78,{{ group_docker_network_ip_network }}79,{{ group_docker_network_ip_network }}80,{{ group_docker_network_ip_network }}81,{{ group_docker_network_ip_network }}82,{{ group_docker_network_ip_network }}83,{{ group_docker_network_ip_network }}84,{{ group_docker_network_ip_network }}85,{{ group_docker_network_ip_network }}86,{{ group_docker_network_ip_network }}87,{{ group_docker_network_ip_network }}88,{{ group_docker_network_ip_network }}89,{{ group_docker_network_ip_network }}90,{{ group_docker_network_ip_network }}91,{{ group_docker_network_ip_network }}92,{{ group_docker_network_ip_network }}93,{{ group_docker_network_ip_network }}94,{{ group_docker_network_ip_network }}95,{{ group_docker_network_ip_network }}96,{{ group_docker_network_ip_network }}97,{{ group_docker_network_ip_network }}98,{{ group_docker_network_ip_network }}99,{{ group_docker_network_ip_network }}100,{{ group_docker_network_ip_network }}101,{{ group_docker_network_ip_network }}102,{{ group_docker_network_ip_network }}103,{{ group_docker_network_ip_network }}104,{{ group_docker_network_ip_network }}105,{{ group_docker_network_ip_network }}106,{{ group_docker_network_ip_network }}107,{{ group_docker_network_ip_network }}108,{{ group_docker_network_ip_network }}109,{{ group_docker_network_ip_network }}110,{{ group_docker_network_ip_network }}111,{{ group_docker_network_ip_network }}112,{{ group_docker_network_ip_network }}113,{{ group_docker_network_ip_network }}114,{{ group_docker_network_ip_network }}115,{{ group_docker_network_ip_network }}116,{{ group_docker_network_ip_network }}117,{{ group_docker_network_ip_network }}118,{{ group_docker_network_ip_network }}119,{{ group_docker_network_ip_network }}120,{{ group_docker_network_ip_network }}121,{{ group_docker_network_ip_network }}122,{{ group_docker_network_ip_network }}123,{{ group_docker_network_ip_network }}124,{{ group_docker_network_ip_network }}125,{{ group_docker_network_ip_network }}126,{{ group_docker_network_ip_network }}127,{{ group_docker_network_ip_network }}128,{{ group_docker_network_ip_network }}129,{{ group_docker_network_ip_network }}130,{{ group_docker_network_ip_network }}131,{{ group_docker_network_ip_network }}132,{{ group_docker_network_ip_network }}133,{{ group_docker_network_ip_network }}134,{{ group_docker_network_ip_network }}135,{{ group_docker_network_ip_network }}136,{{ group_docker_network_ip_network }}137,{{ group_docker_network_ip_network }}138,{{ group_docker_network_ip_network }}139,{{ group_docker_network_ip_network }}140,{{ group_docker_network_ip_network }}141,{{ group_docker_network_ip_network }}142,{{ group_docker_network_ip_network }}143,{{ group_docker_network_ip_network }}144,{{ group_docker_network_ip_network }}145,{{ group_docker_network_ip_network }}146,{{ group_docker_network_ip_network }}147,{{ group_docker_network_ip_network }}148,{{ group_docker_network_ip_network }}149,{{ group_docker_network_ip_network }}150,{{ group_docker_network_ip_network }}151,{{ group_docker_network_ip_network }}152,{{ group_docker_network_ip_network }}153,{{ group_docker_network_ip_network }}154,{{ group_docker_network_ip_network }}155,{{ group_docker_network_ip_network }}156,{{ group_docker_network_ip_network }}157,{{ group_docker_network_ip_network }}158,{{ group_docker_network_ip_network }}159,{{ group_docker_network_ip_network }}160,{{ group_docker_network_ip_network }}161,{{ group_docker_network_ip_network }}162,{{ group_docker_network_ip_network }}163,{{ group_docker_network_ip_network }}164,{{ group_docker_network_ip_network }}165,{{ group_docker_network_ip_network }}166,{{ group_docker_network_ip_network }}167,{{ group_docker_network_ip_network }}168,{{ group_docker_network_ip_network }}169,{{ group_docker_network_ip_network }}170,{{ group_docker_network_ip_network }}171,{{ group_docker_network_ip_network }}172,{{ group_docker_network_ip_network }}173,{{ group_docker_network_ip_network }}174,{{ group_docker_network_ip_network }}175,{{ group_docker_network_ip_network }}176,{{ group_docker_network_ip_network }}177,{{ group_docker_network_ip_network }}178,{{ group_docker_network_ip_network }}179,{{ group_docker_network_ip_network }}180,{{ group_docker_network_ip_network }}181,{{ group_docker_network_ip_network }}182,{{ group_docker_network_ip_network }}183,{{ group_docker_network_ip_network }}184,{{ group_docker_network_ip_network }}185,{{ group_docker_network_ip_network }}186,{{ group_docker_network_ip_network }}187,{{ group_docker_network_ip_network }}188,{{ group_docker_network_ip_network }}189,{{ group_docker_network_ip_network }}190,{{ group_docker_network_ip_network }}191,{{ group_docker_network_ip_network }}192,{{ group_docker_network_ip_network }}193,{{ group_docker_network_ip_network }}194,{{ group_docker_network_ip_network }}195,{{ group_docker_network_ip_network }}196,{{ group_docker_network_ip_network }}197,{{ group_docker_network_ip_network }}198,{{ group_docker_network_ip_network }}199,{{ group_docker_network_ip_network }}200,{{ group_docker_network_ip_network }}201,{{ group_docker_network_ip_network }}202,{{ group_docker_network_ip_network }}203,{{ group_docker_network_ip_network }}204,{{ group_docker_network_ip_network }}205,{{ group_docker_network_ip_network }}206,{{ group_docker_network_ip_network }}207,{{ group_docker_network_ip_network }}208,{{ group_docker_network_ip_network }}209,{{ group_docker_network_ip_network }}210,{{ group_docker_network_ip_network }}211,{{ group_docker_network_ip_network }}212,{{ group_docker_network_ip_network }}213,{{ group_docker_network_ip_network }}214,{{ group_docker_network_ip_network }}215,{{ group_docker_network_ip_network }}216,{{ group_docker_network_ip_network }}217,{{ group_docker_network_ip_network }}218,{{ group_docker_network_ip_network }}219,{{ group_docker_network_ip_network }}220,{{ group_docker_network_ip_network }}221,{{ group_docker_network_ip_network }}222,{{ group_docker_network_ip_network }}223,{{ group_docker_network_ip_network }}224,{{ group_docker_network_ip_network }}225,{{ group_docker_network_ip_network }}226,{{ group_docker_network_ip_network }}227,{{ group_docker_network_ip_network }}228,{{ group_docker_network_ip_network }}229,{{ group_docker_network_ip_network }}230,{{ group_docker_network_ip_network }}231,{{ group_docker_network_ip_network }}232,{{ group_docker_network_ip_network }}233,{{ group_docker_network_ip_network }}234,{{ group_docker_network_ip_network }}235,{{ group_docker_network_ip_network }}236,{{ group_docker_network_ip_network }}237,{{ group_docker_network_ip_network }}238,{{ group_docker_network_ip_network }}239,{{ group_docker_network_ip_network }}240,{{ group_docker_network_ip_network }}241,{{ group_docker_network_ip_network }}242,{{ group_docker_network_ip_network }}243,{{ group_docker_network_ip_network }}244,{{ group_docker_network_ip_network }}245,{{ group_docker_network_ip_network }}246,{{ group_docker_network_ip_network }}247,{{ group_docker_network_ip_network }}248,{{ group_docker_network_ip_network }}249,{{ group_docker_network_ip_network }}250,{{ group_docker_network_ip_network }}251,{{ group_docker_network_ip_network }}252,{{ group_docker_network_ip_network }}253,{{ group_docker_network_ip_network }}254"
+role_regards_mconfig_storage:
+  rate_expiration_tick: "{{ (group_config_mservices.storage | default({})).get('rate_expiration_tick', storage_default.rate_expiration_tick) }}"
+  quota_sync_tick: "{{ (group_config_mservices.storage | default({})).get('quota_sync_tick', storage_default.quota_sync_tick) }}"
+  quota_error_report_tick: "{{ (group_config_mservices.storage | default({})).get('quota_error_report_tick', storage_default.quota_error_report_tick) }}"
 
-  role_regards_mconfig_proxy:
-    url: "{{ (group_config_mservices.proxy | default({})).get('url', false)}}"
-    no_proxy: "{{ (group_config_mservices.proxy | default({})).get('no_proxy', default_no_proxy) }}" 
+# ----------------------------------
+# Mail configuration
+# ----------------------------------
 
-  role_regards_mconfig_ssl:
-    allow_insecure: "{{ (group_config_mservices.ssl | default({})).get('allow_insecure', false)}}"
+mail_default:
+  host: rs-maildev
+  port: 1025
+  username:
+  password:
+  noreply: regards@noreply.fr
 
-  role_regards_mconfig_legacy_spring: "{{ group_config_mservices.get('legacy_spring', false) }}"
+role_regards_mconfig_mail:
+  host: "{{ (group_config_mservices.mail | default({})).get('host', mail_default.host) }}"
+  port: "{{ (group_config_mservices.mail | default({})).get('port', mail_default.port) }}"
+  username: "{{ (group_config_mservices.mail | default({})).get('username', mail_default.username) }}"
+  password: "{{ (group_config_mservices.mail | default({})).get('password', mail_default.password) }}"
+  noreply: "{{ (group_config_mservices.mail | default({})).get('noreply', mail_default.noreply) }}"
+
+# ----------------------------------
+# Eureka configuration
+# ----------------------------------
+
+eureka_default:
+  host: rs-registry
+  port: 9032
+
+role_regards_mconfig_eureka:
+  host: "{{ (group_config_mservices.eureka | default({})).get('host', eureka_default.host) }}"
+  port: "{{ (group_config_mservices.eureka | default({})).get('port', eureka_default.port) }}"
+
+# ----------------------------------
+# Elastic configuration
+# ----------------------------------
+
+elastic_default:
+  host: rs-elasticsearch
+  cluster: regards
+  port: 9200
+
+role_regards_mconfig_elastic:
+  host: "{{ (group_config_mservices.elastic | default({})).get('host', elastic_default.host) }}"
+  cluster: "{{ (group_config_mservices.elastic | default({})).get('cluster', elastic_default.cluster) }}"
+  port: "{{ (group_config_mservices.elastic | default({})).get('port', elastic_default.port) }}"
+
+
+# ----------------------------------
+# RabbitMQ configuration
+# ----------------------------------
+amqp_default:
+  host: rs-rabbitmq
+  client: 5672
+  http: 15672
+  user: guest
+  password: guest
+
+role_regards_mconfig_amqp:
+  host: "{{ (group_config_mservices.amqp | default({})).get('host', amqp_default.host )}}"
+  client: "{{ (group_config_mservices.amqp | default({})).get('client', amqp_default.client )}}"
+  http: "{{ (group_config_mservices.amqp | default({})).get('http', amqp_default.http )}}"
+  user: "{{ (group_config_mservices.amqp | default({})).get('user', amqp_default.user )}}"
+  password: "{{ (group_config_mservices.amqp | default({})).get('password', amqp_default.password )}}"
+
+# ----------------------------------
+# PostgreSQL configuration
+# ----------------------------------
+postgres_default:
+  user: azertyuiop123456789
+  password: azertyuiop123456789
+  host: rs-postgres
+  port: 5432
+  instance_db_name: rs_instance
+  project_db_name: "{{ group_config_mservices.init_project }}"
+
+role_regards_mconfig_postgres:
+  # first project configuration
+  project:
+    host: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('host', postgres_default.host )}}"
+    port: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('port', postgres_default.port )}}"
+    db: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('db', postgres_default.project_db_name )}}"
+    user: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('user', postgres_default.user )}}"
+    password: "{{ (group_config_mservices.postgres | default({})).get('init_project', {}).get('password', postgres_default.password )}}"
+  # Instance db connection
+  instance_db:
+    host: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('host', postgres_default.host )}}"
+    port: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('port', postgres_default.port )}}"
+    db: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('db', postgres_default.instance_db_name )}}"
+    user: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('user', postgres_default.user )}}"
+    password: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('password', postgres_default.password )}}"
+
+role_regards_mconfig_public_url: "{{ group_docker_mservices.front.protocol }}://{{ group_docker_mservices.front.host }}:{{ group_docker_mservices.front.port }}"
+
+# ----------------------------------
+# Microservice list
+# ----------------------------------
+role_regards_mconfig_mservices: "{{ group_docker_mservices }}"
+
+role_regards_mconfig_workers: "{{ group_docker_workers|default([]) }}"
+
+# ----------------------------------
+# Swagger config
+# ----------------------------------
+role_regards_mconfig_swagger:
+  admin_instance:
+    name: Admin instance
+    title: MICROSERVICE ADMIN INSTANCE
+    description: System management and configuration
+  admin:
+    name: Admin
+    title: MICROSERVICE ADMIN
+    description: System management and configuration
+  authentication:
+    name: Authentication
+    title: MICROSERVICE AUTHENTICATION
+    description: System authentication management
+  dam:
+    name: DAM
+    title: MICROSERVICE DAM
+    description: Data management API
+  notifier:
+    name: Notifier
+    title: MICROSERVICE NOTIFIER
+    description: Notification management API
+  fem:
+    name: FEM
+    title: MICROSERVICE FEM
+    description: Feature management API
+  catalog:
+    name: Catalog
+    title: MICROSERVICE CATALOG
+    description: Search API
+  access_project:
+    name: Access project
+    title: MICROSERVICE ACCESS
+    description: Configuration for project GUI
+  access_instance:
+    name: Access instance
+    title: MICROSERVICE ACCESS INSTANCE
+    description: Configuration for portal and instance admin GUI
+  storage:
+    name: Storage
+    title: MICROSERVICE STORAGE
+    description: Files storage management
+  order:
+    name: Order
+    title: MICROSERVICE ORDER
+    description: Order API
+  ingest:
+    name: Ingest
+    title: MICROSERVICE INGEST
+    description: Ingest API
+  dataprovider:
+    name: Data Provider
+    title: MICROSERVICE DATAPROVIDER
+    description: Data Provider API
+  processing:
+    name: Processing
+    title: MICROSERVICE PROCESSING
+    description: Processing API
+  worker_manager:
+    name: Worker manager
+    title: MICROSERVICE WORKER MANAGER
+    description: Worker Manager API
+role_regards_mconfig_swagger_license: GPL-3.0
+
+# ----------------------------------
+# Proxy configuration
+# ----------------------------------
+default_no_proxy: "rs-admin-instance,rs-admin,rs-authentication,rs-dam,rs-catalog,rs-storage,rs-order,rs-ingest,rs-dataprovider,rs-processing,rs-access-project,rs-access-instance,rs-front,{{ group_docker_network_ip_network }}0,{{ group_docker_network_ip_network }}1,{{ group_docker_network_ip_network }}2,{{ group_docker_network_ip_network }}3,{{ group_docker_network_ip_network }}4,{{ group_docker_network_ip_network }}5,{{ group_docker_network_ip_network }}6,{{ group_docker_network_ip_network }}7,{{ group_docker_network_ip_network }}8,{{ group_docker_network_ip_network }}9,{{ group_docker_network_ip_network }}10,{{ group_docker_network_ip_network }}11,{{ group_docker_network_ip_network }}12,{{ group_docker_network_ip_network }}13,{{ group_docker_network_ip_network }}14,{{ group_docker_network_ip_network }}15,{{ group_docker_network_ip_network }}16,{{ group_docker_network_ip_network }}17,{{ group_docker_network_ip_network }}18,{{ group_docker_network_ip_network }}19,{{ group_docker_network_ip_network }}20,{{ group_docker_network_ip_network }}21,{{ group_docker_network_ip_network }}22,{{ group_docker_network_ip_network }}23,{{ group_docker_network_ip_network }}24,{{ group_docker_network_ip_network }}25,{{ group_docker_network_ip_network }}26,{{ group_docker_network_ip_network }}27,{{ group_docker_network_ip_network }}28,{{ group_docker_network_ip_network }}29,{{ group_docker_network_ip_network }}30,{{ group_docker_network_ip_network }}31,{{ group_docker_network_ip_network }}32,{{ group_docker_network_ip_network }}33,{{ group_docker_network_ip_network }}34,{{ group_docker_network_ip_network }}35,{{ group_docker_network_ip_network }}36,{{ group_docker_network_ip_network }}37,{{ group_docker_network_ip_network }}38,{{ group_docker_network_ip_network }}39,{{ group_docker_network_ip_network }}40,{{ group_docker_network_ip_network }}41,{{ group_docker_network_ip_network }}42,{{ group_docker_network_ip_network }}43,{{ group_docker_network_ip_network }}44,{{ group_docker_network_ip_network }}45,{{ group_docker_network_ip_network }}46,{{ group_docker_network_ip_network }}47,{{ group_docker_network_ip_network }}48,{{ group_docker_network_ip_network }}49,{{ group_docker_network_ip_network }}50,{{ group_docker_network_ip_network }}51,{{ group_docker_network_ip_network }}52,{{ group_docker_network_ip_network }}53,{{ group_docker_network_ip_network }}54,{{ group_docker_network_ip_network }}55,{{ group_docker_network_ip_network }}56,{{ group_docker_network_ip_network }}57,{{ group_docker_network_ip_network }}58,{{ group_docker_network_ip_network }}59,{{ group_docker_network_ip_network }}60,{{ group_docker_network_ip_network }}61,{{ group_docker_network_ip_network }}62,{{ group_docker_network_ip_network }}63,{{ group_docker_network_ip_network }}64,{{ group_docker_network_ip_network }}65,{{ group_docker_network_ip_network }}66,{{ group_docker_network_ip_network }}67,{{ group_docker_network_ip_network }}68,{{ group_docker_network_ip_network }}69,{{ group_docker_network_ip_network }}70,{{ group_docker_network_ip_network }}71,{{ group_docker_network_ip_network }}72,{{ group_docker_network_ip_network }}73,{{ group_docker_network_ip_network }}74,{{ group_docker_network_ip_network }}75,{{ group_docker_network_ip_network }}76,{{ group_docker_network_ip_network }}77,{{ group_docker_network_ip_network }}78,{{ group_docker_network_ip_network }}79,{{ group_docker_network_ip_network }}80,{{ group_docker_network_ip_network }}81,{{ group_docker_network_ip_network }}82,{{ group_docker_network_ip_network }}83,{{ group_docker_network_ip_network }}84,{{ group_docker_network_ip_network }}85,{{ group_docker_network_ip_network }}86,{{ group_docker_network_ip_network }}87,{{ group_docker_network_ip_network }}88,{{ group_docker_network_ip_network }}89,{{ group_docker_network_ip_network }}90,{{ group_docker_network_ip_network }}91,{{ group_docker_network_ip_network }}92,{{ group_docker_network_ip_network }}93,{{ group_docker_network_ip_network }}94,{{ group_docker_network_ip_network }}95,{{ group_docker_network_ip_network }}96,{{ group_docker_network_ip_network }}97,{{ group_docker_network_ip_network }}98,{{ group_docker_network_ip_network }}99,{{ group_docker_network_ip_network }}100,{{ group_docker_network_ip_network }}101,{{ group_docker_network_ip_network }}102,{{ group_docker_network_ip_network }}103,{{ group_docker_network_ip_network }}104,{{ group_docker_network_ip_network }}105,{{ group_docker_network_ip_network }}106,{{ group_docker_network_ip_network }}107,{{ group_docker_network_ip_network }}108,{{ group_docker_network_ip_network }}109,{{ group_docker_network_ip_network }}110,{{ group_docker_network_ip_network }}111,{{ group_docker_network_ip_network }}112,{{ group_docker_network_ip_network }}113,{{ group_docker_network_ip_network }}114,{{ group_docker_network_ip_network }}115,{{ group_docker_network_ip_network }}116,{{ group_docker_network_ip_network }}117,{{ group_docker_network_ip_network }}118,{{ group_docker_network_ip_network }}119,{{ group_docker_network_ip_network }}120,{{ group_docker_network_ip_network }}121,{{ group_docker_network_ip_network }}122,{{ group_docker_network_ip_network }}123,{{ group_docker_network_ip_network }}124,{{ group_docker_network_ip_network }}125,{{ group_docker_network_ip_network }}126,{{ group_docker_network_ip_network }}127,{{ group_docker_network_ip_network }}128,{{ group_docker_network_ip_network }}129,{{ group_docker_network_ip_network }}130,{{ group_docker_network_ip_network }}131,{{ group_docker_network_ip_network }}132,{{ group_docker_network_ip_network }}133,{{ group_docker_network_ip_network }}134,{{ group_docker_network_ip_network }}135,{{ group_docker_network_ip_network }}136,{{ group_docker_network_ip_network }}137,{{ group_docker_network_ip_network }}138,{{ group_docker_network_ip_network }}139,{{ group_docker_network_ip_network }}140,{{ group_docker_network_ip_network }}141,{{ group_docker_network_ip_network }}142,{{ group_docker_network_ip_network }}143,{{ group_docker_network_ip_network }}144,{{ group_docker_network_ip_network }}145,{{ group_docker_network_ip_network }}146,{{ group_docker_network_ip_network }}147,{{ group_docker_network_ip_network }}148,{{ group_docker_network_ip_network }}149,{{ group_docker_network_ip_network }}150,{{ group_docker_network_ip_network }}151,{{ group_docker_network_ip_network }}152,{{ group_docker_network_ip_network }}153,{{ group_docker_network_ip_network }}154,{{ group_docker_network_ip_network }}155,{{ group_docker_network_ip_network }}156,{{ group_docker_network_ip_network }}157,{{ group_docker_network_ip_network }}158,{{ group_docker_network_ip_network }}159,{{ group_docker_network_ip_network }}160,{{ group_docker_network_ip_network }}161,{{ group_docker_network_ip_network }}162,{{ group_docker_network_ip_network }}163,{{ group_docker_network_ip_network }}164,{{ group_docker_network_ip_network }}165,{{ group_docker_network_ip_network }}166,{{ group_docker_network_ip_network }}167,{{ group_docker_network_ip_network }}168,{{ group_docker_network_ip_network }}169,{{ group_docker_network_ip_network }}170,{{ group_docker_network_ip_network }}171,{{ group_docker_network_ip_network }}172,{{ group_docker_network_ip_network }}173,{{ group_docker_network_ip_network }}174,{{ group_docker_network_ip_network }}175,{{ group_docker_network_ip_network }}176,{{ group_docker_network_ip_network }}177,{{ group_docker_network_ip_network }}178,{{ group_docker_network_ip_network }}179,{{ group_docker_network_ip_network }}180,{{ group_docker_network_ip_network }}181,{{ group_docker_network_ip_network }}182,{{ group_docker_network_ip_network }}183,{{ group_docker_network_ip_network }}184,{{ group_docker_network_ip_network }}185,{{ group_docker_network_ip_network }}186,{{ group_docker_network_ip_network }}187,{{ group_docker_network_ip_network }}188,{{ group_docker_network_ip_network }}189,{{ group_docker_network_ip_network }}190,{{ group_docker_network_ip_network }}191,{{ group_docker_network_ip_network }}192,{{ group_docker_network_ip_network }}193,{{ group_docker_network_ip_network }}194,{{ group_docker_network_ip_network }}195,{{ group_docker_network_ip_network }}196,{{ group_docker_network_ip_network }}197,{{ group_docker_network_ip_network }}198,{{ group_docker_network_ip_network }}199,{{ group_docker_network_ip_network }}200,{{ group_docker_network_ip_network }}201,{{ group_docker_network_ip_network }}202,{{ group_docker_network_ip_network }}203,{{ group_docker_network_ip_network }}204,{{ group_docker_network_ip_network }}205,{{ group_docker_network_ip_network }}206,{{ group_docker_network_ip_network }}207,{{ group_docker_network_ip_network }}208,{{ group_docker_network_ip_network }}209,{{ group_docker_network_ip_network }}210,{{ group_docker_network_ip_network }}211,{{ group_docker_network_ip_network }}212,{{ group_docker_network_ip_network }}213,{{ group_docker_network_ip_network }}214,{{ group_docker_network_ip_network }}215,{{ group_docker_network_ip_network }}216,{{ group_docker_network_ip_network }}217,{{ group_docker_network_ip_network }}218,{{ group_docker_network_ip_network }}219,{{ group_docker_network_ip_network }}220,{{ group_docker_network_ip_network }}221,{{ group_docker_network_ip_network }}222,{{ group_docker_network_ip_network }}223,{{ group_docker_network_ip_network }}224,{{ group_docker_network_ip_network }}225,{{ group_docker_network_ip_network }}226,{{ group_docker_network_ip_network }}227,{{ group_docker_network_ip_network }}228,{{ group_docker_network_ip_network }}229,{{ group_docker_network_ip_network }}230,{{ group_docker_network_ip_network }}231,{{ group_docker_network_ip_network }}232,{{ group_docker_network_ip_network }}233,{{ group_docker_network_ip_network }}234,{{ group_docker_network_ip_network }}235,{{ group_docker_network_ip_network }}236,{{ group_docker_network_ip_network }}237,{{ group_docker_network_ip_network }}238,{{ group_docker_network_ip_network }}239,{{ group_docker_network_ip_network }}240,{{ group_docker_network_ip_network }}241,{{ group_docker_network_ip_network }}242,{{ group_docker_network_ip_network }}243,{{ group_docker_network_ip_network }}244,{{ group_docker_network_ip_network }}245,{{ group_docker_network_ip_network }}246,{{ group_docker_network_ip_network }}247,{{ group_docker_network_ip_network }}248,{{ group_docker_network_ip_network }}249,{{ group_docker_network_ip_network }}250,{{ group_docker_network_ip_network }}251,{{ group_docker_network_ip_network }}252,{{ group_docker_network_ip_network }}253,{{ group_docker_network_ip_network }}254"  # noqa line-length
+
+role_regards_mconfig_proxy:
+  url: "{{ (group_config_mservices.proxy | default({})).get('url', false)}}"
+  no_proxy: "{{ (group_config_mservices.proxy | default({})).get('no_proxy', default_no_proxy) }}"
+
+role_regards_mconfig_ssl:
+  allow_insecure: "{{ (group_config_mservices.ssl | default({})).get('allow_insecure', false)}}"
+
+role_regards_mconfig_legacy_spring: "{{ group_config_mservices.get('legacy_spring', false) }}"

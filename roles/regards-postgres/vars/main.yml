@@ -2,11 +2,11 @@
 role_regards_postgres_is_defined: "{{ group_docker_cots.postgres is defined }}"
 role_regards_postgres_mservices: "{{ group_docker_mservices }}"
 
-role_regards_postgres_mservices_instance: 
+role_regards_postgres_mservices_instance:
   - admin_instance
   - access_instance
 
-role_regards_postgres_mservices_no_connection: 
+role_regards_postgres_mservices_no_connection:
   - config
   - registry
   - gateway

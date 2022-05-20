@@ -1,7 +1,7 @@
 ---
 
 - name: Create REGARDS structure
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     mode: '0750'
@@ -15,11 +15,11 @@
   become: true
 
 - name: Create REGARDS plugins folders
-  file:
+  ansible.builtin.file:
     path: "{{ role_regards_plugins_workspace_local }}regards/plugins/{{ item }}"
     state: directory
     # Allow root and non root to write in this folder. Why ?
-    # These folders are mounted to containers;  but the parent folder too while deploying plugins 
+    # These folders are mounted to containers;  but the parent folder too while deploying plugins
     mode: '2777'
     owner: "{{ role_regards_plugins_container_run_user }}"
     group: "{{ role_regards_plugins_container_run_group }}"
@@ -30,7 +30,7 @@
   become: true
 
 - name: Run plugins container
-  docker_container:
+  community.docker.docker_container:
     name: "{{ item.image }}"
     image: "{{ role_regards_plugins_docker_registry }}/{{ item.image }}:{{ item.tag }}"
     pull: true
@@ -44,5 +44,8 @@
     ansible_python_interpreter: "env python{{ python_version }}"
 
 - name: Ensure files are 0555
-  command: find {{ role_regards_plugins_workspace }} -type f -exec chmod 0555 {} \;
+  ansible.builtin.command: find {{ role_regards_plugins_workspace }} -type f -exec chmod 0555 {} \;
   become: true
+  register: fix_access_rights
+  changed_when: fix_access_rights.rc != 0
+  failed_when: fix_access_rights.rc != 0

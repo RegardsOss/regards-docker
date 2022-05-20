@@ -1,18 +1,18 @@
 ---
   - name: Delete previous helm charts for REGARDS µServices
-    file:
+    ansible.builtin.file:
       state: absent
       path: "{{ output_dir }}"
 
   - name: Init generated helm charts structure
-    file:
+    ansible.builtin.file:
       state: directory
       path: "{{ output_dir }}"
       owner: "{{ ansible_user }}"
       group: "{{ ansible_user }}"
 
   - name: Reinstate volatile notice (README)
-    copy:
+    ansible.builtin.copy:
       src: "REAME-volatile.md"
       dest: "{{ output_dir }}/README.md"
 
@@ -23,7 +23,7 @@
   - debug: var=repo_out.stdout_lines
 
   - name: "Build microservices charts"
-    include_tasks: build-chart.yaml
+    ansible.builtin.include_tasks: build-chart.yaml
     vars:
       bms_ms_name: "{{ chart.name | mandatory }}"
       bms_build_config: "{{ chart.build_config | default(true) }}"

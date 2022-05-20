@@ -14,4 +14,7 @@
 ---
   role_install_modules_pip_trusted_host: "{{ (pip | default({})).trusted_host | default('') }}"
   role_install_modules_pip_index_url: "{{ (pip | default({})).index_url | default('') }}"
-  role_install_pip_cli: "{{ (python_version == 2) | ternary('pip2', 'pip3') }}"
+  role_install_modules_pip_cli: "{{ (python_version == 2) | ternary('pip2', 'pip3') }}"
+  role_install_modules_pip_http_proxy: "{{ ((environment_http_proxy is defined) and (environment_http_proxy != None)) | ternary(environment_http_proxy, '') }}"
+  role_install_modules_pip_https_proxy: "{{ ((environment_https_proxy is defined) and (environment_https_proxy != None)) | ternary(environment_https_proxy, '') }}"
+  role_install_modules_pip_no_proxy: "{{ ((environment_no_proxy is defined) and (environment_no_proxy != None)) | ternary(environment_no_proxy, '') }}"

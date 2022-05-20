@@ -1,7 +1,7 @@
 ---
 
 - name: Add files
-  template:
+  ansible.builtin.template:
     src: "{{ item }}"
     dest: "/tmp/{{ item }}"
     mode: '0750'
@@ -18,7 +18,7 @@
     name: "postinstall-kibana-logs"
     image: "{{ role_regards_elasticsearch_sidecar_registry }}/regards-bash"
     pull: true
-    command: bash /send-kibana-dashboard.sh
+    ansible.builtin.command: bash /send-kibana-dashboard.sh
     detach: false
     network_mode: "{{ role_regards_elasticsearch_sidecar_docker_network_name }}"
     networks_cli_compatible: true
@@ -34,7 +34,7 @@
     ansible_python_interpreter: "env python{{ python_version }}"
 
 - name: Delete files
-  file:
+  ansible.builtin.file:
     path: "/tmp/{{ item }}"
     state: absent
   with_items:

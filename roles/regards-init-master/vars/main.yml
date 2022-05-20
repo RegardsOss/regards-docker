@@ -30,5 +30,5 @@ role_regards_init_master_cots: "{{ group_docker_cots }}"
 
 role_regards_init_public_url: "{{ group_docker_mservices.front.protocol }}://{{ group_docker_mservices.front.host }}:{{ group_docker_mservices.front.port }}"
 
-#Workers
+# Workers
 role_regards_init_workers: "{{ group_docker_workers | default([]) }}"

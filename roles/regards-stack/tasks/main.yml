@@ -1,90 +1,108 @@
 ---
-  - name: Generate mandatory stacks files
-    template:
-      src: "{{ item }}"
-      dest: "{{ role_regards_stack_stack }}"
-      mode: '0740'
-      owner: "{{ role_regards_stack_container_root_user }}"
-      group: "{{ role_regards_stack_container_root_group }}"
-    with_items:
-      - regards-stack.yml
-      - elastic.yml
-      - rabbitmq.yml
-    become: true
+- name: Generate mandatory stacks files
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ role_regards_stack_stack }}"
+    mode: '0740'
+    owner: "{{ role_regards_stack_container_root_user }}"
+    group: "{{ role_regards_stack_container_root_group }}"
+  with_items:
+    - regards-stack.yml
+    - elastic.yml
+    - rabbitmq.yml
+  become: true
 
-  - name: Generate logs.yml
-    template:
-      src: logs.yml
-      dest: "{{ role_regards_stack_stack }}"
-      mode: '0740'
-      owner: "{{ role_regards_stack_container_root_user }}"
-      group: "{{ role_regards_stack_container_root_group }}"
-    become: true
-    when: role_regards_stack_cots.elasticsearch_logs is defined or role_regards_stack_cots.kibana_logs is defined or role_regards_stack_cots.fluent is defined
+- name: Generate logs.yml
+  ansible.builtin.template:
+    src: logs.yml
+    dest: "{{ role_regards_stack_stack }}"
+    mode: '0740'
+    owner: "{{ role_regards_stack_container_root_user }}"
+    group: "{{ role_regards_stack_container_root_group }}"
+  become: true
+  when: role_regards_stack_cots.elasticsearch_logs is defined or role_regards_stack_cots.kibana_logs is defined or role_regards_stack_cots.fluent is defined
 
-  - name: Generate doc.yml
-    template:
-      src: doc.yml
-      dest: "{{ role_regards_stack_stack }}"
-      mode: '0740'
-      owner: "{{ role_regards_stack_container_root_user }}"
-      group: "{{ role_regards_stack_container_root_group }}"
-    become: true
-    when: role_regards_stack_cots.doc is defined
+- name: Generate doc.yml
+  ansible.builtin.template:
+    src: doc.yml
+    dest: "{{ role_regards_stack_stack }}"
+    mode: '0740'
+    owner: "{{ role_regards_stack_container_root_user }}"
+    group: "{{ role_regards_stack_container_root_group }}"
+  become: true
+  when: role_regards_stack_cots.doc is defined
 
-  - name: Generate mail.yml
-    template:
-      src: mail.yml
-      dest: "{{ role_regards_stack_stack }}"
-      mode: '0740'
-      owner: "{{ role_regards_stack_container_root_user }}"
-      group: "{{ role_regards_stack_container_root_group }}"
-    become: true
-    when: role_regards_stack_cots.maildev is defined
+- name: Generate s3-minio.yml
+  ansible.builtin.template:
+    src: s3-minio.yml
+    dest: "{{ role_regards_stack_stack }}"
+    mode: '0740'
+    owner: "{{ role_regards_stack_container_root_user }}"
+    group: "{{ role_regards_stack_container_root_group }}"
+  become: true
+  when: role_regards_stack_cots.s3_minio is defined
 
-  - name: Generate postgresql.yml
-    template:
-      src: postgresql.yml
-      dest: "{{ role_regards_stack_stack }}"
-      mode: '0740'
-      owner: "{{ role_regards_stack_container_root_user }}"
-      group: "{{ role_regards_stack_container_root_group }}"
-    become: true
-    when: role_regards_stack_cots.postgres is defined or role_regards_stack_cots.phppgadmin is defined
+- name: Generate mail.yml
+  ansible.builtin.template:
+    src: mail.yml
+    dest: "{{ role_regards_stack_stack }}"
+    mode: '0740'
+    owner: "{{ role_regards_stack_container_root_user }}"
+    group: "{{ role_regards_stack_container_root_group }}"
+  become: true
+  when: role_regards_stack_cots.maildev is defined
 
-  - name: Generate workers.yml 
-    template:
-      src: workers.yml
-      dest: "{{ role_regards_stack_stack }}"
-      mode: '0740'
-      owner: "{{ role_regards_stack_container_root_user }}"
-      group: "{{ role_regards_stack_container_root_group }}"
-    become: true
-    when: role_regards_stack_workers | length > 0
+- name: Generate postgresql.yml
+  ansible.builtin.template:
+    src: postgresql.yml
+    dest: "{{ role_regards_stack_stack }}"
+    mode: '0740'
+    owner: "{{ role_regards_stack_container_root_user }}"
+    group: "{{ role_regards_stack_container_root_group }}"
+  become: true
+  when: role_regards_stack_cots.postgres is defined or role_regards_stack_cots.phppgadmin is defined
 
-  - set_fact:
-      launch_swarm: >
-        docker stack deploy 
-        -c {{ role_regards_stack_stack }}regards-stack.yml 
-        -c {{ role_regards_stack_stack }}elastic.yml 
-        {% if role_regards_stack_cots.elasticsearch_logs is defined or role_regards_stack_cots.kibana_logs is defined or role_regards_stack_cots.fluent is defined %}
-        -c {{ role_regards_stack_stack }}logs.yml 
-        {% endif %}
-        {% if role_regards_stack_cots.doc is defined %}
-        -c {{ role_regards_stack_stack }}doc.yml 
-        {% endif %}
-        {% if role_regards_stack_cots.maildev is defined %}
-        -c {{ role_regards_stack_stack }}mail.yml 
-        {% endif %}
-        {% if role_regards_stack_cots.postgres is defined or role_regards_stack_cots.phppgadmin is defined %}
-        -c {{ role_regards_stack_stack }}postgresql.yml
-        {% endif %}
-        -c {{ role_regards_stack_stack }}rabbitmq.yml 
-        {% if role_regards_stack_workers | length > 0 %}
-        -c {{ role_regards_stack_stack }}workers.yml 
-        {% endif %}
-        --with-registry-auth 
-        {{ role_regards_stack_stack_name }}
+- name: Generate workers.yml
+  ansible.builtin.template:
+    src: workers.yml
+    dest: "{{ role_regards_stack_stack }}"
+    mode: '0740'
+    owner: "{{ role_regards_stack_container_root_user }}"
+    group: "{{ role_regards_stack_container_root_group }}"
+  become: true
+  when: role_regards_stack_workers | length > 0
 
-  - name: Run REGARDS
-    command: "{{ launch_swarm }}"
+- name: Compute docker stack deploy command
+  ansible.builtin.set_fact:
+    launch_swarm: >
+      docker stack deploy
+      -c {{ role_regards_stack_stack }}regards-stack.yml
+      -c {{ role_regards_stack_stack }}elastic.yml
+      {% if role_regards_stack_cots.elasticsearch_logs is defined or role_regards_stack_cots.kibana_logs is defined or role_regards_stack_cots.fluent is defined %}
+      -c {{ role_regards_stack_stack }}logs.yml
+      {% endif %}
+      {% if role_regards_stack_cots.doc is defined %}
+      -c {{ role_regards_stack_stack }}doc.yml
+      {% endif %}
+      {% if role_regards_stack_cots.s3_minio is defined %}
+      -c {{ role_regards_stack_stack }}s3-minio.yml
+      {% endif %}
+      {% if role_regards_stack_cots.maildev is defined %}
+      -c {{ role_regards_stack_stack }}mail.yml
+      {% endif %}
+      {% if role_regards_stack_cots.postgres is defined or role_regards_stack_cots.phppgadmin is defined %}
+      -c {{ role_regards_stack_stack }}postgresql.yml
+      {% endif %}
+      -c {{ role_regards_stack_stack }}rabbitmq.yml
+      {% if role_regards_stack_workers | length > 0 %}
+      -c {{ role_regards_stack_stack }}workers.yml
+      {% endif %}
+      --with-registry-auth
+      --prune
+      {{ role_regards_stack_stack_name }}
+
+- name: Run REGARDS
+  ansible.builtin.command: "{{ launch_swarm }}"
+  register: deploy
+  changed_when: deploy.rc != 0
+  failed_when: deploy.rc != 0

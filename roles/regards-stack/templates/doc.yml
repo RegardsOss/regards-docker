@@ -4,6 +4,12 @@ services:
 {% if role_regards_stack_cots.doc is defined %}
   rs-doc:
     image: {{role_regards_stack_registry}}/regards-doc:{{ role_regards_stack_cots.doc.tag }}
+{%if (role_regards_stack_cots.doc.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_cots.doc.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{role_regards_stack_container_run_uid}}:{{role_regards_stack_container_run_gid}}"
     hostname: rs-doc
     read_only: true

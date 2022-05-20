@@ -1,0 +1,33 @@
+version: '3.7'
+services:
+
+{% if role_regards_stack_cots.s3_minio is defined %}
+  rs-s3-minio:
+    image: {{ role_regards_stack_registry }}/regards-s3-minio:{{ role_regards_stack_cots.s3_minio.tag | default("latest") }}
+    user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
+    hostname: rs-s3-minio
+    read_only: true
+    networks:
+      - {{ role_regards_stack_docker_network_name }}
+{% if role_regards_stack_cots.s3_minio.client is defined or role_regards_stack_cots.s3_minio.admin is defined %}
+    ports:
+{% if role_regards_stack_cots.s3_minio.admin is defined %}
+      - "{{ role_regards_stack_cots.s3_minio.admin }}:9001"
+{% endif %}
+{% if role_regards_stack_cots.s3_minio.client is defined %}
+      - "{{ role_regards_stack_cots.s3_minio.client }}:9000"
+{% endif %}
+{% endif %}
+    volumes:
+      - {{ role_regards_stack_workspace_local }}s3-minio:/data
+      - type: tmpfs
+        target: /.minio
+{% if role_regards_stack_cots.s3_minio.client is defined %}
+    environment:
+      - "MINIO_SERVER_URL={{ role_regards_stack_minio_public_url }}:{{ role_regards_stack_cots.s3_minio.client }}"
+{% endif %}
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
+{% endif %}

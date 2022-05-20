@@ -4,6 +4,12 @@ services:
 {% if role_regards_stack_cots.postgres is defined %}
   rs-postgres:
     image: {{ role_regards_stack_registry }}/regards-database:{{ role_regards_stack_cots.postgres.tag | default("latest") }}
+{%if (role_regards_stack_cots.postgres.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_cots.postgres.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-postgres
     read_only: true
@@ -39,6 +45,12 @@ services:
 {% if role_regards_stack_cots.phppgadmin is defined %}
   rs-phppgadmin:
     image: {{ role_regards_stack_registry }}/regards-phppgadmin:{{ role_regards_stack_cots.phppgadmin.tag | default("latest") }}
+{%if (role_regards_stack_cots.phppgadmin.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_cots.phppgadmin.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-phppgadmin
     read_only: true

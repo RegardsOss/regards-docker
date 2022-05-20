@@ -4,7 +4,6 @@ role_regards_fluentd_workspace_local_logs: "{{ group_workdir_local }}{{group_sta
 role_regards_fluentd_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/fluentd/"
 
 
-  
 role_regards_fluentd_container_root_user: "{{ group_container_root_user }}"
 role_regards_fluentd_container_root_group: "{{ group_container_root_group }}"
 role_regards_fluentd_container_run_user: "{{ group_container_run_user }}"

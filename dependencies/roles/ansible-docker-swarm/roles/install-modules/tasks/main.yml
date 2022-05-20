@@ -28,11 +28,14 @@
       - jinja2~=2.11
       - markupsafe~=1.0
     state: latest
-    executable: "{{ role_install_pip_cli }}"
+    executable: "{{ role_install_modules_pip_cli }}"
     umask: "0022"
   environment:
     PIP_INDEX_URL: "{{ role_install_modules_pip_index_url }}"
     PIP_TRUSTED_HOST: "{{ role_install_modules_pip_trusted_host }}"
+    HTTP_PROXY: "{{ role_install_modules_pip_http_proxy }}"
+    HTTPS_PROXY: "{{ role_install_modules_pip_https_proxy }}"
+    NO_PROXY: "{{ role_install_modules_pip_no_proxy }}"
   when: python_version == 3
 
 - name: Install python2 dependencies using pip 
@@ -47,18 +50,21 @@
       - jinja2~=2.11
       - markupsafe~=1.0
     state: latest
-    executable: "{{ role_install_pip_cli }}"
+    executable: "{{ role_install_modules_pip_cli }}"
     umask: "0022"
   environment:
     PIP_INDEX_URL: "{{ role_install_modules_pip_index_url }}"
     PIP_TRUSTED_HOST: "{{ role_install_modules_pip_trusted_host }}"
+    HTTP_PROXY: "{{ role_install_modules_pip_http_proxy }}"
+    HTTPS_PROXY: "{{ role_install_modules_pip_https_proxy }}"
+    NO_PROXY: "{{ role_install_modules_pip_no_proxy }}"
   when: python_version == 2
 
 # We're stuck with pyc files not readable by everyone, even with umask defined.
 # Looks like pyc files are generated outside umask definition ????
 # So we decided to make them readeable by everyone using chmod
-- name: "Get the {{ role_install_pip_cli }} package path"
-  shell: "{{ role_install_pip_cli }} show docker | grep Location | cut -d ' ' -f 2"
+- name: "Get the {{ role_install_modules_pip_cli }} package path"
+  shell: "{{ role_install_modules_pip_cli }} show docker | grep Location | cut -d ' ' -f 2"
   register: python_package_path
 
 - name: "Ensure pyc files inside {{ python_package_path.stdout }} are x55"

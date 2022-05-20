@@ -1,31 +1,32 @@
 ---
-  - name: Install REGARDS on master node
-    hosts: master
-    roles:
-      - regards-init-master
-      - regards-init-network-workdir
+- name: Install REGARDS on master node
+  hosts: master
+  roles:
+    - regards-init-master
+    - regards-init-network-workdir
 
 
-  - name: Install REGARDS plugins on all nodes
-    hosts: regards_nodes:!swarm_manager_only_nodes
-    roles:
-      - regards-plugins
+- name: Install REGARDS plugins on all nodes
+  hosts: regards_nodes:!swarm_manager_only_nodes
+  roles:
+    - regards-plugins
 
 
-  - name: Install REGARDS structure on all nodes
-    hosts: regards_nodes:!swarm_manager_only_nodes
-    become: true
-    roles:
-      - regards-logback
-      - regards-fluentd
-      - regards-mconfig
-      - regards-front
-      - regards-postgres
-      - regards-elasticsearch
-      - regards-rabbitmq
-      - regards-workers
+- name: Install REGARDS structure on all nodes
+  hosts: regards_nodes:!swarm_manager_only_nodes
+  become: true
+  roles:
+    - regards-logback
+    - regards-fluentd
+    - regards-mconfig
+    - regards-front
+    - regards-postgres
+    - regards-s3-minio
+    - regards-elasticsearch
+    - regards-rabbitmq
+    - regards-workers
 
-  - name: Launch stack
-    hosts: master
-    roles:
-      - regards-stack
+- name: Launch stack
+  hosts: master
+  roles:
+    - regards-stack

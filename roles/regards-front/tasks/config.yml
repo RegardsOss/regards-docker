@@ -1,9 +1,8 @@
 ---
-  - name: Generate reverse proxy config file
-    template:
-      src: "{{ role_regards_front_nginx_conf }}"
-      dest: "{{ role_regards_front_nginx_target_conf }}"
-      mode: '0700'
-      owner: "{{ role_regards_front_container_run_user }}"
-      group: "{{ role_regards_front_container_run_group }}"
-      
+- name: Generate reverse proxy config file
+  ansible.builtin.template:
+    src: "{{ role_regards_front_nginx_conf }}"
+    dest: "{{ role_regards_front_nginx_target_conf }}"
+    mode: '0700'
+    owner: "{{ role_regards_front_container_run_user }}"
+    group: "{{ role_regards_front_container_run_group }}"

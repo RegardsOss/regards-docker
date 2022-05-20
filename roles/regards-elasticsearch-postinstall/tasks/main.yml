@@ -1,7 +1,7 @@
 ---
 
 - name: Add script file
-  template:
+  ansible.builtin.template:
     src: update-indices.sh
     dest: /tmp/update-indices.sh
     mode: '0750'
@@ -10,7 +10,7 @@
   become: true
 
 - name: Run container to updates ES settings 
-  docker_container:
+  community.docker.docker_container:
     name: "postinstall-elasticsearch"
     image: "{{ role_regards_elasticsearch_sidecar_registry }}/regards-bash"
     pull: true
@@ -28,7 +28,7 @@
     ansible_python_interpreter: "env python{{ python_version }}"
 
 - name: Delete script file
-  file:
+  ansible.builtin.file:
     path: /tmp/update-indices.sh
     state: absent
   become: true

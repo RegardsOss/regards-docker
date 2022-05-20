@@ -3,7 +3,16 @@ services:
 
 {% for worker in role_regards_stack_workers %}
   {{ worker.name }}:
-    image: {{ role_regards_stack_registry }}/{{ worker.name }}:{{ worker.tag }}
+    image: {{ worker.docker_registry | default(role_regards_stack_registry) }}/{{ worker.image | default(worker.name) }}:{{ worker.tag }}
+{%if (worker.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in worker.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
+{% if worker.command is defined %}
+    command: {{ worker.command }}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: {{ worker.name }}
     read_only: true
@@ -16,6 +25,12 @@ services:
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
+{%if (worker.configuration | default({})).environment is defined %}
+    environment:
+{% for key, value in worker.configuration.environment.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     volumes:
       - {{ role_regards_stack_workspace_local }}regards/workers/{{ worker.name }}/logs:/logs
 {% if worker.volumes is defined %}

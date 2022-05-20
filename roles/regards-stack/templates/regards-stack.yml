@@ -4,6 +4,12 @@ services:
 {% if role_regards_stack_mservices.config is defined %}
   rs-config:
     image: {{ role_regards_stack_registry }}/rs-config:{{ role_regards_stack_mservices.config.tag }}
+{%if (role_regards_stack_mservices.config.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.config.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-config
     read_only: true
@@ -34,6 +40,12 @@ services:
   # Eureka
   rs-registry:
     image: {{ role_regards_stack_registry }}/rs-registry:{{ role_regards_stack_mservices.registry.tag }}
+{%if (role_regards_stack_mservices.registry.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.registry.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-registry
     read_only: true
@@ -74,6 +86,12 @@ services:
   # Spring cloud gateway
   rs-gateway:
     image: {{ role_regards_stack_registry }}/rs-gateway:{{ role_regards_stack_mservices.gateway.tag }}
+{%if (role_regards_stack_mservices.gateway.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.gateway.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-gateway
     read_only: true
@@ -85,7 +103,7 @@ services:
           - node.labels.{{ role_regards_stack_mservices.gateway.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.gateway.node_label_placement_constraint.value }}
 {% endif %}
 {% if role_regards_stack_mservices.gateway.jdwp is defined %}
-    environment: 
+    environment:
       - ACTIVE_DEBUG=true
 {% endif %}
 {% if role_regards_stack_mservices.gateway.yourkit is defined %}
@@ -122,6 +140,12 @@ services:
 {% if role_regards_stack_mservices.admin_instance is defined %}
   rs-admin-instance:
     image: {{ role_regards_stack_registry }}/{{ role_regards_stack_mservices_admin_instance_image_name }}:{{ role_regards_stack_mservices.admin_instance.tag }}
+{%if (role_regards_stack_mservices.admin_instance.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.admin_instance.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-admin-instance
     read_only: true
@@ -133,8 +157,9 @@ services:
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
+    environment:
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}      
 {% if role_regards_stack_mservices.admin_instance.jdwp is defined %}
-    environment: 
       - ACTIVE_DEBUG=true
 {% endif %}
 {% if role_regards_stack_mservices.admin_instance.yourkit is defined %}
@@ -169,6 +194,12 @@ services:
 {% if role_regards_stack_mservices.admin is defined %}
   rs-admin:
     image: {{ role_regards_stack_registry }}/{{ role_regards_stack_mservices_admin_image_name  }}:{{ role_regards_stack_mservices.admin.tag }}
+{%if (role_regards_stack_mservices.admin.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.admin.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-admin
     read_only: true
@@ -179,8 +210,9 @@ services:
         constraints:
           - node.labels.{{ role_regards_stack_mservices.admin.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.admin.node_label_placement_constraint.value }}
 {% endif %}
+    environment:
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.admin.jdwp is defined %}
-    environment: 
       - ACTIVE_DEBUG=true
 {% endif %}
 {% if role_regards_stack_mservices.admin.yourkit is defined %}
@@ -217,6 +249,12 @@ services:
 {% if role_regards_stack_mservices.authentication is defined %}
   rs-authentication:
     image: {{ role_regards_stack_registry }}/rs-authentication:{{ role_regards_stack_mservices.authentication.tag }}
+{%if (role_regards_stack_mservices.authentication.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.authentication.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-authentication
     read_only: true
@@ -227,8 +265,9 @@ services:
         constraints:
           - node.labels.{{ role_regards_stack_mservices.authentication.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.authentication.node_label_placement_constraint.value }}
 {% endif %}
+    environment:
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.authentication.jdwp is defined %}
-    environment: 
       - ACTIVE_DEBUG=true
 {% endif %}
 {% if role_regards_stack_mservices.authentication.yourkit is defined %}
@@ -266,6 +305,12 @@ services:
 {% if role_regards_stack_mservices.dam is defined %}
   rs-dam:
     image: {{ role_regards_stack_registry }}/rs-dam:{{ role_regards_stack_mservices.dam.tag }}
+{%if (role_regards_stack_mservices.dam.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.dam.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-dam
     read_only: true
@@ -278,8 +323,9 @@ services:
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
-{% if role_regards_stack_mservices.dam.jdwp is defined %}
     environment: 
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+{% if role_regards_stack_mservices.dam.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
 {% if role_regards_stack_mservices.dam.yourkit is defined %}
@@ -322,6 +368,12 @@ services:
 {% if role_regards_stack_mservices.notifier is defined %}
   rs-notifier:
     image: {{ role_regards_stack_registry }}/rs-notifier:{{ role_regards_stack_mservices.notifier.tag }}
+{%if (role_regards_stack_mservices.notifier.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.notifier.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-notifier
     read_only: true
@@ -334,8 +386,9 @@ services:
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
+    environment:
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.notifier.jdwp is defined %}
-    environment: 
       - ACTIVE_DEBUG=true
 {% endif %}
 {% if role_regards_stack_mservices.notifier.yourkit is defined %}
@@ -371,6 +424,12 @@ services:
 {% if role_regards_stack_mservices.fem is defined %}
   rs-fem:
     image: {{ role_regards_stack_registry }}/rs-fem:{{ role_regards_stack_mservices.fem.tag }}
+{%if (role_regards_stack_mservices.fem.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.fem.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-fem
     read_only: true
@@ -383,8 +442,9 @@ services:
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
+    environment:
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.fem.jdwp is defined %}
-    environment: 
       - ACTIVE_DEBUG=true
 {% endif %}
 {% if role_regards_stack_mservices.fem.yourkit is defined %}
@@ -427,6 +487,12 @@ services:
 {% if role_regards_stack_mservices.catalog is defined %}
   rs-catalog:
     image: {{ role_regards_stack_registry }}/rs-catalog:{{ role_regards_stack_mservices.catalog.tag }}
+{%if (role_regards_stack_mservices.catalog.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.catalog.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-catalog
     read_only: true
@@ -439,8 +505,9 @@ services:
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
+    environment:
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.catalog.jdwp is defined %}
-    environment: 
       - ACTIVE_DEBUG=true
 {% endif %}
 {% if role_regards_stack_mservices.catalog.yourkit is defined %}
@@ -477,6 +544,12 @@ services:
 {% if role_regards_stack_mservices.access_instance is defined %}
   rs-access-instance:
     image: {{ role_regards_stack_registry }}/{{ role_regards_stack_mservices_access_instance_image_name }}:{{ role_regards_stack_mservices.access_instance.tag }}
+{%if (role_regards_stack_mservices.access_instance.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.access_instance.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-access-instance
     read_only: true
@@ -488,8 +561,9 @@ services:
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
+    environment:
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.access_instance.jdwp is defined %}
-    environment: 
       - ACTIVE_DEBUG=true
 {% endif %}
 {% if role_regards_stack_mservices.access_instance.yourkit is defined %}
@@ -524,6 +598,12 @@ services:
 {% if role_regards_stack_mservices.access_project is defined %}
   rs-access-project:
     image: {{ role_regards_stack_registry }}/rs-access-project:{{ role_regards_stack_mservices.access_project.tag }}
+{%if (role_regards_stack_mservices.access_project.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.access_project.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-access-project
     read_only: true
@@ -534,8 +614,9 @@ services:
         constraints:
           - node.labels.{{ role_regards_stack_mservices.access_project.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.access_project.node_label_placement_constraint.value }}
 {% endif %}
+    environment:
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.access_project.jdwp is defined %}
-    environment: 
       - ACTIVE_DEBUG=true
 {% endif %}
 {% if role_regards_stack_mservices.access_project.yourkit is defined %}
@@ -572,6 +653,12 @@ services:
 {% if role_regards_stack_mservices.front is defined %}
   rs-front:
     image: {{ role_regards_stack_registry }}/rs-front:{{ role_regards_stack_mservices.front.tag }}
+{%if (role_regards_stack_mservices.front.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.front.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-front
     read_only: true
@@ -609,6 +696,12 @@ services:
 {% if role_regards_stack_mservices.storage is defined %}
   rs-storage:
     image: {{ role_regards_stack_registry }}/rs-storage:{{ role_regards_stack_mservices.storage.tag }}
+{%if (role_regards_stack_mservices.storage.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.storage.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-storage
     read_only: true
@@ -621,8 +714,9 @@ services:
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
+    environment:
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.storage.jdwp is defined %}
-    environment: 
       - ACTIVE_DEBUG=true
 {% endif %}
 {% if role_regards_stack_mservices.storage.yourkit is defined %}
@@ -667,6 +761,12 @@ services:
 {% if role_regards_stack_mservices.order is defined %}
   rs-order:
     image: {{ role_regards_stack_registry }}/rs-order:{{ role_regards_stack_mservices.order.tag }}
+{%if (role_regards_stack_mservices.order.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.order.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-order
     read_only: true
@@ -679,8 +779,9 @@ services:
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
+    environment:
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.order.jdwp is defined %}
-    environment: 
       - ACTIVE_DEBUG=true
 {% endif %}
 {% if role_regards_stack_mservices.order.yourkit is defined %}
@@ -725,6 +826,12 @@ services:
 {% if role_regards_stack_mservices.processing is defined %}
   rs-processing:
     image: {{ role_regards_stack_registry }}/rs-processing:{{ role_regards_stack_mservices.processing.tag }}
+{%if (role_regards_stack_mservices.processing.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.processing.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-processing
     read_only: true
@@ -737,8 +844,9 @@ services:
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
-{% if role_regards_stack_mservices.processing.jdwp is defined %}
     environment:
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+{% if role_regards_stack_mservices.processing.jdwp is defined %}
       - ACTIVE_DEBUG=true
       # as /tmp is mounted as noexec into docker containers we configure specific tmp directory for jna lib
       - JAVA_TOOL_OPTIONS="-Djna.tmpdir=/processing/jna-tmp"
@@ -783,6 +891,12 @@ services:
 {% if role_regards_stack_mservices.ingest is defined %}
   rs-ingest:
     image: {{ role_regards_stack_registry }}/rs-ingest:{{ role_regards_stack_mservices.ingest.tag }}
+{%if (role_regards_stack_mservices.ingest.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.ingest.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-ingest
     read_only: true
@@ -795,8 +909,9 @@ services:
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
+    environment:
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.ingest.jdwp is defined %}
-    environment: 
       - ACTIVE_DEBUG=true
 {% endif %}
 {% if role_regards_stack_mservices.ingest.yourkit is defined %}
@@ -839,6 +954,12 @@ services:
 {% if role_regards_stack_mservices.dataprovider is defined %}
   rs-dataprovider:
     image: {{ role_regards_stack_registry }}/rs-dataprovider:{{ role_regards_stack_mservices.dataprovider.tag }}
+{%if (role_regards_stack_mservices.dataprovider.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.dataprovider.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-dataprovider
     read_only: true
@@ -851,8 +972,9 @@ services:
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
+    environment:
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.dataprovider.jdwp is defined %}
-    environment: 
       - ACTIVE_DEBUG=true
 {% endif %}
 {% if role_regards_stack_mservices.dataprovider.yourkit is defined %}
@@ -895,6 +1017,12 @@ services:
 {% if role_regards_stack_mservices.worker_manager is defined %}
   rs-worker-manager:
     image: {{ role_regards_stack_registry }}/rs-worker-manager:{{ role_regards_stack_mservices.worker_manager.tag }}
+{%if (role_regards_stack_mservices.worker_manager.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.worker_manager.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-worker-manager
     read_only: true
@@ -907,8 +1035,9 @@ services:
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
+    environment:
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.worker_manager.jdwp is defined %}
-    environment: 
       - ACTIVE_DEBUG=true
 {% endif %}
 {% if role_regards_stack_mservices.worker_manager.yourkit is defined %}

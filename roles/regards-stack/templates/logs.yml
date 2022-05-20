@@ -4,6 +4,12 @@ services:
 {% if role_regards_stack_cots.elasticsearch_logs is defined %}
   rs-logs-elasticsearch:
     image: {{role_regards_stack_registry}}/regards-elasticsearch:{{ role_regards_stack_cots.elasticsearch_logs.tag | default("latest") }}
+{%if (role_regards_stack_cots.elasticsearch_logs.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_cots.elasticsearch_logs.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{role_regards_stack_container_run_uid}}:{{role_regards_stack_container_run_gid}}"
 {% if role_regards_stack_cots.rabbitmq.global_service is defined %}
     hostname: "rs-logs-elasticsearch-{{ '{{' }}.Node.Hostname{{ '}}' }}"
@@ -62,6 +68,12 @@ services:
 {% if role_regards_stack_cots.fluent is defined %}
   rs-fluent:
     image: {{role_regards_stack_registry}}/regards-fluent:{{ role_regards_stack_cots.fluent.tag | default("latest") }}
+{%if (role_regards_stack_cots.fluent.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_cots.fluent.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{role_regards_stack_container_run_uid}}:{{role_regards_stack_container_run_gid}}"
     hostname: rs-fluent
     read_only: true
@@ -115,6 +127,12 @@ services:
 {% if role_regards_stack_cots.kibana_logs is defined %}
   rs-logs-kibana:
     image: {{role_regards_stack_registry}}/regards-kibana:{{ role_regards_stack_cots.kibana_logs.tag | default("latest") }}
+{%if (role_regards_stack_cots.kibana_logs.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_cots.kibana_logs.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
     user: "{{role_regards_stack_container_run_uid}}:{{role_regards_stack_container_run_gid}}"
     hostname: rs-logs-kibana
     read_only: true

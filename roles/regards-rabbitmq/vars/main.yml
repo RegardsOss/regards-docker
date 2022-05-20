@@ -16,7 +16,7 @@ amqp_default:
   user: guest
   password: guest
 
-# Users 
+# Users
 # REGARDS admin account
 role_regards_rabbitmq_admin:
   name: "{{ (group_config_mservices.amqp | default({})).get('user', amqp_default.user )}}"

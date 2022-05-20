@@ -4,12 +4,12 @@
 #
 ---
   - name: "[helm/{{ bms_ms_name }}] Copy logback ConfigMap source file"
-    copy:
+    ansible.builtin.copy:
       src: "{{ playbook_dir }}/roles/regards-logback/files/{{ bms_ms_name }}/logback.xml"
       dest: "{{ output_dir }}/{{ bms_ms_name }}/config/logback.xml"
 
   - name: "[helm/{{ bms_ms_name }}] Generate default values"
-    template:
+    ansible.builtin.template:
       src: "{{ role_path }}/charts/{{ bms_ms_name }}/{{ template_file }}"
       dest: "{{ output_dir }}/{{ bms_ms_name }}/{{ template_file }}"
     vars:

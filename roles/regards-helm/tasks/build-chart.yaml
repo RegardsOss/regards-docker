@@ -5,7 +5,7 @@
 ---
   - block:
       - name: "[helm/{{ bms_ms_name }}] Copy static Helm files"
-        copy:
+        ansible.builtin.copy:
           src: "{{ role_path }}/charts/{{ bms_ms_name }}"
           dest: "{{ output_dir }}"
 
@@ -15,7 +15,7 @@
 
       
       # for charts that needs configuration
-      - include_tasks: "{{ bms_config_tasks_file }}"
+      - ansible.builtin.include_tasks: "{{ bms_config_tasks_file }}"
         vars:
           # The default configuration building tasks file is build-chart-config.yaml, 
           # unless a file exists in tasks folder, with the name <chart-name>.yaml

@@ -12,7 +12,7 @@
         init_project: "{{ '{{' }} default .Values.global.regards.initProject .Values.regards.initProject {{ '}}' }}"
 
   - name: "[helm/{{ bms_ms_name }}] Generate default values"
-    template:
+    ansible.builtin.template:
       src: "{{ role_path }}/charts/{{ bms_ms_name }}/{{ template_file }}"
       dest: "{{ output_dir }}/{{ bms_ms_name }}/{{ template_file }}"
     vars:
