@@ -99,3 +99,22 @@
     - shutdown.sh
     - regenerate-ca.sh
   become: true
+
+- name: Add to bashrc
+  blockinfile:
+    marker: "## {mark} added by ansible (autocomplete)"
+    path: /root/.bashrc
+    block: |
+      if [ -f /etc/bash_completion.d/autocomplete.sh ]; then
+        . /etc/bash_completion.d/autocomplete.sh
+      fi
+    backup: yes
+
+- name: Add autocomplete script
+  template:
+    src: autocomplete.sh
+    dest: /etc/bash_completion.d/
+    mode: '0750'
+    owner: root
+
+
