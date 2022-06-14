@@ -109,6 +109,7 @@
         . /etc/bash_completion.d/autocomplete.sh
       fi
     backup: yes
+  become: true
 
 - name: Add autocomplete script
   template:
@@ -116,5 +117,5 @@
     dest: /etc/bash_completion.d/
     mode: '0750'
     owner: root
-
+  become: true
 
