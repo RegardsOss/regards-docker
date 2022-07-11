@@ -1,4 +1,13 @@
 version: '3.7'
+
+{% if role_regards_stack_mservices.front is defined and role_regards_stack_mservices.front.ssl is defined %}
+secrets:
+  front_ssl_crt:
+    file: "{{ role_regards_stack_config }}regards/nginx/ssl/{{ role_regards_stack_mservices.front.ssl.crt }}"
+  front_ssl_key:
+    file: "{{ role_regards_stack_config }}regards/nginx/ssl/{{ role_regards_stack_mservices.front.ssl.key }}"
+{% endif %}
+
 services:
 
 {% if role_regards_stack_mservices.config is defined %}
@@ -687,6 +696,13 @@ services:
         target: /tmp
       - type: tmpfs
         target: /var/www/conf
+{% if role_regards_stack_mservices.front.ssl is defined %}
+    secrets:
+      - source: front_ssl_crt
+        target: /etc/ssl/server.crt
+      - source: front_ssl_key
+        target: /etc/ssl/server.key
+{% endif %}
     logging:
       options:
         max-size: "10m"

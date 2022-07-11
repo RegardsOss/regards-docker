@@ -1,0 +1,15 @@
+---
+role_regards_front_ssl_is_defined: "{{ group_docker_mservices.front.ssl is defined }}"
+role_regards_front_ssl_files: "{{ (group_docker_mservices.front.ssl | default({})) }}"
+
+# NGINX SSL src and dest infos
+role_regards_front_ssl_destination: "{{ group_workdir_local }}{{ group_stack_name }}/config/regards/nginx/ssl"
+role_regards_front_ssl_location_inside_playbook: "{{ inventory_dir }}/group_vars/regards_nodes/files/ssl"
+
+# Docker user
+role_regards_front_ssl_container_root_user: "{{ group_container_root_user }}"
+role_regards_front_ssl_container_root_group: "{{ group_container_root_group }}"
+role_regards_front_ssl_container_run_user: "{{ group_container_run_user }}"
+role_regards_front_ssl_container_run_group: "{{ group_container_run_group }}"
+role_regards_front_ssl_setype: "{{ group_setype }}"
+role_regards_front_ssl_seuser: "{{ group_seuser }}"

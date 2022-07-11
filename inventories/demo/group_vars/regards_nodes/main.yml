@@ -70,58 +70,40 @@ group_docker_plugins:
 group_docker_mservices:
   config:
     tag: "{{ group_docker_tags.back }}"
-    http: 9031
   registry:
-    http: 9032
     tag: "{{ group_docker_tags.back }}"
   gateway:
-    # jdwp: 19030
     tag: "{{ group_docker_tags.back }}"
   admin_instance:
-    # jdwp: 19037
     tag: "{{ group_docker_tags.back }}"
   admin:
-    # jdwp: 19033
     tag: "{{ group_docker_tags.back }}"
   authentication:
-    # jdwp: 19034
     tag: "{{ group_docker_tags.back }}"
   dam:
-    # jdwp: 19035
-    tag: "{{ group_docker_tags.back }}"
-  notifier:
-    # jdwp: 19039
-    tag: "{{ group_docker_tags.back }}"
-  fem:
-    # jdwp: 19038
     tag: "{{ group_docker_tags.back }}"
   catalog:
-    # jdwp: 19036
     tag: "{{ group_docker_tags.back }}"
   access_instance:
-    # jdwp: 19040
     tag: "{{ group_docker_tags.back }}"
   access_project:
-    # jdwp: 19041
     tag: "{{ group_docker_tags.back }}"
-  storage:
-    # jdwp: 19042
-    tag: "{{ group_docker_tags.back }}"
-  order:
-    # jdwp: 19043
-    tag: "{{ group_docker_tags.back }}"
-  ingest:
-    # jdwp: 19044
-    tag: "{{ group_docker_tags.back }}"
-  dataprovider:
-    # jdwp: 19045
-    tag: "{{ group_docker_tags.back }}"
-  processing:
-    # jdwp: 19046
-    tag: "{{ group_docker_tags.back }}"
-  worker_manager:
-    # jdwp: 19047
-    tag: "{{ group_docker_tags.back }}"
+#  notifier:
+#    tag: "{{ group_docker_tags.back }}"
+#  fem:
+#    tag: "{{ group_docker_tags.back }}"
+#  storage:
+#    tag: "{{ group_docker_tags.back }}"
+#  order:
+#    tag: "{{ group_docker_tags.back }}"
+#  ingest:
+#    tag: "{{ group_docker_tags.back }}"
+#  dataprovider:
+#    tag: "{{ group_docker_tags.back }}"
+#  processing:
+#    tag: "{{ group_docker_tags.back }}"
+#  worker_manager:
+#    tag: "{{ group_docker_tags.back }}"
   front:
     protocol: http
     host: "{{ global_stack.master_node_host_name }}"
@@ -157,7 +139,7 @@ group_docker_cots:
     http: 5080
   rabbitmq:
     tag: "{{ group_docker_tags.cots }}"
-    http: 16672
+    http: 15672
 
 # COTS configuration
 group_docker_cots_configuration:

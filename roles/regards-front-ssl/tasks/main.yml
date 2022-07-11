@@ -1,0 +1,3 @@
+---
+- ansible.builtin.include_tasks: init.yml
+  when: role_regards_front_ssl_is_defined|bool

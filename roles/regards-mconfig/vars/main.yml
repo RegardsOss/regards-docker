@@ -134,7 +134,7 @@ role_regards_mconfig_postgres:
     user: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('user', postgres_default.user )}}"
     password: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('password', postgres_default.password )}}"
 
-role_regards_mconfig_public_url: "{{ group_docker_mservices.front.protocol }}://{{ group_docker_mservices.front.host }}:{{ group_docker_mservices.front.port }}"
+role_regards_mconfig_public_url: "{{ group_docker_mservices.front.protocol }}://{{ group_docker_mservices.front.host }}:{{ group_docker_mservices.front.public_port | default(group_docker_mservices.front.port) }}"
 
 # ----------------------------------
 # Microservice list

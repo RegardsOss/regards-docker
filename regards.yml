@@ -26,6 +26,12 @@
     - regards-rabbitmq
     - regards-workers
 
+- name: Install SWARM configs and secrets files
+  hosts: master
+  become: true
+  roles:
+    - regards-front-ssl
+
 - name: Launch stack
   hosts: master
   roles:

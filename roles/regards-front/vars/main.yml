@@ -16,7 +16,7 @@ role_regards_front_setype: "{{ group_setype }}"
 role_regards_front_seuser: "{{ group_seuser }}"
 
 # Vars for config file
-role_regards_front_public_server_port: "{{ group_docker_mservices.front.port }}"
+role_regards_front_public_server_port: "{{ group_docker_mservices.front.public_port | default(group_docker_mservices.front.port) }}"
 # Gateway URI to address when using regards-front reverse proxy
 gateway_default:
   host: rs-gateway
@@ -26,3 +26,7 @@ role_regards_dns_resolver: "127.0.0.11"
 
 role_regards_front_zuul_legacy_regex: "{{ (group_config_mservices.get('legacy_spring', false) == true) | ternary('(/zuul)?', '') }}"
 role_regards_front_zuul_legacy_path: "{{ (group_config_mservices.get('legacy_spring', false) == true) | ternary('/zuul', '') }}"
+
+role_regards_front_is_ssl_defined: "{{ group_docker_mservices.front.ssl is defined }}"
+
+role_regards_front_host: "{{ group_docker_mservices.front.host }}"

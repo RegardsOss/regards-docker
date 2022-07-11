@@ -1,0 +1,25 @@
+---
+- name: Create SSL folder
+  ansible.builtin.file:
+    path: "{{ role_regards_front_ssl_destination }}"
+    state: directory
+    mode: '2750'
+    owner: "{{ role_regards_front_ssl_container_root_user }}"
+    group: "{{ role_regards_front_ssl_container_root_group }}"
+    setype: "{{ role_regards_front_ssl_setype }}"
+    seuser: "{{ role_regards_front_ssl_seuser }}"
+
+- name: Copy certificates
+  ansible.builtin.copy:
+    src: "{{ role_regards_front_ssl_location_inside_playbook }}/{{ item }}"
+    dest: "{{ role_regards_front_ssl_destination }}/{{ item }}"
+    mode: '0440'
+    # Do not replace the file if it already exist, as the replacement of the certificate may be out of this playbook scope
+    force: no
+    owner: "{{ role_regards_front_ssl_container_root_user }}"
+    group: "{{ role_regards_front_ssl_container_root_group }}"
+    setype: "{{ role_regards_front_ssl_setype }}"
+    seuser: "{{ role_regards_front_ssl_seuser }}"
+  loop:
+    - "{{ role_regards_front_ssl_files.crt }}"
+    - "{{ role_regards_front_ssl_files.key }}"
