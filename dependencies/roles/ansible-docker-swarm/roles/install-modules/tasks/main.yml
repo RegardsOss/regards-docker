@@ -49,6 +49,8 @@
       # Update Ansible dep jinja2 (and markupsafe) to its last version
       - jinja2~=2.11
       - markupsafe~=1.0
+      - requests==2.27.1
+      - certifi<=2020.4.5.1
     state: latest
     executable: "{{ role_install_modules_pip_cli }}"
     umask: "0022"
