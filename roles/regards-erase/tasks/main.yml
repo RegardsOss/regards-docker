@@ -4,3 +4,25 @@
 
   - name: Shutdown REGARDS
     ansible.builtin.command: "docker stack rm {{ role_regards_erase_stack_name }}"
+
+  - name: Get regards network info
+    docker_network_info:
+      name: "{{ role_regards_erase_docker_network_name }}"
+    register: docker_network_name_info
+    become: true
+    vars:
+      ansible_python_interpreter: "env python{{ python_version }}"
+
+  - name: Should delete regards network?
+    ansible.builtin.set_fact:
+      delete_regards_network: "{{ docker_network_name_info.exists == true }}"
+
+  - name: Remove regards network
+    docker_network:
+      name: "{{ role_regards_erase_docker_network_name  }}"
+      state: absent
+    become: true
+    when: delete_regards_network|bool
+    run_once: true
+    vars:
+      ansible_python_interpreter: "env python{{ python_version }}"
