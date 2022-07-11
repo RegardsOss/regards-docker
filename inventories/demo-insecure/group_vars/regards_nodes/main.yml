@@ -17,7 +17,7 @@ group_seuser: 'system_u'
 # it's ok to give it to him all REGARDS files
 group_container_root_user: '{{ global_regards.your_user }}'
 # When false, regards users creation need to be done externally
-group_enable_setup_regards_users: true
+group_enable_setup_regards_users: false
 # Your user has access to regards installed files 
 group_container_root_group: "{{ global_regards.your_user }}"
 # Your user owns all files created by containers and runtime server
@@ -90,12 +90,6 @@ group_docker_mservices:
   dam:
     # jdwp: 19035
     tag: "{{ group_docker_tags.back }}"
-  notifier:
-    # jdwp: 19039
-    tag: "{{ group_docker_tags.back }}"
-  fem:
-    # jdwp: 19038
-    tag: "{{ group_docker_tags.back }}"
   catalog:
     # jdwp: 19036
     tag: "{{ group_docker_tags.back }}"
@@ -105,24 +99,30 @@ group_docker_mservices:
   access_project:
     # jdwp: 19041
     tag: "{{ group_docker_tags.back }}"
+  notifier:
+    # jdwp: 19039
+    tag: "{{ group_docker_tags.back }}"
+  fem:
+    # jdwp: 19038
+    tag: "{{ group_docker_tags.back }}"
   storage:
     # jdwp: 19042
     tag: "{{ group_docker_tags.back }}"
-  order:
-    # jdwp: 19043
-    tag: "{{ group_docker_tags.back }}"
-  ingest:
-    # jdwp: 19044
-    tag: "{{ group_docker_tags.back }}"
-  dataprovider:
-    # jdwp: 19045
-    tag: "{{ group_docker_tags.back }}"
-  processing:
-    # jdwp: 19046
-    tag: "{{ group_docker_tags.back }}"
-  worker_manager:
-    # jdwp: 19047
-    tag: "{{ group_docker_tags.back }}"
+#  order:
+#    # jdwp: 19043
+#    tag: "{{ group_docker_tags.back }}"
+#  ingest:
+#    # jdwp: 19044
+#    tag: "{{ group_docker_tags.back }}"
+#  dataprovider:
+#    # jdwp: 19045
+#    tag: "{{ group_docker_tags.back }}"
+#  processing:
+#    # jdwp: 19046
+#    tag: "{{ group_docker_tags.back }}"
+#  worker_manager:
+#    # jdwp: 19047
+#    tag: "{{ group_docker_tags.back }}"
   front:
     protocol: http
     host: "{{ global_stack.master_node_host_name }}"
@@ -156,14 +156,24 @@ group_docker_cots:
   phppgadmin:
     tag: "{{ group_docker_tags.cots }}"
     http: 5080
+    db: 
+      - name: Local BD
+        host: rs-postgres
+        port: 5432
+    setting_owned_only: true
+    setting_main_theme: 'default'
+    setting_raw_rows: 100
+    setting_raw_chars: 100
+    setting_sidebar_left_width: 300
   rabbitmq:
     tag: "{{ group_docker_tags.cots }}"
-    http: 16672
+    http: 15672
+    client: 5672
 
 # COTS configuration
 group_docker_cots_configuration:
   postgres:
-    nbTenant: 10
+    nbTenant: 5
   elasticsearch:
     cluster_name: regards-{{ group_stack_name }}
   elasticsearch_logs:

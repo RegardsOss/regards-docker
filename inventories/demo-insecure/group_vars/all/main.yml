@@ -1,8 +1,8 @@
 global_stack:
   # Master node host name
-  master_node_host_name: PO15489
+  master_node_host_name: localhost
   # Regards installation directory
-  workdir: /opt/regards-demo/
+  workdir: /home/johndoe/workspace/regards/
   # Docker configuration
   docker:
     # Docker installation directory
@@ -17,15 +17,15 @@ global_regards:
   # Name of the first initialized project
   project_name: demo
   # Files owner
-  your_user: jondoe
-  your_user_id: 1001
+  your_user: johndoe
+  your_user_id: 1000
   # Default instance admin user
   admin:
     login: regards@cnes.fr
     password: regards
     
 # Allow install new repository for docker installation
-group_enable_add_repo: true
+group_enable_add_repo: false
 
 global_proxy:
 #  url: http://proxy.exemple.fr:1234
