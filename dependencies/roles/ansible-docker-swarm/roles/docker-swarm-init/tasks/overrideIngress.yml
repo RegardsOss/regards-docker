@@ -21,17 +21,20 @@
 
 - name: Should recreate ingress network?
   set_fact:
-    recreate_ingress: ingress_info.network.Ingress != true or ingress_info.network.Options["com.docker.network.driver.mtu"] != "1200" or ingress_info.network.IPAM.Config[0].Gateway != "{{ docker_ingress_network_gateway }}" or ingress_info.network.IPAM.Config[0].Subnet != "{{ docker_ingress_network }}"
+    recreate_ingress: "{{ 
+      ingress_info.network.Ingress != true or 
+      ingress_info.network.Options[\"com.docker.network.driver.mtu\"] | default(0) != \"1200\" or 
+      ingress_info.network.IPAM.Config[0].Gateway != docker_ingress_network_gateway or 
+      ingress_info.network.IPAM.Config[0].Subnet != docker_ingress_network 
+      }}"
 
 - name: Remove ingress network
-  docker_network:
-    name: ingress
-    state: absent
-  when: recreate_ingress|bool
+  shell: >
+        . /etc/profile.d/docker-client.sh;
+        printf 'Y' | docker network remove ingress
   run_once: true
   ignore_errors: true
-  vars:
-    ansible_python_interpreter: "env python{{ python_version }}"
+  when: recreate_ingress|bool
 
 # Limitation from docker_network lib - cannot create an ingress network
 # See https://github.com/ansible-collections/community.docker/issues/69

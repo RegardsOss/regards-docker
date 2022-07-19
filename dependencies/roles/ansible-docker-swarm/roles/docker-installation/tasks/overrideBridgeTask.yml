@@ -23,7 +23,12 @@
 
 - name: Should recreate bridge network?
   set_fact:
-    recreate_gwbridge: bridge_info.network.Options["com.docker.network.bridge.name"] != "docker_gwbridge" or bridge_info.network.Options["com.docker.network.bridge.enable_icc"] != "false" or bridge_info.network.Options["com.docker.network.bridge.enable_ip_masquerade"] != "true" or bridge_info.network.IPAM.Config[0].Subnet != "{{ docker_gwbridge_network }}"
+    recreate_gwbridge: "{{ 
+      bridge_info.network.Options[\"com.docker.network.bridge.name\"] != \"docker_gwbridge\" or
+      bridge_info.network.Options[\"com.docker.network.bridge.enable_icc\"] != \"false\" or
+      bridge_info.network.Options[\"com.docker.network.bridge.enable_ip_masquerade\"] != \"true\" or
+      bridge_info.network.IPAM.Config[0].Subnet != docker_gwbridge_network 
+      }}"
 
 - name: Set netmask for gwbridge docker network
   shell: >
