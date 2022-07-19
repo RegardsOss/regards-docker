@@ -1,13 +1,13 @@
 # Name of the stack to deploy in docker swarm
 group_stack_name: regards
 # Network disk shared accross every nodes
-group_workdir_network: "{{ global_stack.workdir }}"
+group_workdir_network: "{{ global_stack.networkdir }}"
 # Do we allow root inside the network volume?
 # When false => tree structure cannot be created and must exists before playbook execution
 group_workdir_network_allow_root: true
 # Everything stored in the workdir_local is not shared across swarm nodes. 
 # We replicate everything on each swarm node to let microservice spawn whatever they want
-group_workdir_local: "{{ group_workdir_network }}"
+group_workdir_local: "{{ global_stack.workdir }}"
 
 group_setype: 'container_file_t'
 group_seuser: 'system_u'
@@ -134,6 +134,9 @@ group_docker_cots:
     http: 5081
   postgres:
     tag: "{{ group_docker_tags.cots }}"
+    node_label_placement_constraint:
+      key: postgres
+      value: indeed
   phppgadmin:
     tag: "{{ group_docker_tags.cots }}"
     http: 5080

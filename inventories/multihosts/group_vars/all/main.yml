@@ -1,8 +1,10 @@
 global_stack:
   # Master node host name
   master_node_host_name: PO15489
-  # Network disk shared accross every nodes
+  # Disk used by every nodes for local files
   workdir: /opt/regards-demo/
+  # Network disk shared accross every nodes
+  networkdir: /share/
   # Docker configuration
   docker:
     # Docker installation directory

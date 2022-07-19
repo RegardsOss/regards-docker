@@ -1,6 +1,6 @@
 [regards_nodes]
-regards-master ansible_host=host-server1  ansible_user=root ansible_password=password
-regards-slave ansible_host=host-server2  ansible_user=root ansible_password=password
+regards-master                          ansible_host=host-server1  ansible_user=root ansible_password=password
+regards-slave  labels='{"postgres": "indeed"}' ansible_host=host-server2  ansible_user=root ansible_password=password
 
 [master]
 regards-master
