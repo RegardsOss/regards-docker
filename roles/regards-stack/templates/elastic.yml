@@ -11,7 +11,7 @@ services:
 {% endfor %}
 {% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
-{% if role_regards_stack_cots.rabbitmq.global_service is defined %}
+{% if role_regards_stack_cots.elasticsearch.global_service is defined %}
     hostname: "rs-elasticsearch-{{ '{{' }}.Node.Hostname{{ '}}' }}"
 {% else %}
     hostname: rs-elasticsearch

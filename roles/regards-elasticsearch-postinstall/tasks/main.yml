@@ -8,6 +8,8 @@
     owner: "{{ role_regards_elasticsearch_sidecar_container_root_user }}"
     group: "{{ role_regards_elasticsearch_sidecar_container_root_group }}"
   become: true
+  # Run on only one server
+  run_once: true
 
 - name: Run container to updates ES settings 
   docker_container:
@@ -26,9 +28,13 @@
       - /tmp/update-indices.sh:/update-indices.sh
   vars:
     ansible_python_interpreter: "env python{{ python_version }}"
+  # Run on only one server
+  run_once: true
 
 - name: Delete script file
   ansible.builtin.file:
     path: /tmp/update-indices.sh
     state: absent
   become: true
+  # Run on only one server
+  run_once: true
