@@ -1,0 +1,13 @@
+---
+role_regards_ca_certificates_is_defined: "{{ group_config_mservices.ca_certificates is defined }}"
+
+role_regards_ca_certificates_destination: "{{ group_workdir_local }}{{ group_stack_name }}/config/regards/ca-certificates"
+role_regards_ca_certificates_location_inside_playbook: "{{ inventory_dir }}/group_vars/regards_nodes/files/ca-certificates"
+
+# Docker user
+role_regards_ca_certificates_container_root_user: "{{ group_container_root_user }}"
+role_regards_ca_certificates_container_root_group: "{{ group_container_root_group }}"
+role_regards_ca_certificates_container_run_user: "{{ group_container_run_user }}"
+role_regards_ca_certificates_container_run_group: "{{ group_container_run_group }}"
+role_regards_ca_certificates_setype: "{{ group_setype }}"
+role_regards_ca_certificates_seuser: "{{ group_seuser }}"

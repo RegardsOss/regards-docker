@@ -37,9 +37,13 @@ services:
       - "{{ role_regards_stack_cots.postgres.client }}:5432"
 {% endif %}
     logging:
+{% if role_regards_stack_cots.postgres.logging is defined %}
+      {{ role_regards_stack_cots.postgres.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_cots.phppgadmin is defined %}
@@ -104,5 +108,13 @@ services:
         target: /tmp
       - type: tmpfs
         target: /var/lib/php5/sessions/
+{% endif %}
+    logging:
+{% if role_regards_stack_cots.phppgadmin.logging is defined %}
+      {{ role_regards_stack_cots.phppgadmin.logging | to_nice_yaml | indent(6) }}
+{% else %}
+      options:
+        max-size: "10m"
+        max-file: "10"
 {% endif %}
 {% endif %}

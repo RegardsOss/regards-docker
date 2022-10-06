@@ -1,11 +1,23 @@
 version: '3.7'
 
-{% if role_regards_stack_mservices.front is defined and role_regards_stack_mservices.front.ssl is defined %}
+{% if role_regards_stack_top_level_volumes|length %}
+# Definition of top level volumes
+volumes:
+{{ role_regards_stack_top_level_volumes | to_nice_yaml(indent=2) | indent(2, true) }}
+{% endif %}
+
+{% if (role_regards_stack_mservices.front is defined and role_regards_stack_mservices.front.ssl is defined) or role_regards_stack_ca_certificates|length > 0 %}
 secrets:
+{% if role_regards_stack_mservices.front is defined and role_regards_stack_mservices.front.ssl is defined %}
   front_ssl_crt:
     file: "{{ role_regards_stack_config }}regards/nginx/ssl/{{ role_regards_stack_mservices.front.ssl.crt }}"
   front_ssl_key:
     file: "{{ role_regards_stack_config }}regards/nginx/ssl/{{ role_regards_stack_mservices.front.ssl.key }}"
+{% endif %}
+{% for file in role_regards_stack_ca_certificates %}
+  ca_cert_{{ file.split('.') | first }}:
+    file: "{{ role_regards_stack_config }}/regards/ca-certificates/{{ file }}"
+{% endfor %}
 {% endif %}
 
 services:
@@ -13,7 +25,7 @@ services:
 {% if role_regards_stack_mservices.config is defined %}
   rs-config:
     image: {{ role_regards_stack_registry }}/rs-config:{{ role_regards_stack_mservices.config.tag }}
-{%if (role_regards_stack_mservices.config.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.config.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.config.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -40,16 +52,20 @@ services:
       - type: tmpfs
         target: /tmp
     logging:
+{% if role_regards_stack_mservices.config.logging is defined %}
+      {{ role_regards_stack_mservices.config.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.registry is defined %}
   # Eureka
   rs-registry:
     image: {{ role_regards_stack_registry }}/rs-registry:{{ role_regards_stack_mservices.registry.tag }}
-{%if (role_regards_stack_mservices.registry.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.registry.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.registry.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -86,16 +102,20 @@ services:
 {% endif %}
 {% endif %}
     logging:
+{% if role_regards_stack_mservices.registry.logging is defined %}
+      {{ role_regards_stack_mservices.registry.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.gateway is defined %}
   # Spring cloud gateway
   rs-gateway:
     image: {{ role_regards_stack_registry }}/rs-gateway:{{ role_regards_stack_mservices.gateway.tag }}
-{%if (role_regards_stack_mservices.gateway.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.gateway.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.gateway.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -140,16 +160,27 @@ services:
       - "{{ role_regards_stack_mservices.gateway.yourkit }}:10001"
 {% endif %}
 {% endif %}
+{% if role_regards_stack_ca_certificates|length > 0 %}
+    secrets:
+{% for file in role_regards_stack_ca_certificates %}
+      - source: ca_cert_{{ file.split('.') | first }}
+        target: "/etc/ca-certificates/{{ file }}"
+{% endfor %}
+{% endif %}
     logging:
+{% if role_regards_stack_mservices.gateway.logging is defined %}
+      {{ role_regards_stack_mservices.gateway.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.admin_instance is defined %}
   rs-admin-instance:
     image: {{ role_regards_stack_registry }}/{{ role_regards_stack_mservices_admin_instance_image_name }}:{{ role_regards_stack_mservices.admin_instance.tag }}
-{%if (role_regards_stack_mservices.admin_instance.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.admin_instance.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.admin_instance.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -195,15 +226,19 @@ services:
 {% endif %}
 {% endif %}
     logging:
+{% if role_regards_stack_mservices.admin_instance.logging is defined %}
+      {{ role_regards_stack_mservices.admin_instance.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.admin is defined %}
   rs-admin:
     image: {{ role_regards_stack_registry }}/{{ role_regards_stack_mservices_admin_image_name  }}:{{ role_regards_stack_mservices.admin.tag }}
-{%if (role_regards_stack_mservices.admin.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.admin.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.admin.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -250,15 +285,19 @@ services:
 {% endif %}
 {% endif %}
     logging:
+{% if role_regards_stack_mservices.admin.logging is defined %}
+      {{ role_regards_stack_mservices.admin.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.authentication is defined %}
   rs-authentication:
     image: {{ role_regards_stack_registry }}/rs-authentication:{{ role_regards_stack_mservices.authentication.tag }}
-{%if (role_regards_stack_mservices.authentication.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.authentication.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.authentication.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -305,16 +344,27 @@ services:
       - "{{ role_regards_stack_mservices.authentication.yourkit }}:10001"
 {% endif %}
 {% endif %}
+{% if role_regards_stack_ca_certificates|length > 0 %}
+    secrets:
+{% for file in role_regards_stack_ca_certificates %}
+      - source: ca_cert_{{ file.split('.') | first }}
+        target: "/etc/ca-certificates/{{ file }}"
+{% endfor %}
+{% endif %}
     logging:
+{% if role_regards_stack_mservices.authentication.logging is defined %}
+      {{ role_regards_stack_mservices.authentication.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.dam is defined %}
   rs-dam:
     image: {{ role_regards_stack_registry }}/rs-dam:{{ role_regards_stack_mservices.dam.tag }}
-{%if (role_regards_stack_mservices.dam.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.dam.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.dam.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -368,16 +418,27 @@ services:
       - "{{ role_regards_stack_mservices.dam.yourkit }}:10001"
 {% endif %}
 {% endif %}
+{% if role_regards_stack_ca_certificates|length > 0 %}
+    secrets:
+{% for file in role_regards_stack_ca_certificates %}
+      - source: ca_cert_{{ file.split('.') | first }}
+        target: "/etc/ca-certificates/{{ file }}"
+{% endfor %}
+{% endif %}
     logging:
+{% if role_regards_stack_mservices.dam.logging is defined %}
+      {{ role_regards_stack_mservices.dam.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.notifier is defined %}
   rs-notifier:
     image: {{ role_regards_stack_registry }}/rs-notifier:{{ role_regards_stack_mservices.notifier.tag }}
-{%if (role_regards_stack_mservices.notifier.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.notifier.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.notifier.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -424,16 +485,27 @@ services:
       - "{{ role_regards_stack_mservices.notifier.yourkit }}:10001"
 {% endif %}
 {% endif %}
+{% if role_regards_stack_ca_certificates|length > 0 %}
+    secrets:
+{% for file in role_regards_stack_ca_certificates %}
+      - source: ca_cert_{{ file.split('.') | first }}
+        target: "/etc/ca-certificates/{{ file }}"
+{% endfor %}
+{% endif %}
     logging:
+{% if role_regards_stack_mservices.notifier.logging is defined %}
+      {{ role_regards_stack_mservices.notifier.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.fem is defined %}
   rs-fem:
     image: {{ role_regards_stack_registry }}/rs-fem:{{ role_regards_stack_mservices.fem.tag }}
-{%if (role_regards_stack_mservices.fem.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.fem.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.fem.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -488,15 +560,19 @@ services:
 {% endif %}
 {% endif %}
     logging:
+{% if role_regards_stack_mservices.fem.logging is defined %}
+      {{ role_regards_stack_mservices.fem.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.catalog is defined %}
   rs-catalog:
     image: {{ role_regards_stack_registry }}/rs-catalog:{{ role_regards_stack_mservices.catalog.tag }}
-{%if (role_regards_stack_mservices.catalog.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.catalog.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.catalog.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -545,15 +621,19 @@ services:
 {% endif %}
 {% endif %}
     logging:
+{% if role_regards_stack_mservices.catalog.logging is defined %}
+      {{ role_regards_stack_mservices.catalog.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.access_instance is defined %}
   rs-access-instance:
     image: {{ role_regards_stack_registry }}/{{ role_regards_stack_mservices_access_instance_image_name }}:{{ role_regards_stack_mservices.access_instance.tag }}
-{%if (role_regards_stack_mservices.access_instance.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.access_instance.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.access_instance.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -599,15 +679,19 @@ services:
 {% endif %}
 {% endif %}
     logging:
+{% if role_regards_stack_mservices.access_instance.logging is defined %}
+      {{ role_regards_stack_mservices.access_instance.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.access_project is defined %}
   rs-access-project:
     image: {{ role_regards_stack_registry }}/rs-access-project:{{ role_regards_stack_mservices.access_project.tag }}
-{%if (role_regards_stack_mservices.access_project.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.access_project.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.access_project.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -653,16 +737,20 @@ services:
       - "{{ role_regards_stack_mservices.access_project.yourkit }}:10001"
 {% endif %}
 {% endif %}
-    logging: 
+    logging:
+{% if role_regards_stack_mservices.access_project.logging is defined %}
+      {{ role_regards_stack_mservices.access_project.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.front is defined %}
   rs-front:
     image: {{ role_regards_stack_registry }}/rs-front:{{ role_regards_stack_mservices.front.tag }}
-{%if (role_regards_stack_mservices.front.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.front.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.front.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -704,15 +792,19 @@ services:
         target: /etc/ssl/server.key
 {% endif %}
     logging:
+{% if role_regards_stack_mservices.front.logging is defined %}
+      {{ role_regards_stack_mservices.front.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.storage is defined %}
   rs-storage:
     image: {{ role_regards_stack_registry }}/rs-storage:{{ role_regards_stack_mservices.storage.tag }}
-{%if (role_regards_stack_mservices.storage.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.storage.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.storage.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -768,16 +860,27 @@ services:
       - {{ role_regards_stack_workspace_network }}regards/workspace:/tmp/workspace
       - type: tmpfs
         target: /tmp
+{% if role_regards_stack_ca_certificates|length > 0 %}
+    secrets:
+{% for file in role_regards_stack_ca_certificates %}
+      - source: ca_cert_{{ file.split('.') | first }}
+        target: "/etc/ca-certificates/{{ file }}"
+{% endfor %}
+{% endif %}
     logging:
+{% if role_regards_stack_mservices.storage.logging is defined %}
+      {{ role_regards_stack_mservices.storage.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.order is defined %}
   rs-order:
     image: {{ role_regards_stack_registry }}/rs-order:{{ role_regards_stack_mservices.order.tag }}
-{%if (role_regards_stack_mservices.order.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.order.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.order.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -834,15 +937,19 @@ services:
       - type: tmpfs
         target: /tmp
     logging:
+{% if role_regards_stack_mservices.order.logging is defined %}
+      {{ role_regards_stack_mservices.order.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.processing is defined %}
   rs-processing:
     image: {{ role_regards_stack_registry }}/rs-processing:{{ role_regards_stack_mservices.processing.tag }}
-{%if (role_regards_stack_mservices.processing.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.processing.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.processing.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -899,15 +1006,19 @@ services:
       - type: tmpfs
         target: /tmp
     logging:
+{% if role_regards_stack_mservices.processing.logging is defined %}
+      {{ role_regards_stack_mservices.processing.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.ingest is defined %}
   rs-ingest:
     image: {{ role_regards_stack_registry }}/rs-ingest:{{ role_regards_stack_mservices.ingest.tag }}
-{%if (role_regards_stack_mservices.ingest.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.ingest.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.ingest.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -962,15 +1073,19 @@ services:
       - type: tmpfs
         target: /tmp
     logging:
+{% if role_regards_stack_mservices.ingest.logging is defined %}
+      {{ role_regards_stack_mservices.ingest.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
         
 {% if role_regards_stack_mservices.dataprovider is defined %}
   rs-dataprovider:
     image: {{ role_regards_stack_registry }}/rs-dataprovider:{{ role_regards_stack_mservices.dataprovider.tag }}
-{%if (role_regards_stack_mservices.dataprovider.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.dataprovider.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.dataprovider.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -1025,15 +1140,19 @@ services:
       - type: tmpfs
         target: /tmp
     logging:
+{% if role_regards_stack_mservices.dataprovider.logging is defined %}
+      {{ role_regards_stack_mservices.dataprovider.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_mservices.worker_manager is defined %}
   rs-worker-manager:
     image: {{ role_regards_stack_registry }}/rs-worker-manager:{{ role_regards_stack_mservices.worker_manager.tag }}
-{%if (role_regards_stack_mservices.worker_manager.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_mservices.worker_manager.configuration | default({})).labels is defined %}
     labels:
 {% for key, value in role_regards_stack_mservices.worker_manager.configuration.labels.items() %}
       {{ key }}: "{{value}}"
@@ -1085,9 +1204,72 @@ services:
       - type: tmpfs
         target: /tmp
     logging:
+{% if role_regards_stack_mservices.worker_manager.logging is defined %}
+      {{ role_regards_stack_mservices.worker_manager.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
+{% endif %}
+
+{% if role_regards_stack_mservices.lta_manager is defined %}
+  rs-lta-manager:
+    image: {{ role_regards_stack_registry }}/rs-lta-manager:{{ role_regards_stack_mservices.lta_manager.tag }}
+{% if (role_regards_stack_mservices.lta_manager.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.lta_manager.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
+    user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
+    hostname: rs-lta-manager
+    read_only: true
+    deploy:
+      replicas: {{ role_regards_stack_mservices.lta_manager.replicas | default(1) }}
+{% if role_regards_stack_mservices.lta_manager.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.lta_manager.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.lta_manager.node_label_placement_constraint.value }}
+{% endif %}
+    networks:
+      - {{ role_regards_stack_docker_network_name }}
+    environment:
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+{% if role_regards_stack_mservices.lta_manager.jdwp is defined %}
+      - ACTIVE_DEBUG=true
+{% endif %}
+{% if role_regards_stack_mservices.lta_manager.yourkit is defined %}
+      - ACTIVE_YOURKIT=true
+{% endif %}
+{% if role_regards_stack_mservices.lta_manager.http is defined or role_regards_stack_mservices.lta_manager.jdwp is defined or role_regards_stack_mservices.lta_manager.jmx is defined or role_regards_stack_mservices.lta_manager.yourkit is defined %}
+    ports:
+{% if role_regards_stack_mservices.lta_manager.http is defined %}
+      - "{{ role_regards_stack_mservices.lta_manager.http }}:9048"
+{% endif %}
+{% if role_regards_stack_mservices.lta_manager.jdwp is defined %}
+      - "{{ role_regards_stack_mservices.lta_manager.jdwp }}:10500"
+{% endif %}
+{% if role_regards_stack_mservices.lta_manager.jmx is defined %}
+      - "{{ role_regards_stack_mservices.lta_manager.jmx }}:18048"
+{% endif %}
+{% if role_regards_stack_mservices.lta_manager.yourkit is defined %}
+      - "{{ role_regards_stack_mservices.lta_manager.yourkit }}:10001"
+{% endif %}
+{% endif %}
+    volumes:
+      - {{ role_regards_stack_logback }}lta-manager:/config:ro
+      - {{ role_regards_stack_workspace_local }}regards/logs/lta-manager:/logs
+      - type: tmpfs
+        target: /tmp
+    logging:
+{% if role_regards_stack_mservices.lta_manager.logging is defined %}
+      {{ role_regards_stack_mservices.lta_manager.logging | to_nice_yaml | indent(6) }}
+{% else %}
+      options:
+        max-size: "10m"
+        max-file: "10"
+{% endif %}
 {% endif %}
 
 networks:

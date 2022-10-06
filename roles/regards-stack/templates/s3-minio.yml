@@ -27,7 +27,11 @@ services:
       - "MINIO_SERVER_URL={{ role_regards_stack_minio_public_url }}:{{ role_regards_stack_cots.s3_minio.client }}"
 {% endif %}
     logging:
+{% if role_regards_stack_cots.s3_minio.logging is defined %}
+      {{ role_regards_stack_cots.s3_minio.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}

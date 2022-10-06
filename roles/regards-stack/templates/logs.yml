@@ -60,9 +60,13 @@ services:
       - bootstrap.memory_lock=false
       - "ES_JAVA_OPTS=-Xms{{ role_regards_stack_cots.elasticsearch_logs.memoryLimit | default("500m") }} -Xmx{{ role_regards_stack_cots.elasticsearch_logs.memoryLimit | default("500m") }} -Djna.tmpdir=/tmpjna"
     logging:
+{% if role_regards_stack_cots.elasticsearch_logs.logging is defined %}
+      {{ role_regards_stack_cots.elasticsearch_logs.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_cots.fluent is defined %}
@@ -117,9 +121,13 @@ services:
       - type: tmpfs
         target: /fluentd/logs
     logging:
+{% if role_regards_stack_cots.fluent.logging is defined %}
+      {{ role_regards_stack_cots.fluent.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 
@@ -159,7 +167,11 @@ services:
       - "{{ role_regards_stack_cots.kibana_logs.http }}:5601"
 {% endif %}
     logging:
+{% if role_regards_stack_cots.kibana_logs.logging is defined %}
+      {{ role_regards_stack_cots.kibana_logs.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}

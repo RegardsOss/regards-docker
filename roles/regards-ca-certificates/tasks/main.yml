@@ -1,0 +1,3 @@
+---
+- ansible.builtin.include_tasks: init.yml
+  when: role_regards_ca_certificates_is_defined|bool

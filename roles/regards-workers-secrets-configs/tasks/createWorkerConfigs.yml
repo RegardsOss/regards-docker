@@ -1,0 +1,21 @@
+---
+- name: Create worker configs folder
+  ansible.builtin.file:
+    path: "{{ role_regards_workers_secrets_configs_configs_destination }}"
+    state: directory
+    mode: '2750'
+    owner: "{{ role_regards_workers_secrets_configs_container_run_user }}"
+    group: "{{ role_regards_workers_secrets_configs_container_run_group }}"
+    setype: "{{ role_regards_workers_secrets_configs_setype }}"
+    seuser: "{{ role_regards_workers_secrets_configs_seuser }}"
+
+- name: Copy configs
+  ansible.builtin.copy:
+    src: "{{ role_regards_workers_secrets_configs_inventory_path_configs }}/{{ item }}"
+    dest: "{{ role_regards_workers_secrets_configs_configs_destination }}/{{ item }}"
+    mode: '0444'
+    owner: "{{ role_regards_workers_secrets_configs_container_run_user }}"
+    group: "{{ role_regards_workers_secrets_configs_container_run_group }}"
+    setype: "{{ role_regards_workers_secrets_configs_setype }}"
+    seuser: "{{ role_regards_workers_secrets_configs_seuser }}"
+  with_items: "{{ role_regards_workers_secrets_configs_configs }}"

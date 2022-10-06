@@ -25,7 +25,11 @@ services:
       - type: tmpfs
         target: /run
     logging:
+{% if role_regards_stack_cots.doc.logging is defined %}
+      {{ role_regards_stack_cots.doc.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}

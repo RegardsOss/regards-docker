@@ -60,9 +60,13 @@ services:
       - bootstrap.memory_lock=false
       - "ES_JAVA_OPTS=-Xms{{ role_regards_stack_cots.elasticsearch.memoryLimit | default("2000m") }} -Xmx{{ role_regards_stack_cots.elasticsearch.memoryLimit | default("2000m") }} -Djna.tmpdir=/tmpjna"
     logging:
+{% if role_regards_stack_cots.elasticsearch.logging is defined %}
+      {{ role_regards_stack_cots.elasticsearch.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 
 {% if role_regards_stack_cots.kibana is defined %}
@@ -92,9 +96,13 @@ services:
       - "{{ role_regards_stack_cots.kibana.http }}:5601"
 {% endif %}
     logging:
+{% if role_regards_stack_cots.kibana.logging is defined %}
+      {{ role_regards_stack_cots.kibana.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% if role_regards_stack_cots.kibana.node_label_placement_constraint is defined %}
     deploy:
       placement:

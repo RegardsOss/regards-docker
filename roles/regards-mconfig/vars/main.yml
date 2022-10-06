@@ -222,3 +222,4 @@ role_regards_mconfig_ssl:
   allow_insecure: "{{ (group_config_mservices.ssl | default({})).get('allow_insecure', false)}}"
 
 role_regards_mconfig_legacy_spring: "{{ group_config_mservices.get('legacy_spring', false) }}"
+role_regards_stack_mservices_access_instance_postgis_enabled: "{{ (group_docker_mservices.access_instance | default({})).get('postgis', true) == true }}"

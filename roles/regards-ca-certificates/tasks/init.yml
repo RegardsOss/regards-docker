@@ -1,0 +1,22 @@
+
+---
+- name: Create CA-CERTIFICATES folder
+  ansible.builtin.file:
+    path: "{{ role_regards_ca_certificates_destination }}"
+    state: directory
+    mode: '2750'
+    owner: "{{ role_regards_ca_certificates_container_root_user }}"
+    group: "{{ role_regards_ca_certificates_container_root_group }}"
+    setype: "{{ role_regards_ca_certificates_setype }}"
+    seuser: "{{ role_regards_ca_certificates_seuser }}"
+
+- name: Copy certificates
+  ansible.builtin.copy:
+    src: "{{ role_regards_ca_certificates_location_inside_playbook }}/"
+    dest: "{{ role_regards_ca_certificates_destination }}/"
+    mode: '0440'
+    force: yes
+    owner: "{{ role_regards_ca_certificates_container_root_user }}"
+    group: "{{ role_regards_ca_certificates_container_root_group }}"
+    setype: "{{ role_regards_ca_certificates_setype }}"
+    seuser: "{{ role_regards_ca_certificates_seuser }}"

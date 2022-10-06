@@ -1,0 +1,6 @@
+---
+- ansible.builtin.include_tasks: createWorkersSecrets.yml
+  when: role_regards_workers_secrets_configs_secrets|length
+
+- ansible.builtin.include_tasks: createWorkerConfigs.yml
+  when: role_regards_workers_secrets_configs_configs|length

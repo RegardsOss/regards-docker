@@ -1,4 +1,21 @@
 version: '3.7'
+
+{% if role_regards_stack_workers_secrets|length %}
+secrets:
+{% for secret in role_regards_stack_workers_secrets %}
+  {{ secret }}:
+    file: "{{ role_regards_stack_workers_secrets_location }}/{{ secret }}"
+{% endfor %}
+{% endif %}
+
+{% if role_regards_stack_workers_configs|length %}
+configs:
+{% for config in role_regards_stack_workers_configs %}
+  {{ config }}:
+    file: "{{ role_regards_stack_workers_configs_location }}/{{ config }}"
+{% endfor %}
+{% endif %}
+
 services:
 
 {% for worker in role_regards_stack_workers %}
@@ -40,13 +57,30 @@ services:
 {% endif %}
       - type: tmpfs
         target: /tmp
+{% if worker.configs is defined %}
+    configs:
+{% for config in worker.configs %}
+      - source: {{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
+{% if worker.secrets is defined %}
+    secrets:
+{% for secret in worker.secrets %}
+      - source: {{ secret.source }}
+        target: {{ secret.destination }}
+{% endfor %}
+{% endif %}
 {% if worker.jdwp is defined %}
     ports:
       - "{{ worker.jdwp }}:10500"
 {% endif %}
     logging:
+{% if worker.logging is defined %}
+      {{ worker.logging | to_nice_yaml | indent(6) }}
+{% else %}
       options:
         max-size: "10m"
         max-file: "10"
-
+{% endif %}
 {% endfor %}

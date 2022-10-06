@@ -30,7 +30,9 @@
   hosts: master
   become: true
   roles:
+    - regards-ca-certificates
     - regards-front-ssl
+    - regards-workers-secrets-configs
 
 - name: Launch stack
   hosts: master

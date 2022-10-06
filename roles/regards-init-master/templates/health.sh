@@ -4,7 +4,7 @@
 # Param 1 : url to check
 function healthCheck
 {   
-    echo $(curl -s -I $1 --noproxy '*' | grep HTTP | cut -d' ' -f2)
+    echo $(curl -s -I $1 --noproxy '*' --insecure | grep HTTP | cut -d' ' -f2)
 }
 
 # Param 1 : HTTP status
