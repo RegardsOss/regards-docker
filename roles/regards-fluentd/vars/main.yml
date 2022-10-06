@@ -31,6 +31,7 @@ role_regards_fluentd_logs_directory:
   - dataprovider
   - processing
   - worker-manager
+  - lta-manager
 
 role_regards_fluentd_workers: "{{ group_docker_workers | default([]) }}"
 

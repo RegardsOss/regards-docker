@@ -207,6 +207,10 @@ role_regards_mconfig_swagger:
     name: Worker manager
     title: MICROSERVICE WORKER MANAGER
     description: Worker Manager API
+  lta_manager:
+    name: Lta manager
+    title: MICROSERVICE LTA MANAGER
+    description: Lta Manager API
 role_regards_mconfig_swagger_license: GPL-3.0
 
 # ----------------------------------

@@ -27,7 +27,14 @@ _script()
   rs-admin-instance \
   rs-admin \
   rs-access-project \
-  rs-access-instance"
+  rs-access-instance \
+  rs-worker-manager \
+  rs-lta-manager \
+  lta-sip-generator-worker \
+  swot-name-extraction-worker \
+  swot-file-extraction-worker \
+  feature-mapper-worker \
+  simple-worker "
   local cur prev
   COMPREPLY=()
   cur="${COMP_WORDS[COMP_CWORD]}"
