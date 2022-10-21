@@ -15,7 +15,7 @@ global_stack:
 # Regards basic configuration
 global_regards:
   # Version to deploy
-  version: 1.8.1
+  version: 1.11.1
   # Name of the first initialized project
   project_name: demo
   # Default instance admin user

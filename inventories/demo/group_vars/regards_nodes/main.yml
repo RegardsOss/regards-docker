@@ -117,10 +117,8 @@ group_docker_workers: []
 group_docker_cots:
   elasticsearch:
     tag: "{{ group_docker_tags.cots }}"
-    legacy: true
 #  elasticsearch_logs:
 #    tag: "{{ group_docker_tags.cots }}"
-#    legacy: true
 #  kibana:
 #    tag: "{{ group_docker_tags.cots }}"
 #    http: 5601
@@ -152,7 +150,6 @@ group_docker_cots_configuration:
 
 
 group_config_mservices:
-  legacy_spring: true
   init_project: "{{ global_regards.project_name }}"
   access_token_validity: 2592000
   instance_admin:
