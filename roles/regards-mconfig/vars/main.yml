@@ -10,7 +10,21 @@ role_regards_mconfig_container_run_user: "{{ group_container_run_user }}"
 # Global config used by µservices
 role_regards_mconfig_config_mservices: "{{ group_config_mservices }}"
 
+# Default profile(s)
+role_regards_mconfig_config_mservices_spring_profiles_active: "production{{ (role_regards_mconfig_config_mservices.get('additional_spring_profiles', false) == false) | ternary('', ',' + role_regards_mconfig_config_mservices.get('additional_spring_profiles', '')) }}"
+
+# Signing keys
+# Legacy secret deprecated
 role_regards_mconfig_mservice_jwt_secret: "{{ role_regards_mconfig_config_mservices.jwt_secret | default('!!!!!==========abcdefghijklmnopqrstuvwxyz0123456789==========!!!!!') }}"
+# All available signing keys
+role_regards_mconfig_mservice_jwt_key_hs256: "{{ role_regards_mconfig_config_mservices.jwt_key_hs256 | default('!!!!!==========abcdefghijklmnopqrstuvwxyz0123456789==========!!!!!') }}"
+role_regards_mconfig_mservice_jwt_key_hs384: "{{ role_regards_mconfig_config_mservices.jwt_key_hs384 | default('') }}"
+role_regards_mconfig_mservice_jwt_key_hs512: "{{ role_regards_mconfig_config_mservices.jwt_key_hs512 | default('!!!!!==========abcdefghijklmnopqrstuvwxyz0123456789==========!!!!!') }}"
+role_regards_mconfig_mservice_jwt_key_rs256: "{{ role_regards_mconfig_config_mservices.jwt_key_rs256 | default('') }}"
+role_regards_mconfig_mservice_jwt_key_rs384: "{{ role_regards_mconfig_config_mservices.jwt_key_rs384 | default('') }}"
+role_regards_mconfig_mservice_jwt_key_rs512: "{{ role_regards_mconfig_config_mservices.jwt_key_rs512 | default('') }}"
+
+
 role_regards_mconfig_mservice_access_token_validity: "{{ role_regards_mconfig_config_mservices.access_token_validity | default('3600') }}"
 role_regards_mconfig_mservice_cipher_iv: "{{ role_regards_mconfig_config_mservices.cipher_iv | default('1234567812345678') }}"
 role_regards_mconfig_mservice_order_jwt_secret: "{{ role_regards_mconfig_config_mservices.order_jwt_secret | default('~~~~~!!!!!!!!!!!0123456789abcdefghijklmnopqrstuvwxyz!!!!!!!!!!!~~~~~') }}"
@@ -19,6 +33,16 @@ role_regards_mconfig_mservice_order_jwt_secret: "{{ role_regards_mconfig_config_
 role_regards_mconfig_setype: "{{ group_setype }}"
 role_regards_mconfig_seuser: "{{ group_seuser }}"
 
+global_ms_default:
+  database_min_pool_size: 2
+  database_max_pool_size: 5
+  jobs_pool_size: 5
+
+role_regards_mconfig_global_default:
+  database_min_pool_size: "{{ global_ms_default.database_min_pool_size }}"
+  database_max_pool_size: "{{ global_ms_default.database_max_pool_size }}"
+  jobs_pool_size: "{{ global_ms_default.jobs_pool_size }}"
+
 # ----------------------------------
 # Admin configuration
 # ----------------------------------
@@ -26,10 +50,12 @@ role_regards_mconfig_seuser: "{{ group_seuser }}"
 instance_admin_default:
   username: regards-admin@c-s.fr
   password: root_admin
+  account_validity_in_days: 355
 
 role_regards_mconfig_instance_admin:
   username: "{{ (group_config_mservices.instance_admin | default({})).get('username', instance_admin_default.username) }}"
   password: "{{ (group_config_mservices.instance_admin | default({})).get('password', instance_admin_default.password) }}"
+  account_validity_in_days: "{{ (role_regards_mconfig_config_mservices | default({})).get('account_validity_in_days', instance_admin_default.account_validity_in_days) }}"
 
 # ----------------------------------
 # Storage configuration
@@ -39,11 +65,139 @@ storage_default:
   rate_expiration_tick: 120
   quota_sync_tick: 30
   quota_error_report_tick: 30
+  read_batch_size: 50
+  entities_per_job: 100
 
 role_regards_mconfig_storage:
-  rate_expiration_tick: "{{ (group_config_mservices.storage | default({})).get('rate_expiration_tick', storage_default.rate_expiration_tick) }}"
-  quota_sync_tick: "{{ (group_config_mservices.storage | default({})).get('quota_sync_tick', storage_default.quota_sync_tick) }}"
-  quota_error_report_tick: "{{ (group_config_mservices.storage | default({})).get('quota_error_report_tick', storage_default.quota_error_report_tick) }}"
+  rate_expiration_tick: "{{ (group_docker_mservices.storage | default({})).get('configuration', {}).get('rate_expiration_tick', storage_default.rate_expiration_tick) }}"
+  quota_sync_tick: "{{ (group_docker_mservices.storage | default({})).get('configuration', {}).get('quota_sync_tick', storage_default.quota_sync_tick) }}"
+  quota_error_report_tick: "{{ (group_docker_mservices.storage | default({})).get('configuration', {}).get('quota_error_report_tick', storage_default.quota_error_report_tick) }}"
+  jobs_pool_size: "{{ (group_docker_mservices.storage | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.jobs_pool_size) }}"
+  database_min_pool_size: "{{ (group_docker_mservices.storage | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
+  database_max_pool_size: "{{ (group_docker_mservices.storage | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
+  read_batch_size: "{{ (group_docker_mservices.storage | default({})).get('configuration', {}).get('read_batch_size', storage_default.read_batch_size) }}"
+  entities_per_job: "{{ (group_docker_mservices.storage | default({})).get('configuration', {}).get('entities_per_job', storage_default.entities_per_job) }}"
+
+# ----------------------------------
+# DAM configuration
+# ----------------------------------
+
+dam_default:
+  ingester_rate_ms: 60000
+  crawler_batch_size: 10000
+
+role_regards_mconfig_dam:
+  ingester_rate_ms: "{{ (group_docker_mservices.dam | default({})).get('configuration', {}).get('crawler_rate_delay_ms', dam_default.ingester_rate_ms) }}"
+  crawler_batch_size: "{{ (group_docker_mservices.dam | default({})).get('configuration', {}).get('crawler_batch_size', dam_default.crawler_batch_size) }}"
+  jobs_pool_size: "{{ (group_docker_mservices.dam | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.jobs_pool_size) }}"
+  database_min_pool_size: "{{ (group_docker_mservices.dam | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
+  database_max_pool_size: "{{ (group_docker_mservices.dam | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
+
+# ----------------------------------
+# Dataprovider configuration
+# ----------------------------------
+
+dataprovider_default:
+  entities_per_job: 100
+
+role_regards_mconfig_dataprovider:
+  entities_per_job: "{{ (group_docker_mservices.dataprovider | default({})).get('configuration', {}).get('entities_per_job', dataprovider_default.entities_per_job) }}"
+  jobs_pool_size: "{{ (group_docker_mservices.dataprovider | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.jobs_pool_size) }}"
+  database_min_pool_size: "{{ (group_docker_mservices.dataprovider | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
+  database_max_pool_size: "{{ (group_docker_mservices.dataprovider | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
+
+# ----------------------------------
+# FEM configuration
+# ----------------------------------
+
+fem_default:
+  entities_per_job: 100
+  read_batch_size: 1000
+
+role_regards_mconfig_fem:
+  entities_per_job: "{{ (group_docker_mservices.fem | default({})).get('configuration', {}).get('entities_per_job', fem_default.entities_per_job) }}"
+  read_batch_size: "{{ (group_docker_mservices.fem | default({})).get('configuration', {}).get('read_batch_size', fem_default.read_batch_size) }}"
+  jobs_pool_size: "{{ (group_docker_mservices.fem | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.jobs_pool_size) }}"
+  database_min_pool_size: "{{ (group_docker_mservices.fem | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
+  database_max_pool_size: "{{ (group_docker_mservices.fem | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
+
+# ----------------------------------
+# Ingest configuration
+# ----------------------------------
+
+ingest_default:
+  entities_per_job: 500
+  read_batch_size: 1000
+
+role_regards_mconfig_ingest:
+  entities_per_job: "{{ (group_docker_mservices.ingest | default({})).get('configuration', {}).get('entities_per_job', ingest_default.entities_per_job) }}"
+  read_batch_size: "{{ (group_docker_mservices.ingest | default({})).get('configuration', {}).get('read_batch_size', ingest_default.read_batch_size) }}"
+  jobs_pool_size: "{{ (group_docker_mservices.ingest | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.jobs_pool_size) }}"
+  database_min_pool_size: "{{ (group_docker_mservices.ingest | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
+  database_max_pool_size: "{{ (group_docker_mservices.ingest | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
+
+# ----------------------------------
+# Notifier configuration
+# ----------------------------------
+
+notifier_default:
+  entities_per_job: 1000
+  read_batch_size: 1000
+
+role_regards_mconfig_notifier:
+  entities_per_job: "{{ (group_docker_mservices.notifier | default({})).get('configuration', {}).get('entities_per_job', notifier_default.entities_per_job) }}"
+  read_batch_size: "{{ (group_docker_mservices.notifier | default({})).get('configuration', {}).get('read_batch_size', notifier_default.read_batch_size) }}"
+  jobs_pool_size: "{{ (group_docker_mservices.notifier | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.jobs_pool_size) }}"
+  database_min_pool_size: "{{ (group_docker_mservices.notifier | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
+  database_max_pool_size: "{{ (group_docker_mservices.notifier | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
+
+# ----------------------------------
+# Order configuration
+# ----------------------------------
+
+order_default:
+  entities_per_job: 10000
+
+role_regards_mconfig_order:
+  entities_per_job: "{{ (group_docker_mservices.order | default({})).get('configuration', {}).get('entities_per_job', order_default.entities_per_job) }}"
+  jobs_pool_size: "{{ (group_docker_mservices.order | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.jobs_pool_size) }}"
+  database_min_pool_size: "{{ (group_docker_mservices.order | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
+  database_max_pool_size: "{{ (group_docker_mservices.order | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
+
+# ----------------------------------
+# Processing configuration
+# ----------------------------------
+
+role_regards_mconfig_processing:
+  jobs_pool_size: "{{ (group_docker_mservices.processing | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.jobs_pool_size) }}"
+  database_min_pool_size: "{{ (group_docker_mservices.processing | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
+  database_max_pool_size: "{{ (group_docker_mservices.processing | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
+
+# ----------------------------------
+# Workermanager configuration
+# ----------------------------------
+
+worker_manager_default:
+  read_batch_size: 1000
+
+role_regards_mconfig_worker_manager:
+  read_batch_size: "{{ (group_docker_mservices.worker_manager | default({})).get('configuration', {}).get('read_batch_size', worker_manager_default.read_batch_size) }}"
+  jobs_pool_size: "{{ (group_docker_mservices.worker_manager | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.jobs_pool_size) }}"
+  database_min_pool_size: "{{ (group_docker_mservices.worker_manager | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
+  database_max_pool_size: "{{ (group_docker_mservices.worker_manager | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
+
+# ----------------------------------
+# LTA Manager configuration
+# ----------------------------------
+
+lta_manager_default:
+  read_batch_size: 1000
+
+role_regards_mconfig_lta_manager_default:
+  read_batch_size: "{{ (group_docker_mservices.lta_manager | default({})).get('configuration', {}).get('read_batch_size', lta_manager_default.read_batch_size) }}"
+  jobs_pool_size: "{{ (group_docker_mservices.lta_manager | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.jobs_pool_size) }}"
+  database_min_pool_size: "{{ (group_docker_mservices.lta_manager | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
+  database_max_pool_size: "{{ (group_docker_mservices.lta_manager | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
 
 # ----------------------------------
 # Mail configuration
