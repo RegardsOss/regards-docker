@@ -84,13 +84,8 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     volumes:
-{% if role_regards_stack_cots.elasticsearch.get("legacy", false) == false %}
       - type: tmpfs
         target: /usr/share/kibana/data/
-{% else %}
-      - type: tmpfs
-        target: /usr/share/kibana/optimize/
-{% endif %}
 {% if role_regards_stack_cots.kibana.http is defined %}
     ports:
       - "{{ role_regards_stack_cots.kibana.http }}:5601"

@@ -1,0 +1,40 @@
+---
+- name: Create html footer folder
+  ansible.builtin.file:
+    path: "{{ role_regards_front_footer_conf_local }}"
+    state: directory
+    mode: '2775'
+    owner: "{{ role_regards_front_footer_container_root_user }}"
+    group: "{{ role_regards_front_footer_container_root_group }}"
+    setype: "{{ role_regards_front_footer_setype }}"
+    seuser: "{{ role_regards_front_footer_seuser }}"
+  when: role_regards_front_footer_show_footer
+
+- name: Create images folder
+  ansible.builtin.file:
+    path: "{{ role_regards_front_footer_conf_local_imgs_folder }}"
+    state: directory
+    mode: '2775'
+    owner: "{{ role_regards_front_footer_container_root_user }}"
+    group: "{{ role_regards_front_footer_container_root_group }}"
+    setype: "{{ role_regards_front_footer_setype }}"
+    seuser: "{{ role_regards_front_footer_seuser }}"
+  when: role_regards_front_footer_show_footer
+
+- name: Generate footer html file
+  ansible.builtin.template:
+    src: regards-version-footer.html
+    dest: "{{ role_regards_front_footer_target_conf }}"
+    mode: '0644'
+    owner: "{{ role_regards_front_footer_container_run_user }}"
+    group: "{{ role_regards_front_footer_container_run_group }}"
+  when: role_regards_front_footer_show_footer
+
+- name: Send images files
+  ansible.builtin.copy:
+    src: "imgs/"
+    dest: "{{ role_regards_front_footer_conf_local_imgs_folder }}"
+    mode: '0644'
+    owner: "{{ role_regards_front_footer_container_run_user }}"
+    group: "{{ role_regards_front_footer_container_run_group }}"
+  when: role_regards_front_footer_show_footer

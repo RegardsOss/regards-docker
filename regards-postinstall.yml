@@ -1,6 +1,5 @@
 ---
 - name: Run postinstall scripts to update CoTS configuration
-  hosts: regards_nodes:!swarm_manager_only_nodes
+  hosts: regards_post_install
   roles:
-    - regards-elasticsearch-postinstall
-    # - regards-kibana-logs-postinstall
+    - regards-kibana-logs-postinstall

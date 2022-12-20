@@ -1,40 +1,38 @@
 ---
-
-- name: Add script file
+- name: Add tmp files to /tmp/
   ansible.builtin.template:
-    src: update-indices.sh
-    dest: /tmp/update-indices.sh
+    src: start.sh
+    dest: /tmp/start.sh
     mode: '0750'
-    owner: "{{ role_regards_elasticsearch_sidecar_container_root_user }}"
-    group: "{{ role_regards_elasticsearch_sidecar_container_root_group }}"
+    owner: "{{ role_regards_elasticsearch_postinstall_container_root_user }}"
+    group: "{{ role_regards_elasticsearch_postinstall_container_root_group }}"
   become: true
-  # Run on only one server
-  run_once: true
+  when: role_regards_elasticsearch_postinstall_elasticsearch_active|bool
 
 - name: Run container to updates ES settings 
   docker_container:
-    name: "postinstall-elasticsearch"
-    image: "{{ role_regards_elasticsearch_sidecar_registry }}/regards-bash"
+    name: postinstall-elasticsearch
+    image: "{{ role_regards_elasticsearch_postinstall_registry }}/regards-bash:{{ role_regards_elasticsearch_postinstall_image_version }}"
     pull: true
-    command: bash /update-indices.sh
+    command: bash /start.sh
     detach: false
-    network_mode: "{{ role_regards_elasticsearch_sidecar_docker_network_name }}"
+    network_mode: none
     networks_cli_compatible: true
     read_only: true
     cleanup: true
+    # container_default_behavior: no_defaults
+    log_driver: json-file
     networks:
-      - name: "{{ role_regards_elasticsearch_sidecar_docker_network_name }}"
+      - name: "{{ role_regards_elasticsearch_postinstall_docker_network_name }}"
     volumes:
-      - /tmp/update-indices.sh:/update-indices.sh
+      - /tmp/start.sh:/start.sh
   vars:
     ansible_python_interpreter: "env python{{ python_version }}"
-  # Run on only one server
-  run_once: true
+  when: role_regards_elasticsearch_postinstall_elasticsearch_active|bool
 
-- name: Delete script file
+- name: Delete tmp files
   ansible.builtin.file:
-    path: /tmp/update-indices.sh
+    path: /tmp/start.sh
     state: absent
   become: true
-  # Run on only one server
-  run_once: true
+  when: role_regards_elasticsearch_postinstall_elasticsearch_active|bool

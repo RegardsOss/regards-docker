@@ -1,0 +1,85 @@
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <style>
+        #footer {
+            border-top: 1px solid transparent;
+            border-bottom: 1px solid transparent;
+            background-color: transparent;
+            border-image: linear-gradient(to right, rgba(255, 255, 255, 0) 0px, rgba(255, 255, 255, 0.55) 49%, rgba(255, 255, 255, 0.55) 50%, rgba(255, 255, 255, 0) 100%);
+            border-image-slice: 1;
+            bottom: 0px;
+            width: 100%;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        #footer .lttle-margin-right {
+            margin-right: 20px;
+        }
+
+        #fotter .little-padding-right {
+            padding-right: 15px;
+        }
+
+        #footer img {
+            max-height: 2em;
+            height: 25px;
+        }
+
+        #footer table {
+            width: 100%;
+        }
+
+        #footer .txtblanc {
+            font-family: Verdana, Arial, sans-serif;
+            font-size: 12px;
+            color: #ffffff;
+        }
+
+        /* default regards dark theme values */
+        /* template looks good only with dark theme. The others are not managed*/
+        .dark-theme {
+            background-color: #303030;
+            color: #ffffff;
+            font-family: Verdana, Arial, sans-serif;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body class="dark-theme">
+    <div id="footer">
+        <div id="app-footer" class="lttle-margin-right">
+            <table>
+                <tbody>
+                    <tr>
+                        <td width="30%" align="center">
+                            <a target="_blank" href="http://www.cnes.fr/">
+                            <img
+                                    class="little-padding-right" src="imgs/CNES_Logo_Blanc_Horizontal.png">
+                            </a>
+                        </td>
+                        <td class="txtblanc" width="40%" align="center">
+                            <span>
+                                Powered by&nbsp;&nbsp;
+                                <a href="https://regardsoss.github.io/" target="_blank">
+                                    <img src="imgs/Regards.png" align="absmiddle">
+                                </a> 
+                                &nbsp;&nbsp; v{{ role_regards_front_footer_regards_version }}
+                            </span>
+                        </td>
+                        <td class="txtblanc" width="30%">
+                            &nbsp;
+{% if role_regards_front_footer_additional_information is defined %}
+                            {{ role_regards_front_footer_additional_information }}
+{% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

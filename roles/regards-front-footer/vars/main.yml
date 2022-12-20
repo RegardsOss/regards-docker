@@ -1,0 +1,22 @@
+---
+
+# Footer Workspace
+role_regards_front_footer_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/regards/nginx/footer/"
+role_regards_front_footer_conf_local_imgs_folder: "{{ role_regards_front_footer_conf_local }}imgs/"
+
+# Footer template file
+role_regards_front_footer_target_conf: "{{ role_regards_front_footer_conf_local }}regards-version-footer.html"
+
+# Docker user
+role_regards_front_footer_container_root_user: "{{ group_container_root_user }}"
+role_regards_front_footer_container_root_group: "{{ group_container_root_group }}"
+role_regards_front_footer_container_run_user: "{{ group_container_run_user }}"
+role_regards_front_footer_container_run_group: "{{ group_container_run_group }}"
+role_regards_front_footer_setype: "{{ group_setype }}"
+role_regards_front_footer_seuser: "{{ group_seuser }}"
+
+# Footer configuration
+role_regards_front_footer_show_footer: "{{ group_docker_mservices.front.show_footer | default(false) | bool }}"
+role_regards_front_footer_additional_information: "{{ global_regards.get('footer_additional_information') }}"
+role_regards_front_footer_regards_version: "{{ global_regards.version }}"
+

@@ -92,23 +92,12 @@ services:
       - "{{ role_regards_stack_cots.phppgadmin.http }}:8080"
 {% endif %}
     volumes:
-{% if role_regards_stack_cots.phppgadmin.get("legacy", false) == false %}
       - type: tmpfs
         target: /tmp
       - type: tmpfs
         target: /run
       - type: tmpfs
         target: /var/lib/nginx/logs/
-{% else %}
-      - type: tmpfs
-        target: /run/lock/apache2/
-      - type: tmpfs
-        target: /run/apache2/
-      - type: tmpfs
-        target: /tmp
-      - type: tmpfs
-        target: /var/lib/php5/sessions/
-{% endif %}
     logging:
 {% if role_regards_stack_cots.phppgadmin.logging is defined %}
       {{ role_regards_stack_cots.phppgadmin.logging | to_nice_yaml | indent(6) }}

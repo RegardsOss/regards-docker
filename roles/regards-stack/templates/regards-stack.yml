@@ -778,6 +778,9 @@ services:
       - "{{ role_regards_stack_workspace_network }}regards/front:/var/www/public/:ro"
       - "{{ role_regards_stack_workspace_local }}regards/logs/front:/var/log/nginx"
       - "{{ role_regards_stack_config }}regards/nginx/nginx.conf:/etc/nginx/nginx.conf:ro"
+{% if role_regards_stack_mservices.front.show_footer|default(false)|bool %}
+      - "{{ role_regards_stack_config }}regards/nginx/footer:/var/www/footer:ro"
+{% endif %}
       - type: tmpfs
         target: /var/cache/nginx
       - type: tmpfs

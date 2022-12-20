@@ -85,9 +85,11 @@ role_regards_mconfig_storage:
 dam_default:
   ingester_rate_ms: 60000
   crawler_batch_size: 10000
+  crawler_init_time_ms: 60000
 
 role_regards_mconfig_dam:
   ingester_rate_ms: "{{ (group_docker_mservices.dam | default({})).get('configuration', {}).get('crawler_rate_delay_ms', dam_default.ingester_rate_ms) }}"
+  crawler_init_time_ms: "{{ (group_docker_mservices.dam | default({})).get('configuration', {}).get('crawler_init_time_ms', dam_default.crawler_init_time_ms) }}"
   crawler_batch_size: "{{ (group_docker_mservices.dam | default({})).get('configuration', {}).get('crawler_batch_size', dam_default.crawler_batch_size) }}"
   jobs_pool_size: "{{ (group_docker_mservices.dam | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.jobs_pool_size) }}"
   database_min_pool_size: "{{ (group_docker_mservices.dam | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
@@ -379,5 +381,4 @@ role_regards_mconfig_proxy:
 role_regards_mconfig_ssl:
   allow_insecure: "{{ (group_config_mservices.ssl | default({})).get('allow_insecure', false)}}"
 
-role_regards_mconfig_legacy_spring: "{{ group_config_mservices.get('legacy_spring', false) }}"
 role_regards_stack_mservices_access_instance_postgis_enabled: "{{ (group_docker_mservices.access_instance | default({})).get('postgis', true) == true }}"

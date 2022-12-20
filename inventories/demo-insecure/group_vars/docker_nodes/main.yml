@@ -3,8 +3,6 @@ name_space_gid: 1400000
 name_space_range: 100000
 docker_group_gid: 1400117
 
-certificates_email: regards@cnes.fr
-
 swarm_manager_eth: "ansible_{{ global_stack.docker.network_interface }}"
 
 docker_bip: 10.122.20.1/24

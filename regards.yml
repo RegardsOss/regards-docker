@@ -20,6 +20,7 @@
     - regards-fluentd
     - regards-mconfig
     - regards-front
+    - regards-front-footer
     - regards-postgres
     - regards-s3-minio
     - regards-elasticsearch

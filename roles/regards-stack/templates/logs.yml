@@ -153,15 +153,10 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     volumes:
-{% if role_regards_stack_cots.elasticsearch_logs.get("legacy", false) == false %}
       - type: tmpfs
         target: /usr/share/kibana/data/
-{% else %}
-      - type: tmpfs
-        target: /usr/share/kibana/optimize/
-{% endif %}
     environment:
-      - ELASTICSEARCH_URL=http://rs-logs-elasticsearch:9200
+      - ELASTICSEARCH_HOSTS=http://rs-logs-elasticsearch:9200
 {% if role_regards_stack_cots.kibana_logs.http is defined %}
     ports:
       - "{{ role_regards_stack_cots.kibana_logs.http }}:5601"

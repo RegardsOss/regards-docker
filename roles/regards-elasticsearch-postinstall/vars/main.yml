@@ -1,8 +1,12 @@
 ---
-role_regards_elasticsearch_sidecar_docker_network_name: "{{ group_docker_network_name }}"
-role_regards_elasticsearch_sidecar_registry: "{{ group_docker_registry }}"
+role_regards_elasticsearch_postinstall_docker_network_name: "{{ group_docker_network_name }}"
+role_regards_elasticsearch_postinstall_registry: "{{ group_docker_registry }}"
 
-role_regards_elasticsearch_sidecar_container_root_user: "{{ group_container_root_user }}"
-role_regards_elasticsearch_sidecar_container_root_group: "{{ group_container_root_group }}"
+role_regards_elasticsearch_postinstall_container_root_user: "{{ group_container_root_user }}"
+role_regards_elasticsearch_postinstall_container_root_group: "{{ group_container_root_group }}"
 
-role_regards_elasticsearch_sidecar_number_of_replica: "{{ ((group_docker_cots.elasticsearch) | ternary(group_docker_cots.elasticsearch, {})).get('number_of_replica', 1) }}"
+role_regards_elasticsearch_postinstall_number_of_replica: "{{ ((group_docker_cots.elasticsearch) | ternary(group_docker_cots.elasticsearch, {})).get('number_of_replica', 1) }}"
+
+role_regards_elasticsearch_postinstall_image_version: "{{ (group_docker_cots.bash | default({})).get('tag', global_regards.version) }}"
+
+role_regards_elasticsearch_postinstall_elasticsearch_active: "{{ group_docker_cots.elasticsearch is defined }}"

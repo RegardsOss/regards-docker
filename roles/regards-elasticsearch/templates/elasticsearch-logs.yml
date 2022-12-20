@@ -10,7 +10,6 @@ network.host: _eth0_
 network.host: 0.0.0.0
 {% endif %}
 
-{% if role_regards_elasticsearch_config_elasticsearch_logs.get("legacy", false) == false %}
 discovery.seed_hosts: rs-logs-elasticsearch
 xpack.security.enabled: false
 ingest.geoip.downloader.enabled: false
@@ -33,10 +32,6 @@ cluster.initial_master_nodes:
 {% endif %}
 {% endfor %}
 
-{% endif %}
-{% elif role_regards_elasticsearch_config_elasticsearch_logs.global_service is defined %}
-# Auto discover elasticsearch using round-robin DNS
-discovery.zen.ping.unicast.hosts: rs-logs-elasticsearch
 {% endif %}
 
 path.repo: ["/usr/share/elasticsearch/backup"]
