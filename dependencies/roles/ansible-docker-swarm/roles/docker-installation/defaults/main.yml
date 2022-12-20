@@ -61,7 +61,7 @@ kernel_tuning_parameters:
   fs.inotify.max_user_watches: '1048576'
 
 
-kernel_rhel_tuning_parameters:
+kernel_rhel_7_tuning_parameters:
   # needed for host mountpoints with RHEL > 7.4
   fs.may_detach_mounts: '1'
 

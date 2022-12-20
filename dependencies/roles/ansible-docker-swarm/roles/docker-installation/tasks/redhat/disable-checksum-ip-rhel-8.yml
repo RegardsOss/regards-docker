@@ -1,0 +1,32 @@
+#
+# Copyright 2018-2020, CS GROUP – France, http://www.c-s.fr
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+# Desactive RedHat 8 optim (https://github.com/moby/moby/issues/41775)
+# Network interface cards can use the TCP offload engine (TOE) to offload processing certain operations to the network controller to improve the network throughput
+# @link https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/configuring_and_managing_networking/configuring-ethtool-offload-features_configuring-and-managing-networking#offload-features-supported-by-networkmanager_configuring-ethtool-offload-features
+- name: Check server has been patched
+  lineinfile: 
+    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ role_docker_network_interface_label }}"
+    line: 'ETHTOOL_OPTS="-K {{ role_docker_network_interface_label }} tx-checksum-ip-generic off"'
+  check_mode: yes
+  register: docker_install_rh8_checksum_ip_generic_is_off
+  changed_when: docker_install_rh8_checksum_ip_generic_is_off.changed
+
+- name: Apply ethtool.feature-tx-checksum-ip-generic off
+  shell: "nmcli con modify {{ role_docker_network_interface_label }} ethtool.feature-tx-checksum-ip-generic off"
+  when: docker_install_rh8_checksum_ip_generic_is_off.changed|bool
+
+- name: Restart network interface
+  shell: "nmcli connection up {{ role_docker_network_interface_label }}"
+  when: docker_install_rh8_checksum_ip_generic_is_off.changed|bool

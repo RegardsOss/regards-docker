@@ -15,14 +15,28 @@
 - name: "[REDHAT] Update basic packages"
   yum:
     name:
-      - ntp
       - tcpdump
       - wget
       - openssl
       - curl
-      - python-setuptools
     state: latest
     update_cache: yes
+
+- name: "[REDHAT] Install RedHat 8 deps"
+  yum:
+    name:
+      - platform-python-setuptools
+      - chrony
+    state: latest
+  when: ansible_facts['distribution_major_version'] >= "8"
+
+- name: "[REDHAT] Install RedHat 7 deps"
+  yum:
+    name:
+      - python-setuptools
+      - ntp
+    state: latest
+  when: ansible_facts['distribution_major_version'] <= "7"
 
 - name: "[REDHAT] Install Pip3"
   yum:

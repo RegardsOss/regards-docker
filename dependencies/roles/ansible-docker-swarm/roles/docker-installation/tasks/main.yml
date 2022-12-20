@@ -95,8 +95,11 @@
     state: present
     reload: yes
     sysctl_file: '/etc/sysctl.d/50-ansible-docker-swarm-tuning.conf'
-  with_dict: '{{ kernel_rhel_tuning_parameters }}'
-  when: kernel_tuning|bool == true and ansible_facts['os_family'] == "RedHat"
+  with_dict: '{{ kernel_rhel_7_tuning_parameters }}'
+  when: kernel_tuning|bool == true and ansible_facts['os_family'] == "RedHat" and ansible_facts["distribution_major_version"] == "7"
+
+- include_tasks: redhat/disable-checksum-ip-rhel-8.yml
+  when: ansible_facts['os_family'] == "RedHat" and ansible_facts["distribution_major_version"] == "8"
 
 - include_tasks: docker-namespace.yml
 
