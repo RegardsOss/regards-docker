@@ -1,0 +1,29 @@
+---
+role_regards_microservices_workspace_local_workdir_workspace_network: "{{ group_workdir_local }}{{group_stack_name}}/workspace/"
+
+role_regards_microservices_workspace_local_workdir_container_root_user: "{{ group_container_root_user }}"
+role_regards_microservices_workspace_local_workdir_container_root_group: "{{ group_container_root_group }}"
+
+role_regards_microservices_workspace_local_workdir_container_run_user: "{{ group_container_run_user }}"
+role_regards_microservices_workspace_local_workdir_container_run_group: "{{ group_container_run_group }}"
+role_regards_microservices_workspace_local_workdir_setype: "{{ group_setype }}"
+role_regards_microservices_workspace_local_workdir_seuser: "{{ group_seuser }}"
+
+role_regards_microservices_workspace_local_registry: "{{ group_docker_registry }}"
+role_regards_microservices_workspace_local_image_version: "{{ (group_docker_cots.bash | default({})).get('tag', global_regards.version) }}"
+
+role_regards_microservices_workspace_local_run_uid: "{{ group_container_run_uid }}"
+role_regards_microservices_workspace_local_run_gid: "{{ group_container_run_gid }}"
+
+role_regards_microservices_workspace_local_top_level_regards: "{{  (group_docker_mounts | default({})).get('regards', {}) }}"
+
+role_regards_microservices_workspace_local_volume_data_inputs: "{{  role_regards_microservices_workspace_local_top_level_regards.get('data_inputs', []) }}"
+
+role_regards_microservices_workspace_local_volume_processing: "{{  role_regards_microservices_workspace_local_top_level_regards.get('processing', {}) }}"
+role_regards_microservices_workspace_local_volume_dam: "{{  role_regards_microservices_workspace_local_top_level_regards.get('dam', {}) }}"
+role_regards_microservices_workspace_local_volume_storage_online: "{{  role_regards_microservices_workspace_local_top_level_regards.get('storage', {}).get('online', {}) }}"
+role_regards_microservices_workspace_local_volume_storage_cache: "{{  role_regards_microservices_workspace_local_top_level_regards.get('storage', {}).get('cache', {}) }}"
+
+role_regards_microservices_workspace_local_volume_workspace: "{{  role_regards_microservices_workspace_local_top_level_regards.get('workspace', {}) }}"
+
+role_regards_microservices_workspace_local_volume_mservices: "{{ group_docker_mservices }}"

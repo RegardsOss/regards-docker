@@ -3,7 +3,7 @@
   ansible.builtin.file:
     path: "{{ role_regards_front_ssl_destination }}"
     state: directory
-    mode: '2750'
+    mode: '2770'
     owner: "{{ role_regards_front_ssl_container_root_user }}"
     group: "{{ role_regards_front_ssl_container_root_group }}"
     setype: "{{ role_regards_front_ssl_setype }}"
@@ -14,8 +14,6 @@
     src: "{{ role_regards_front_ssl_location_inside_playbook }}/{{ item }}"
     dest: "{{ role_regards_front_ssl_destination }}/{{ item }}"
     mode: '0440'
-    # Do not replace the file if it already exist, as the replacement of the certificate may be out of this playbook scope
-    force: no
     owner: "{{ role_regards_front_ssl_container_root_user }}"
     group: "{{ role_regards_front_ssl_container_root_group }}"
     setype: "{{ role_regards_front_ssl_setype }}"

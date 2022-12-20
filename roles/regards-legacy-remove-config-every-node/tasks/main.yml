@@ -1,0 +1,24 @@
+---
+- name: Remove legacy files ?
+  pause: prompt='Please confirm you want to remove legacy configs files from every node ? Press return to continue. Press Ctrl+c and then "a" to abort'
+
+- name: Delete config folder (may retry)
+  ansible.builtin.command: "rm -rf {{ role_regards_legacy_remove_config_every_node_rootdir_to_remove }}"
+  args:
+    warn: false # We use command instead of file to be able to retry
+  retries: 3 
+  delay: 5
+  register: result
+  until: result is not failed
+  become: true
+
+- name: Delete plugins folder (may retry)
+  ansible.builtin.command: "rm -rf {{ role_regards_legacy_remove_config_every_node_plugins_rootdir_to_remove }}"
+  args:
+    warn: false # We use command instead of file to be able to retry
+  retries: 3 
+  delay: 5
+  register: result
+  until: result is not failed
+  become: true
+  when: role_regards_legacy_remove_config_every_node_has_plugins|bool

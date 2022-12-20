@@ -1,5 +1,5 @@
 ---
-
+role_regards_front_is_defined: "{{ group_docker_mservices.front is defined }}"
 # NGINX Workspace
 role_regards_front_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/regards/nginx/"
 
@@ -10,8 +10,6 @@ role_regards_front_nginx_target_conf: "{{ role_regards_front_conf_local }}nginx.
 # Docker user
 role_regards_front_container_root_user: "{{ group_container_root_user }}"
 role_regards_front_container_root_group: "{{ group_container_root_group }}"
-role_regards_front_container_run_user: "{{ group_container_run_user }}"
-role_regards_front_container_run_group: "{{ group_container_run_group }}"
 role_regards_front_setype: "{{ group_setype }}"
 role_regards_front_seuser: "{{ group_seuser }}"
 

@@ -7,4 +7,4 @@
 # @see https://github.com/moby/moby/issues/35011
 # just run this script ....
 
-docker swarm ca --rotate
+docker swarm ca --rotate --cert-expiry 87600h0m0s

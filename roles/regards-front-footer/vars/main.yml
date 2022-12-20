@@ -10,8 +10,6 @@ role_regards_front_footer_target_conf: "{{ role_regards_front_footer_conf_local 
 # Docker user
 role_regards_front_footer_container_root_user: "{{ group_container_root_user }}"
 role_regards_front_footer_container_root_group: "{{ group_container_root_group }}"
-role_regards_front_footer_container_run_user: "{{ group_container_run_user }}"
-role_regards_front_footer_container_run_group: "{{ group_container_run_group }}"
 role_regards_front_footer_setype: "{{ group_setype }}"
 role_regards_front_footer_seuser: "{{ group_seuser }}"
 

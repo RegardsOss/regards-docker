@@ -1,0 +1,20 @@
+---
+role_regards_elasticsearch_workspace_local_path: "{{ group_workdir_local }}{{ group_stack_name }}/workspace/elasticsearch/"
+
+role_regards_elasticsearch_workspace_local_container_root_user: "{{ group_container_root_user }}"
+role_regards_elasticsearch_workspace_local_container_root_group: "{{ group_container_root_group }}"
+
+role_regards_elasticsearch_workspace_local_container_run_user: "{{ group_container_run_user }}"
+role_regards_elasticsearch_workspace_local_container_run_group: "{{ group_container_run_group }}"
+role_regards_elasticsearch_workspace_local_setype: "{{ group_setype }}"
+role_regards_elasticsearch_workspace_local_seuser: "{{ group_seuser }}"
+
+
+role_regards_elasticsearch_workspace_local_elasticsearch_defined: "{{ group_docker_cots.elasticsearch is defined }}"
+role_regards_elasticsearch_workspace_local_elasticsearch_logs_defined: "{{ group_docker_cots.elasticsearch_logs is defined }}"
+
+role_regards_elasticsearch_workspace_local_elasticsearch_data_active: "{{  not (group_docker_mounts | default({})).get('elasticsearch', {}).get('data', {}).nfs is defined }}"
+role_regards_elasticsearch_workspace_local_elasticsearch_backup_active: "{{  not (group_docker_mounts | default({})).get('elasticsearch', {}).get('backup', {}).nfs is defined }}"
+
+role_regards_elasticsearch_workspace_local_elasticsearch_logs_data_active: "{{ not (group_docker_mounts | default({})).get('elasticsearch_logs', {}).get('data', {}).nfs is defined }}"
+role_regards_elasticsearch_workspace_local_elasticsearch_logs_backup_active: "{{ not (group_docker_mounts | default({})).get('elasticsearch_logs', {}).get('backup', {}).nfs is defined }}"

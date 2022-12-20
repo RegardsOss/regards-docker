@@ -1,0 +1,16 @@
+---
+role_regards_mounts_secrets_configs_container_root_user: "{{ group_container_root_user }}"
+role_regards_mounts_secrets_configs_container_root_group: "{{ group_container_root_group }}"
+role_regards_mounts_secrets_configs_setype: "{{ group_setype }}"
+role_regards_mounts_secrets_configs_seuser: "{{ group_seuser }}"
+
+# Inventory configs and secrets
+
+role_regards_mounts_secrets_configs_configs: "{{ (group_docker_mounts | default({})).get('configs', []) }}"
+role_regards_mounts_secrets_configs_secrets: "{{ (group_docker_mounts | default({})).get('secrets', []) }}"
+
+role_regards_mounts_secrets_configs_inventory_path_configs: "{{ inventory_dir }}/group_vars/regards_nodes/files"
+role_regards_mounts_secrets_configs_inventory_path_secrets: "{{ inventory_dir }}/group_vars/regards_nodes/files"
+
+role_regards_mounts_secrets_configs_configs_destination: "{{ group_workdir_local }}{{ group_stack_name }}/config/mounted/configs"
+role_regards_mounts_secrets_configs_secrets_destination: "{{ group_workdir_local }}{{ group_stack_name }}/config/mounted/secrets"

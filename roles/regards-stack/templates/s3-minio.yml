@@ -1,7 +1,24 @@
 version: '3.7'
-services:
 
-{% if role_regards_stack_cots.s3_minio is defined %}
+volumes:
+  data-s3-minio-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_s3_minio_data.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_s3_minio_data.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_s3_minio_data.get('device_postfix', 's3-minio/') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}s3-minio/
+{% endif %}
+
+services:
   rs-s3-minio:
     image: {{ role_regards_stack_registry }}/regards-s3-minio:{{ role_regards_stack_cots.s3_minio.tag | default("latest") }}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
@@ -19,7 +36,9 @@ services:
 {% endif %}
 {% endif %}
     volumes:
-      - {{ role_regards_stack_workspace_local }}s3-minio:/data
+      - type: volume
+        source: data-s3-minio-datavolume
+        target: /data
       - type: tmpfs
         target: /.minio
 {% if role_regards_stack_cots.s3_minio.client is defined %}
@@ -33,5 +52,4 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
-{% endif %}
 {% endif %}

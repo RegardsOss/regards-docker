@@ -1,0 +1,22 @@
+---
+role_regards_plugins_workspace_nfs_run_uid: "{{ group_container_run_uid }}"
+role_regards_plugins_workspace_nfs_run_gid: "{{ group_container_run_gid }}"
+
+role_regards_plugins_workspace_nfs_top_level_nfs_servers: "{{  (group_docker_mounts | default({})).get('nfs', []) }}"
+
+role_regards_plugins_workspace_nfs_active: "{{ (group_docker_mounts | default({})).get('regards', {}).get('plugins', {}).nfs is defined }}"
+role_regards_plugins_workspace_nfs_mount_conf: "{{ (group_docker_mounts | default({})).get('regards', {}).get('plugins', {}) }}"
+
+role_regards_plugins_workspace_nfs_docker_registry: "{{ group_docker_registry }}"
+role_regards_plugins_workspace_nfs_plugins: "{{ group_docker_plugins }}"
+
+role_regards_plugins_workspace_nfs_microservice_having_plugin:
+  - authentication
+  - dam
+  - fem
+  - notifier
+  - catalog
+  - storage
+  - ingest
+  - dataprovider
+  - processing

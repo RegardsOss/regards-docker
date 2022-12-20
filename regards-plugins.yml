@@ -1,6 +1,10 @@
 ---
 - name: Refresh the REGARDS with all the conf within the Ansible project
   hosts: regards_nodes:!swarm_manager_only_nodes
-
   roles:
-    - regards-plugins
+    - regards-plugins-workspace-local
+
+- name: Initiate NFS workspaces 
+  hosts: slaves[0]
+  roles:
+    - regards-plugins-workspace-nfs

@@ -1,12 +1,8 @@
 ---
-
 # Workspace
 role_regards_logback_workdir: "{{ group_workdir_local }}{{ group_stack_name }}/config/regards/logback/"
 
 # Docker users
-role_regards_logback_container_run_group: "{{ group_container_run_group }}"
-role_regards_logback_container_run_user: "{{ group_container_run_user }}"
-
 role_regards_logback_container_root_user: "{{ group_container_root_user }}"
 role_regards_logback_container_root_group: "{{ group_container_root_group }}"
 role_regards_logback_setype: "{{ group_setype }}"

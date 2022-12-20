@@ -1,0 +1,5 @@
+---
+- name: Delete config files on every node as they are not used anymore
+  hosts: slaves
+  roles:
+    - regards-legacy-remove-config-every-node

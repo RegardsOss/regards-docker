@@ -1,0 +1,6 @@
+---
+- ansible.builtin.include_tasks: createSecrets.yml
+  when: role_regards_mounts_secrets_configs_secrets|length
+
+- ansible.builtin.include_tasks: createConfigs.yml
+  when: role_regards_mounts_secrets_configs_configs|length

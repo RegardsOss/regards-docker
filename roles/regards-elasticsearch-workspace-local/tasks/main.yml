@@ -1,0 +1,10 @@
+---
+- ansible.builtin.include_tasks: init.yml
+  when: role_regards_elasticsearch_workspace_local_elasticsearch_defined|bool or role_regards_elasticsearch_workspace_local_elasticsearch_logs_defined|bool
+
+- name: Set vm.max_map_count to sysctl for Ref
+  sysctl:
+    name: vm.max_map_count
+    value: "262144"
+    sysctl_file: /etc/sysctl.d/55-regards-ref.conf
+    reload: true

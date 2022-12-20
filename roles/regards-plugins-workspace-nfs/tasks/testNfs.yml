@@ -1,0 +1,3 @@
+---
+- ansible.builtin.include_tasks: initPlugins.yml
+  when: nfs_server.name == role_regards_plugins_workspace_nfs_mount_conf.nfs

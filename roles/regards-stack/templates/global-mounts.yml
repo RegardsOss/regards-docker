@@ -1,0 +1,42 @@
+version: '3.7'
+
+{% if role_regards_stack_top_level_configs|length %}
+configs:
+{% for config in role_regards_stack_top_level_configs %}
+  conf_{{ config.file }}:
+    name: conf_{{ loop.index0 }}_${CHECKSUM_TOP_LEVEL_CONFIG_FILE_{{ loop.index0 }}}
+    file: "{{ role_regards_stack_top_level_configs_location }}/{{ config.path }}/{{ config.file }}"
+{% endfor %}
+{% endif %}
+
+{% if role_regards_stack_top_level_secrets|length %}
+secrets:
+{% for secret in role_regards_stack_top_level_secrets %}
+  secret_{{ secret.file }}:
+    name: {{ secret.file }}${CHECKSUM_TOP_LEVEL_SECRET_FILE_{{ loop.index0 }}}
+    file: "{{ role_regards_stack_top_level_secrets_location }}/{{ secret.path }}/{{ secret.file }}"
+{% endfor %}
+{% endif %}
+
+{% if role_regards_stack_top_level_volumes|length %}
+# Definition of top level volumes
+volumes:
+{% for top_level_volume in role_regards_stack_top_level_volumes %}
+  {{ top_level_volume.name }}:
+    driver: local
+    driver_opts:
+{% if top_level_volume.get("local", False)|bool %}
+      type: none
+      o: bind
+      device: {{ top_level_volume.source }}
+{% else %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == top_level_volume.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ top_level_volume.device_postfix }}"
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}

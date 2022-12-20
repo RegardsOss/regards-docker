@@ -1,8 +1,18 @@
 ---
+- name: Create reverse proxy folder
+  ansible.builtin.file:
+    path: "{{ role_regards_front_conf_local }}"
+    state: directory
+    mode: '2750'
+    owner: "{{ role_regards_front_container_root_user }}"
+    group: "{{ role_regards_front_container_root_group }}"
+    setype: "{{ role_regards_front_setype }}"
+    seuser: "{{ role_regards_front_seuser }}"
+
 - name: Generate reverse proxy config file
   ansible.builtin.template:
     src: "{{ role_regards_front_nginx_conf }}"
     dest: "{{ role_regards_front_nginx_target_conf }}"
-    mode: '0700'
-    owner: "{{ role_regards_front_container_run_user }}"
-    group: "{{ role_regards_front_container_run_group }}"
+    mode: '0770'
+    owner: "{{ role_regards_front_container_root_user }}"
+    group: "{{ role_regards_front_container_root_group }}"

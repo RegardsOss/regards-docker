@@ -8,6 +8,7 @@
     group: "{{ role_regards_stack_container_root_group }}"
   with_items:
     - regards-stack.yml
+    - global-mounts.yml
     - elastic.yml
     - rabbitmq.yml
   become: true
@@ -72,37 +73,8 @@
   become: true
   when: role_regards_stack_workers | length > 0
 
-- name: Compute docker stack deploy command
-  ansible.builtin.set_fact:
-    launch_swarm: >
-      docker stack deploy
-      -c {{ role_regards_stack_stack }}regards-stack.yml
-      -c {{ role_regards_stack_stack }}elastic.yml
-      {% if role_regards_stack_cots.elasticsearch_logs is defined or role_regards_stack_cots.kibana_logs is defined or role_regards_stack_cots.fluent is defined %}
-      -c {{ role_regards_stack_stack }}logs.yml
-      {% endif %}
-      {% if role_regards_stack_cots.doc is defined %}
-      -c {{ role_regards_stack_stack }}doc.yml
-      {% endif %}
-      {% if role_regards_stack_cots.s3_minio is defined %}
-      -c {{ role_regards_stack_stack }}s3-minio.yml
-      {% endif %}
-      {% if role_regards_stack_cots.maildev is defined %}
-      -c {{ role_regards_stack_stack }}mail.yml
-      {% endif %}
-      {% if role_regards_stack_cots.postgres is defined or role_regards_stack_cots.phppgadmin is defined %}
-      -c {{ role_regards_stack_stack }}postgresql.yml
-      {% endif %}
-      -c {{ role_regards_stack_stack }}rabbitmq.yml
-      {% if role_regards_stack_workers | length > 0 %}
-      -c {{ role_regards_stack_stack }}workers.yml
-      {% endif %}
-      --with-registry-auth
-      --prune
-      {{ role_regards_stack_stack_name }}
-
 - name: Run REGARDS
-  ansible.builtin.command: "{{ launch_swarm }}"
+  ansible.builtin.shell: "{{ role_regards_stack_cli }}deploy.sh"
   register: deploy
   changed_when: deploy.rc != 0
   failed_when: deploy.rc != 0

@@ -20,13 +20,15 @@ function display
 }
 
 
-if [ $# -lt 1 ]
+if [ $# -gt 1 ]
 then
-  echo "Syntax: ./health.sh <tenant>"
+  echo "Syntax: ./health.sh [<tenant>]"
+  echo "Test for all tenants by default"
   exit 1
 fi
 
-declare tenant=${1}
+# Fallback to "all", which test all tenants
+declare tenant=${1:all}
 
 declare -A MSERVICE_TO_CONTAINER;
 MSERVICE_TO_CONTAINER["admin_instance"]="rs-admin-instance"

@@ -1,0 +1,68 @@
+---
+- name: "Create a tmp volume to initiate {{ nfs_server.name }}"
+  docker_volume:
+    name: tmp_nfs
+    recreate: always
+    driver_options:
+      type: nfs
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}"
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"
+
+# role_regards_init_nfs_workspaces_tmp_folder must be writtable. Sometimes /tmp is not writable
+- name: Create some tmp folder
+  ansible.builtin.file:
+    path: "{{ role_regards_init_nfs_workspaces_tmp_folder }}"
+    state: directory
+    mode: '0777'
+    owner: "{{ role_regards_init_nfs_workspaces_container_root_user }}"
+    group: "{{ role_regards_init_nfs_workspaces_container_root_group }}"
+    setype: "{{ role_regards_init_nfs_workspaces_setype }}"
+    seuser: "{{ role_regards_init_nfs_workspaces_seuser }}"
+  become: true
+
+- name: Add script file to tmp folder
+  ansible.builtin.template:
+    src: "start.sh"
+    dest: "{{ role_regards_init_nfs_workspaces_tmp_folder }}/start.sh"
+    mode: '0777'
+    owner: "{{ role_regards_init_nfs_workspaces_container_run_user }}"
+    group: "{{ role_regards_init_nfs_workspaces_container_run_group }}"
+  become: true
+
+- name: "Initiate required folders on NFS {{ nfs_server.name }}"
+  docker_container:
+    name: "create-directories-on-{{ nfs_server.name }}"
+    image: "{{ role_regards_init_nfs_workspaces_registry }}/regards-bash:{{ role_regards_init_nfs_workspaces_image_version }}"
+    pull: true
+    command: bash /scripts/start.sh
+    detach: false
+    network_mode: none
+    networks_cli_compatible: true
+    read_only: true
+    cleanup: true
+    user: "{{ role_regards_init_nfs_workspaces_run_uid }}:{{ role_regards_init_nfs_workspaces_run_gid }}"
+    # container_default_behavior: no_defaults
+    log_driver: json-file
+    # For now, let's just retry few times before killing install
+    restart_retries: 10
+    restart_policy: on-failure
+    volumes:
+      - tmp_nfs:/shared
+      - "{{ role_regards_init_nfs_workspaces_tmp_folder }}:/scripts"
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"
+
+- name: Delete tmp folder
+  ansible.builtin.file:
+    path: "{{ role_regards_init_nfs_workspaces_tmp_folder }}"
+    state: absent
+  become: true
+
+- name: Remove tmp volume
+  docker_volume:
+    name: tmp_nfs
+    state: absent
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"

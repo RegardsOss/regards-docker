@@ -1,0 +1,9 @@
+---
+role_regards_postgres_workspace_local_is_defined: "{{ group_docker_cots.postgres is defined }}"
+
+role_regards_postgres_workspace_local_workspace_local: "{{ group_workdir_local }}{{group_stack_name}}/workspace/"
+
+role_regards_postgres_workspace_local_container_run_user: "{{ group_container_run_user }}"
+role_regards_postgres_workspace_local_container_run_group: "{{ group_container_run_group }}"
+role_regards_postgres_workspace_local_setype: "{{ group_setype }}"
+role_regards_postgres_workspace_local_seuser: "{{ group_seuser }}"

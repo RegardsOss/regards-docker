@@ -1,0 +1,72 @@
+---
+- name: Create storage folder
+  ansible.builtin.file:
+    path: "{{ role_regards_microservices_workspace_local_workdir_workspace_network }}regards/storage/"
+    state: directory
+    mode: '0750'
+    owner: "{{ role_regards_microservices_workspace_local_workdir_container_root_user }}"
+    group: "{{ role_regards_microservices_workspace_local_workdir_container_root_group }}"
+    setype: "{{ role_regards_microservices_workspace_local_workdir_setype }}"
+    seuser: "{{ role_regards_microservices_workspace_local_workdir_seuser }}"
+  when: (not role_regards_microservices_workspace_local_volume_dam.nfs is defined) or (not role_regards_microservices_workspace_local_volume_storage_online.nfs is defined) or (not role_regards_microservices_workspace_local_volume_storage_cache.nfs is defined)
+
+- name: Create DAM documents folder
+  ansible.builtin.file:
+    path: "{{ role_regards_microservices_workspace_local_workdir_workspace_network }}regards/storage/dam"
+    state: directory
+    mode: '2750'
+    owner: "{{ role_regards_microservices_workspace_local_workdir_container_run_user }}"
+    group: "{{ role_regards_microservices_workspace_local_workdir_container_run_group }}"
+    setype: "{{ role_regards_microservices_workspace_local_workdir_setype }}"
+    seuser: "{{ role_regards_microservices_workspace_local_workdir_seuser }}"
+  when: not role_regards_microservices_workspace_local_volume_dam.nfs is defined
+
+- name: Create online local storages folder
+  ansible.builtin.file:
+    path: "{{ role_regards_microservices_workspace_local_workdir_workspace_network }}regards/storage/onlines"
+    state: directory
+    mode: '2750'
+    owner: "{{ role_regards_microservices_workspace_local_workdir_container_run_user }}"
+    group: "{{ role_regards_microservices_workspace_local_workdir_container_run_group }}"
+    setype: "{{ role_regards_microservices_workspace_local_workdir_setype }}"
+    seuser: "{{ role_regards_microservices_workspace_local_workdir_seuser }}"
+  when: not role_regards_microservices_workspace_local_volume_storage_online.nfs is defined and role_regards_microservices_workspace_local_volume_mservices.storage is defined
+
+- name: Create STORAGE cache folder
+  ansible.builtin.file:
+    path: "{{ role_regards_microservices_workspace_local_workdir_workspace_network }}regards/storage/cache"
+    state: directory
+    mode: '2750'
+    owner: "{{ role_regards_microservices_workspace_local_workdir_container_run_user }}"
+    group: "{{ role_regards_microservices_workspace_local_workdir_container_run_group }}"
+    setype: "{{ role_regards_microservices_workspace_local_workdir_setype }}"
+    seuser: "{{ role_regards_microservices_workspace_local_workdir_seuser }}"
+  when: not role_regards_microservices_workspace_local_volume_storage_cache.nfs is defined and role_regards_microservices_workspace_local_volume_mservices.storage is defined
+
+- name: Create processing folder
+  ansible.builtin.file:
+    path: "{{ role_regards_microservices_workspace_local_workdir_workspace_network }}regards/processing/"
+    state: directory
+    mode: '2750'
+    owner: "{{ role_regards_microservices_workspace_local_workdir_container_run_user }}"
+    group: "{{ role_regards_microservices_workspace_local_workdir_container_run_group }}"
+    setype: "{{ role_regards_microservices_workspace_local_workdir_setype }}"
+    seuser: "{{ role_regards_microservices_workspace_local_workdir_seuser }}"
+  when: not role_regards_microservices_workspace_local_volume_processing.nfs is defined and role_regards_microservices_workspace_local_volume_mservices.processing is defined
+
+- name: Create common microservices workspace directories
+  ansible.builtin.file:
+    path: "{{ role_regards_microservices_workspace_local_workdir_workspace_network }}regards/workspace"
+    state: directory
+    mode: '2750'
+    owner: "{{ role_regards_microservices_workspace_local_workdir_container_run_user }}"
+    group: "{{ role_regards_microservices_workspace_local_workdir_container_run_group }}"
+    setype: "{{ role_regards_microservices_workspace_local_workdir_setype }}"
+    seuser: "{{ role_regards_microservices_workspace_local_workdir_seuser }}"
+  when: not role_regards_microservices_workspace_local_volume_workspace.nfs is defined
+
+- name: Iterate over Data Inputs
+  ansible.builtin.include_tasks: createInputsFolders.yml
+  loop: "{{ role_regards_microservices_workspace_local_volume_data_inputs }}"
+  loop_control:
+    loop_var: data_input

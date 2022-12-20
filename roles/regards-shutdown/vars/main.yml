@@ -1,2 +1,2 @@
 ---
-role_regards_erase_stack_name: "{{ group_stack_name }}"
+role_regards_shutdown_cli: "{{ group_workdir_local }}{{ group_stack_name }}/cli/"

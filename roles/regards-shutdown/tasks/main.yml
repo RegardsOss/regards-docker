@@ -1,3 +1,6 @@
 ---
-  - name: Shutdown REGARDS
-    ansible.builtin.command: "docker stack rm {{ role_regards_erase_stack_name }}"
+- name: Shutdown REGARDS (Are you on Multinode stack ? You need SSH login without password to make this task works)
+  ansible.builtin.shell: "{{ role_regards_shutdown_cli }}shutdown.sh"
+  register: deploy
+  changed_when: deploy.rc != 0
+  failed_when: deploy.rc != 0

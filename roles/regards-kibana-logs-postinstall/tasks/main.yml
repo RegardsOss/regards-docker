@@ -10,6 +10,7 @@
     - start.sh
     - kibana-settings.ndjson
     - logs_kibana_visu.ndjson
+    - space.ndjson
   become: true
   when: role_regards_kibana_logs_postinstall_kibana_active|bool
 
@@ -31,6 +32,7 @@
     volumes:
       - /tmp/start.sh:/start.sh
       - /tmp/kibana-settings.ndjson:/kibana-settings.ndjson
+      - /tmp/space.ndjson:/space.ndjson
       - /tmp/logs_kibana_visu.ndjson:/logs_kibana_visu.ndjson
   vars:
     ansible_python_interpreter: "env python{{ python_version }}"
@@ -44,5 +46,6 @@
     - start.sh
     - kibana-settings.ndjson
     - logs_kibana_visu.ndjson
+    - space.ndjson
   become: true
   when: role_regards_kibana_logs_postinstall_kibana_active|bool

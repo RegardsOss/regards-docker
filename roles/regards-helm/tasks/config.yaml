@@ -46,7 +46,6 @@
           protocol: http
           host: "{{ '{{' }} default .Values.global.regards.front.host .Values.regards.front.host {{ '}}' }}"
           port: "{{ '{{' }} default .Values.global.regards.front.port .Values.regards.front.port {{ '}}' }}"
-      group_workdir_network_allow_root: true
       group_stack_name: nil
 
   - name: "[helm/{{ bms_ms_name }}] Generate default values"

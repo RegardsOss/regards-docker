@@ -1,6 +1,3 @@
 role_regards_erase_stack_name: "{{ group_stack_name }}"
 
-role_regards_erase_rootdir_network_with_stack_name: "{{ group_workdir_network }}{{group_stack_name}}"
-role_regards_erase_rootdir_network_root_folder: "{{group_workdir_network}}*"
-
 role_regards_erase_docker_network_name: "{{ group_docker_network_name }}"

@@ -1,0 +1,3 @@
+---
+- ansible.builtin.include_tasks: config.yml
+  when: role_regards_elasticsearch_config_elasticsearch_logs_defined|bool or role_regards_elasticsearch_config_elasticsearch_defined|bool

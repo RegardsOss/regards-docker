@@ -1,0 +1,12 @@
+---
+
+- name: Create s3-minio folder
+  ansible.builtin.file:
+    path: "{{ role_regards_s3_minio_workspace_local_workspace_local }}s3-minio"
+    state: directory
+    mode: '2750'
+    owner: "{{ role_regards_s3_minio_workspace_local_container_run_user }}"
+    group: "{{ role_regards_s3_minio_workspace_local_container_run_group }}"
+    setype: "{{ role_regards_s3_minio_workspace_local_setype }}"
+    seuser: "{{ role_regards_s3_minio_workspace_local_seuser }}"
+  when: role_regards_s3_minio_workspace_local_active|bool

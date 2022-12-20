@@ -1,0 +1,26 @@
+---
+role_regards_postgres_config_is_defined: "{{ group_docker_cots.postgres is defined }}"
+role_regards_postgres_config_mservices: "{{ group_docker_mservices }}"
+
+role_regards_postgres_config_mservices_instance:
+  - admin_instance
+  - access_instance
+
+role_regards_postgres_config_mservices_no_connection:
+  - config
+  - registry
+  - gateway
+  - front
+
+role_regards_postgres_config_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/postgres/"
+
+role_regards_postgres_config_container_root_user: "{{ group_container_root_user }}"
+role_regards_postgres_config_container_root_group: "{{ group_container_root_group }}"
+role_regards_postgres_config_setype: "{{ group_setype }}"
+role_regards_postgres_config_seuser: "{{ group_seuser }}"
+
+role_regards_postgres_config_config_default_project: "{{ group_config_mservices.init_project }}"
+
+role_regards_postgres_config_nb_connections_by_tenant: 5
+
+role_regards_postgres_config_nb_tenant: "{{ group_docker_cots_configuration.postgres.nbTenant }}"

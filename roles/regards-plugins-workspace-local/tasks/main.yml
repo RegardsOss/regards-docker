@@ -1,0 +1,3 @@
+---
+- ansible.builtin.include_tasks: init.yml
+  when: role_regards_plugins_workspace_local_active|bool

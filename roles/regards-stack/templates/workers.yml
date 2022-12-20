@@ -1,23 +1,6 @@
 version: '3.7'
 
-{% if role_regards_stack_workers_secrets|length %}
-secrets:
-{% for secret in role_regards_stack_workers_secrets %}
-  {{ secret }}:
-    file: "{{ role_regards_stack_workers_secrets_location }}/{{ secret }}"
-{% endfor %}
-{% endif %}
-
-{% if role_regards_stack_workers_configs|length %}
-configs:
-{% for config in role_regards_stack_workers_configs %}
-  {{ config }}:
-    file: "{{ role_regards_stack_workers_configs_location }}/{{ config }}"
-{% endfor %}
-{% endif %}
-
 services:
-
 {% for worker in role_regards_stack_workers %}
   {{ worker.name }}:
     image: {{ worker.docker_registry | default(role_regards_stack_registry) }}/{{ worker.image | default(worker.name) }}:{{ worker.tag }}
@@ -57,17 +40,23 @@ services:
 {% endif %}
       - type: tmpfs
         target: /tmp
-{% if worker.configs is defined %}
     configs:
+      - source: rs_workers_application.yml
+        target: /tmp/application.yml
+{% if worker.config is defined %}
+      - source: rs_conf_{{ worker.name }}.yml
+        target: /tmp/{{ worker.name }}.yml
+{% endif %}
+{% if worker.configs is defined %}
 {% for config in worker.configs %}
-      - source: {{ config.source }}
+      - source: conf_{{ config.source }}
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
 {% if worker.secrets is defined %}
     secrets:
 {% for secret in worker.secrets %}
-      - source: {{ secret.source }}
+      - source: secret_{{ secret.source }}
         target: {{ secret.destination }}
 {% endfor %}
 {% endif %}

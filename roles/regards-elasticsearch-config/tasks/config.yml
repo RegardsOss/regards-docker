@@ -1,0 +1,28 @@
+---
+- name: Create ES config folder
+  ansible.builtin.file:
+    path: "{{ role_regards_elasticsearch_config_conf_local }}"
+    state: directory
+    mode: '0770'
+    owner: "{{ role_regards_elasticsearch_config_container_root_user }}"
+    group: "{{ role_regards_elasticsearch_config_container_root_group }}"
+    setype: "{{ role_regards_elasticsearch_config_setype }}"
+    seuser: "{{ role_regards_elasticsearch_config_seuser }}"
+
+- name: Copy config file
+  ansible.builtin.template:
+    src: elasticsearch.yml
+    dest: "{{ role_regards_elasticsearch_config_conf_local }}"
+    mode: '0770'
+    owner: "{{ role_regards_elasticsearch_config_container_root_user }}"
+    group: "{{ role_regards_elasticsearch_config_container_root_group }}"
+  when: role_regards_elasticsearch_config_elasticsearch_defined|bool
+
+- name: Copy logs config file
+  ansible.builtin.template:
+    src: elasticsearch-logs.yml
+    dest: "{{ role_regards_elasticsearch_config_conf_local }}"
+    mode: '0770'
+    owner: "{{ role_regards_elasticsearch_config_container_root_user }}"
+    group: "{{ role_regards_elasticsearch_config_container_root_group }}"
+  when: role_regards_elasticsearch_config_elasticsearch_logs_defined|bool

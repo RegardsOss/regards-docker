@@ -3,37 +3,45 @@
   hosts: master
   roles:
     - regards-init-master
-    - regards-init-network-workdir
-
 
 - name: Install REGARDS plugins on all nodes
   hosts: regards_nodes:!swarm_manager_only_nodes
   roles:
-    - regards-plugins
+    - regards-plugins-workspace-local
 
-
-- name: Install REGARDS structure on all nodes
+- name: Install REGARDS local workspaces on every nodes
   hosts: regards_nodes:!swarm_manager_only_nodes
   become: true
   roles:
-    - regards-logback
-    - regards-fluentd
-    - regards-mconfig
-    - regards-front
-    - regards-front-footer
-    - regards-postgres
-    - regards-s3-minio
-    - regards-elasticsearch
-    - regards-rabbitmq
+    - regards-microservices-workspace-local
+    - regards-logs-workspace-local
+    - regards-postgres-workspace-local
+    - regards-s3-minio-workspace-local
+    - regards-elasticsearch-workspace-local
+    - regards-rabbitmq-workspace-local
     - regards-workers
 
-- name: Install SWARM configs and secrets files
+- name: Initiate NFS workspaces 
+  hosts: slaves[0]
+  roles:
+    - regards-init-nfs-workspaces
+    - regards-plugins-workspace-nfs
+
+- name: Install SWARM configs and secrets files on master node
   hosts: master
   become: true
   roles:
-    - regards-ca-certificates
+    - regards-front
     - regards-front-ssl
-    - regards-workers-secrets-configs
+    - regards-front-footer
+    - regards-fluentd-config
+    - regards-postgres-config
+    - regards-elasticsearch-config
+    - regards-rabbitmq-config
+    - regards-mconfig
+    - regards-logback
+    - regards-mounts-secrets-configs
+    - regards-ca-certificates
 
 - name: Launch stack
   hosts: master

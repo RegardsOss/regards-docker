@@ -37,6 +37,9 @@ sendConfigFile kibana-settings.ndjson
 # Import Log Search view
 sendConfigFile logs_kibana_visu.ndjson
 
+# Import Space view
+sendConfigFile space.ndjson
+
 result_ok=true
 
 exit 0

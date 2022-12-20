@@ -1,0 +1,30 @@
+---
+- name: Create rabbitMQ config folder
+  ansible.builtin.file:
+    dest: "{{ role_regards_rabbitmq_config_conf_local }}"
+    state: directory
+    mode: '0770'
+    owner: "{{ role_regards_rabbitmq_config_container_root_user }}"
+    group: "{{ role_regards_rabbitmq_config_container_root_group }}"
+    setype: "{{ role_regards_rabbitmq_config_setype }}"
+    seuser: "{{ role_regards_rabbitmq_config_seuser }}"
+
+- name: Create RabbitMQ definitions config file
+  ansible.builtin.copy:
+    dest: "{{ role_regards_rabbitmq_config_conf_local }}/definitions.json"
+    content: "{{ role_regards_rabbitmq_config_definition | to_nice_json }}"
+    mode: '0770'
+    owner: "{{ role_regards_rabbitmq_config_container_root_user }}"
+    group: "{{ role_regards_rabbitmq_config_container_root_group }}"
+    setype: "{{ role_regards_rabbitmq_config_setype }}"
+    seuser: "{{ role_regards_rabbitmq_config_seuser }}"
+
+- name: Generate RabbitMQ config file
+  ansible.builtin.template:
+    src: "rabbitmq.conf"
+    dest: "{{ role_regards_rabbitmq_config_conf_local }}/rabbitmq.conf"
+    mode: '0770'
+    owner: "{{ role_regards_rabbitmq_config_container_root_user }}"
+    group: "{{ role_regards_rabbitmq_config_container_root_group }}"
+    setype: "{{ role_regards_rabbitmq_config_setype }}"
+    seuser: "{{ role_regards_rabbitmq_config_seuser }}"

@@ -1,7 +1,35 @@
 version: '3.7'
-services:
 
-{% if role_regards_stack_cots.rabbitmq is defined %}
+# Config name must contains less than 32 [a-zA-Z0-9-_.] caracters
+configs:
+  rs-rabbitmq_definitions.json:
+    # Hacky solution: this file changes everytime a password inside this file is generated, so this is disconnected
+    # from file change. Operators must use rabbitmq.manual_reversion to make this config file refreshed
+    name: rabbitmq_definitions_json_{{ role_regards_stack_rabbitmq_manual_reversion }}
+    file: {{ role_regards_stack_config }}rabbitmq/definitions.json
+  rs-rabbitmq_rabbitmq.conf:
+    name: rabbitmq_rabbitmq_conf_${CHECKSUM_RS_RABBITMQ_RABBITMQ_CONF}
+    file: {{ role_regards_stack_config }}rabbitmq/rabbitmq.conf
+
+volumes:
+  data-rabbitmq-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_rabbitmq_data.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_rabbitmq_data.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_rabbitmq_data.get('device_postfix', 'rabbitmq') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}rabbitmq
+{% endif %}
+
+services:
   rs-rabbitmq:
     image: {{ role_regards_stack_registry }}/regards-messaging:{{ role_regards_stack_cots.rabbitmq.tag | default("latest") }}
 {%if (role_regards_stack_cots.rabbitmq.configuration | default({})).labels is defined %}
@@ -10,7 +38,7 @@ services:
       {{ key }}: "{{value}}"
 {% endfor %}
 {% endif %}
-    user: "{{role_regards_stack_container_run_uid}}:{{role_regards_stack_container_run_gid}}"
+    user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
 {% if role_regards_stack_cots.rabbitmq.global_service is defined %}
     hostname: "rs-rabbitmq-{{ '{{' }}.Node.Hostname{{ '}}' }}"
 {% else %}
@@ -18,11 +46,16 @@ services:
 {% endif %}
     read_only: true
     volumes:
-      - {{ role_regards_stack_workspace_local }}rabbitmq:/var/lib/rabbitmq/mnesia/
-      - {{ role_regards_stack_config }}rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
-      - {{ role_regards_stack_config }}rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - type: volume
+        source: data-rabbitmq-datavolume
+        target: /var/lib/rabbitmq/mnesia/
       - type: tmpfs
         target: /var/log/rabbitmq/log/
+    configs:
+      - source: rs-rabbitmq_definitions.json
+        target: /etc/rabbitmq/definitions.json
+      - source: rs-rabbitmq_rabbitmq.conf
+        target: /etc/rabbitmq/rabbitmq.conf
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_cots.rabbitmq.http is defined or role_regards_stack_cots.rabbitmq.client is defined and role_regards_stack_cots.rabbitmq.global_service is defined == false %}
@@ -49,5 +82,4 @@ services:
     environment:
       - RABBITMQ_USE_LONGNAME=true
       - RABBITMQ_ERLANG_COOKIE={{ role_regards_stack_config_rabbitmq_erlang_cookie }}
-{% endif %}
 {% endif %}

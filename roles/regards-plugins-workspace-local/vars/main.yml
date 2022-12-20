@@ -1,0 +1,30 @@
+---
+# Docker images version
+role_regards_plugins_workspace_local_docker_registry: "{{ group_docker_registry }}"
+role_regards_plugins_workspace_local_plugins: "{{ group_docker_plugins }}"
+
+role_regards_plugins_workspace_local_active: "{{  not (group_docker_mounts | default({})).get('regards', {}).get('plugins', {}).nfs is defined }}"
+
+role_regards_plugins_workspace_local_microservice_having_plugin:
+  - authentication
+  - dam
+  - fem
+  - notifier
+  - catalog
+  - storage
+  - ingest
+  - dataprovider
+  - processing
+
+# Docker conf
+role_regards_plugins_workspace_local_workdir_local: "{{ group_workdir_local }}"
+role_regards_plugins_workspace_local_workspace_local: "{{ group_workdir_local }}{{group_stack_name}}/workspace/"
+role_regards_plugins_workspace_local_workspace: "{{ group_workdir_local }}{{group_stack_name}}/workspace/regards/plugins"
+
+role_regards_plugins_workspace_local_container_root_user: "{{ group_container_root_user }}"
+role_regards_plugins_workspace_local_container_root_group: "{{ group_container_root_group }}"
+
+role_regards_plugins_workspace_local_container_run_user: "{{ group_container_run_user }}"
+role_regards_plugins_workspace_local_container_run_group: "{{ group_container_run_group }}"
+role_regards_plugins_workspace_local_setype: "{{ group_setype }}"
+role_regards_plugins_workspace_local_seuser: "{{ group_seuser }}"

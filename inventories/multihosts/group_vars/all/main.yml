@@ -1,10 +1,8 @@
 global_stack:
   # Master node host name
   master_node_host_name: PO15489
-  # Disk used by every nodes for local files
+  # Local path used to install REGARDS across every node
   workdir: /opt/regards-demo/
-  # Network disk shared accross every nodes
-  networkdir: /share/
   # Docker configuration
   docker:
     # Docker installation directory

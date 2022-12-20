@@ -1,0 +1,32 @@
+{% if role_regards_elasticsearch_config_elasticsearch.global_service is defined %}
+# Specify the interface to use between elasticsearches, otherwise it uses eth1
+network.host: _eth0_
+{% else %}
+network.host: 0.0.0.0
+{% endif %}
+
+discovery.seed_hosts: rs-elasticsearch
+xpack.security.enabled: false
+ingest.geoip.downloader.enabled: false
+{% if role_regards_elasticsearch_config_elasticsearch.global_service is not defined %}
+discovery.type: single-node
+{% else %}
+
+cluster.initial_master_nodes:
+{%   for hostname in groups['all'] %}
+{%     if role_regards_elasticsearch_config_elasticsearch.node_label_placement_constraint is defined %}
+{%       if hostvars[hostname].ansible_host is defined and hostvars[hostname].labels is defined %}
+{%         for constraintKey, constraintValue in hostvars[hostname].labels.items() %}
+{%           if constraintKey == role_regards_elasticsearch_config_elasticsearch.node_label_placement_constraint.key and constraintValue == role_regards_elasticsearch_config_elasticsearch.node_label_placement_constraint.value %}
+  - rs-elasticsearch-{{ hostvars[hostname]['ansible_host'] }}
+{%           endif %}
+{%         endfor %}
+{%       endif %}
+{%     else %}
+  - rs-elasticsearch-{{ hostvars[hostname]['ansible_host'] }}
+{%     endif %}
+{%   endfor %}
+
+{% endif %}
+path.repo: ["/usr/share/elasticsearch/backup"]
+path.data: ${ES_PATH_DATA}

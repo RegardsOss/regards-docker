@@ -1,5 +1,5 @@
 ---
 - name: Run postinstall scripts to update CoTS configuration
-  hosts: regards_post_install
+  hosts: slaves[0]
   roles:
     - regards-kibana-logs-postinstall

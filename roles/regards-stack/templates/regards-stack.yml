@@ -1,27 +1,572 @@
 version: '3.7'
 
-{% if role_regards_stack_top_level_volumes|length %}
-# Definition of top level volumes
-volumes:
-{{ role_regards_stack_top_level_volumes | to_nice_yaml(indent=2) | indent(2, true) }}
-{% endif %}
-
-{% if (role_regards_stack_mservices.front is defined and role_regards_stack_mservices.front.ssl is defined) or role_regards_stack_ca_certificates|length > 0 %}
+{% if (role_regards_stack_mservices.front is defined and role_regards_stack_mservices.front.ssl is defined) %}
 secrets:
 {% if role_regards_stack_mservices.front is defined and role_regards_stack_mservices.front.ssl is defined %}
-  front_ssl_crt:
-    file: "{{ role_regards_stack_config }}regards/nginx/ssl/{{ role_regards_stack_mservices.front.ssl.crt }}"
   front_ssl_key:
+    name: front_ssl_key_${CHECKSUM_RS_FRONT_SSL_KEY}
     file: "{{ role_regards_stack_config }}regards/nginx/ssl/{{ role_regards_stack_mservices.front.ssl.key }}"
 {% endif %}
+{% endif %}
+
+volumes:
+################## DATA INPUTS ###################
+{% for data_input in role_regards_stack_volume_data_inputs %}
+  {{ data_input.name }}:
+    driver: local
+    driver_opts:
+{% if data_input.get("local", False)|bool %}
+      type: none
+      o: bind
+      device: {{ data_input.source }}
+{% else %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == data_input.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ data_input.device_postfix }}"
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% if role_regards_stack_mservices.processing is defined %}
+################## PROCESSING ###################
+  processing-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_processing.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_processing.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_processing.get('device_postfix', 'regards/processing') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}regards/processing
+{% endif %}
+{% endif %}
+{% if role_regards_stack_mservices.dam is defined %}
+################## DAM STORAGE ###################
+  dam-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_dam.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_dam.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_dam.get('device_postfix', 'regards/storage/dam') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}regards/storage/dam
+{% endif %}
+{% endif %}
+####################### WORKSPACE ########################
+  workspace-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_workspace.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_workspace.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_workspace.get('device_postfix', 'regards/workspace') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}regards/workspace
+{% endif %}
+{% if role_regards_stack_mservices.storage is defined %}
+################## STORAGE MICROSERVICE ###################
+  online-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_storage_online.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_storage_online.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_storage_online.get('device_postfix', 'regards/storage/onlines') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}regards/storage/onlines
+{% endif %}
+
+  cache-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_storage_cache.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_storage_cache.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_storage_cache.get('device_postfix', 'regards/storage/cache') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}regards/storage/cache
+{% endif %}
+{% endif %}
+
+############# MICROSERVICE LOGS FOLDER ##############
+{% for mservice in role_regards_stack_volume_mservices_logs %}
+  logs-{{ mservice }}-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_logs.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_logs.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_logs.get('device_postfix', 'regards/logs/') }}{{ mservice }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}regards/logs/{{ mservice }}
+{% endif %}
+{% endfor %}
+
+################## PLUGINS MICROSERVICE ###################
+
+{% if role_regards_stack_mservices.authentication is defined %}
+  authentication-plugins-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_plugins.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/authentication') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}regards/plugins/authentication
+{% endif %}
+{% endif %}
+
+{% if role_regards_stack_mservices.catalog is defined %}
+  catalog-plugins-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_plugins.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/catalog') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}regards/plugins/catalog
+{% endif %}
+{% endif %}
+
+{% if role_regards_stack_mservices.dam is defined %}
+  dam-plugins-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_plugins.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/dam') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}regards/plugins/dam
+{% endif %}
+{% endif %}
+
+{% if role_regards_stack_mservices.dataprovider is defined %}
+  dataprovider-plugins-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_plugins.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/dataprovider') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}regards/plugins/dataprovider
+{% endif %}
+{% endif %}
+
+{% if role_regards_stack_mservices.fem is defined %}
+  fem-plugins-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_plugins.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/fem') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}regards/plugins/fem
+{% endif %}
+{% endif %}
+
+{% if role_regards_stack_mservices.ingest is defined %}
+  ingest-plugins-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_plugins.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/ingest') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}regards/plugins/ingest
+{% endif %}
+{% endif %}
+
+{% if role_regards_stack_mservices.notifier is defined %}
+  notifier-plugins-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_plugins.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/notifier') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}regards/plugins/notifier
+{% endif %}
+{% endif %}
+
+{% if role_regards_stack_mservices.processing is defined %}
+  processing-plugins-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_plugins.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/processing') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}regards/plugins/processing
+{% endif %}
+{% endif %}
+
+{% if role_regards_stack_mservices.storage is defined %}
+  storage-plugins-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_plugins.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/storage') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}regards/plugins/storage
+{% endif %}
+{% endif %}
+
+
+
+
+configs:
+######################################################
+################## Logback configs ###################
+######################################################
+{% if role_regards_stack_mservices.gateway is defined %}
+  rs-gateway_logback.xml:
+    name: gateway_logback_xml_${CHECKSUM_RS_GATEWAY_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}gateway/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.registry is defined %}
+  rs-registry_logback.xml:
+    name: registry_logback_xml_${CHECKSUM_RS_REGISTRY_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}registry/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.admin_instance is defined %}
+  rs-admin-instance_logback.xml:
+    name: admin_instance_logback_xml_${CHECKSUM_RS_ADMIN_INSTANCE_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}admin-instance/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.admin is defined %}
+  rs-admin_logback.xml:
+    name: admin_logback_xml_${CHECKSUM_RS_ADMIN_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}admin/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.authentication is defined %}
+  rs-authentication_logback.xml:
+    name: authentication_logback_xml_${CHECKSUM_RS_AUTHENTICATION_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}authentication/logback.xml
+{% endif %}
+  rs-config_logback.xml:
+    name: config_logback_xml_${CHECKSUM_RS_CONFIG_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}config/logback.xml
+{% if role_regards_stack_mservices.dam is defined %}
+  rs-dam_logback.xml:
+    name: dam_logback_xml_${CHECKSUM_RS_DAM_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}dam/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.notifier is defined %}
+  rs-notifier_logback.xml:
+    name: notifier_logback_xml_${CHECKSUM_RS_NOTIFIER_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}notifier/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.fem is defined %}
+  rs-fem_logback.xml:
+    name: fem_logback_xml_${CHECKSUM_RS_FEM_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}fem/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.catalog is defined %}
+  rs-catalog_logback.xml:
+    name: catalog_logback_xml_${CHECKSUM_RS_CATALOG_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}catalog/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.access_instance is defined %}
+  rs-access-instance_logback.xml:
+    name: access_instance_logback_xml_${CHECKSUM_RS_ACCESS_INSTANCE_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}access-instance/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.access_project is defined %}
+  rs-access-project_logback.xml:
+    name: access_project_logback_xml_${CHECKSUM_RS_ACCESS_PROJECT_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}access-project/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.order is defined %}
+  rs-order_logback.xml:
+    name: order_logback_xml_${CHECKSUM_RS_ORDER_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}order/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.processing is defined %}
+  rs-processing_logback.xml:
+    name: processing_logback_xml_${CHECKSUM_RS_PROCESSING_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}processing/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.storage is defined %}
+  rs-storage_logback.xml:
+    name: storage_logback_xml_${CHECKSUM_RS_STORAGE_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}storage/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.ingest is defined %}
+  rs-ingest_logback.xml:
+    name: ingest_logback_xml_${CHECKSUM_RS_INGEST_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}ingest/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.dataprovider is defined %}
+  rs-dataprovider_logback.xml:
+    name: dataprovider_logback_xml_${CHECKSUM_RS_DATAPROVIDER_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}dataprovider/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.worker_manager is defined %}
+  rs-worker-manager_logback.xml:
+    name: worker_manager_logback_xml_${CHECKSUM_RS_WORKER_MANAGER_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}worker-manager/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.lta_manager is defined %}
+  rs-lta-manager_logback.xml:
+    name: lta_manager_logback_xml_${CHECKSUM_RS_LTA_MANAGER_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}lta-manager/logback.xml
+{% endif %}
+
+############################################################
+################## Microservices configs ###################
+############################################################
+
+  rs_ms_application.properties:
+    name: rs_ms_application_properties_${CHECKSUM_RS_MS_APPLICATION_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/application.properties
+{% if role_regards_stack_mservices.access_instance is defined %}
+  rs_ms_access-instance.properties:
+    name: rs_ms_access_inst_properties_${CHECKSUM_RS_MS_ACCESS_INSTANCE_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-access-instance.properties
+{% endif %}
+{% if role_regards_stack_mservices.access_project is defined %}
+  rs_ms_access-project.properties:
+    name: rs_ms_access_pro_properties_${CHECKSUM_RS_MS_ACCESS_PROJECT_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-access-project.properties
+{% endif %}
+{% if role_regards_stack_mservices.admin_instance is defined %}
+  rs_ms_admin_instance.properties:
+    name: rs_ms_admin_inst_properties_${CHECKSUM_RS_MS_ADMIN_INSTANCE_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-admin-instance.properties
+{% endif %}
+{% if role_regards_stack_mservices.admin is defined %}
+  rs_ms_admin.properties:
+    name: rs_ms_admin_properties_${CHECKSUM_RS_MS_ADMIN_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-admin.properties
+{% endif %}
+{% if role_regards_stack_mservices.authentication is defined %}
+  rs_ms_authentication.properties:
+    name: rs_ms_authenti_properties_${CHECKSUM_RS_MS_AUTHENTICATION_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-authentication.properties
+{% endif %}
+{% if role_regards_stack_mservices.catalog is defined %}
+  rs_ms_catalog.properties:
+    name: rs_ms_catalog_properties_${CHECKSUM_RS_MS_CATALOG_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-catalog.properties
+{% endif %}
+{% if role_regards_stack_mservices.dam is defined %}
+  rs_ms_dam.properties:
+    name: rs_ms_dam_props_${CHECKSUM_RS_MS_DAM_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-dam.properties
+{% endif %}
+{% if role_regards_stack_mservices.dataprovider is defined %}
+  rs_ms_dataprovider.properties:
+    name: rs_ms_dataprovider_properties_${CHECKSUM_RS_MS_DATAPROVIDER_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-dataprovider.properties
+{% endif %}
+{% if role_regards_stack_mservices.fem is defined %}
+  rs_ms_fem.properties:
+    name: rs_ms_fem_properties_${CHECKSUM_RS_MS_FEM_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-fem.properties
+{% endif %}
+{% if role_regards_stack_mservices.gateway is defined %}
+  rs_ms_gateway.properties:
+    name: rs_ms_gateway_properties_${CHECKSUM_RS_MS_GATEWAY_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-gateway.properties
+{% endif %}
+{% if role_regards_stack_mservices.ingest is defined %}
+  rs_ms_ingest.properties:
+    name: rs_ms_ingest_properties_${CHECKSUM_RS_MS_INGEST_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-ingest.properties
+{% endif %}
+{% if role_regards_stack_mservices.lta_manager is defined %}
+  rs_ms_lta-manager.properties:
+    name: rs_ms_lta_manager_properties_${CHECKSUM_RS_MS_LTA_MANAGER_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-lta-manager.properties
+{% endif %}
+{% if role_regards_stack_mservices.notifier is defined %}
+  rs_ms_notifier.properties:
+    name: rs_ms_notifier_properties_${CHECKSUM_RS_MS_NOTIFIER_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-notifier.properties
+{% endif %}
+{% if role_regards_stack_mservices.order is defined %}
+  rs_ms_order.properties:
+    name: rs_ms_order_properties_${CHECKSUM_RS_MS_ORDER_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-order.properties
+{% endif %}
+{% if role_regards_stack_mservices.processing is defined %}
+  rs_ms_processing.properties:
+    name: rs_ms_processing_properties_${CHECKSUM_RS_MS_PROCESSING_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-processing.properties
+{% endif %}
+{% if role_regards_stack_mservices.registry is defined %}
+  rs_ms_registry.properties:
+    name: rs_ms_registry_properties_${CHECKSUM_RS_MS_REGISTRY_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-registry.properties
+{% endif %}
+{% if role_regards_stack_mservices.storage is defined %}
+  rs_ms_storage.properties:
+    name: rs_ms_storage_properties_${CHECKSUM_RS_MS_STORAGE_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-storage.properties
+{% endif %}
+{% if role_regards_stack_mservices.worker_manager is defined %}
+  rs_ms_worker-manager.properties:
+    name: rs_ms_worker_manager_properties_${CHECKSUM_RS_MS_WORKER_MANAGER_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-worker-manager.properties
+{% endif %}
+
+#############################################
+################ WORKER #####################
+#############################################
+
+{% if role_regards_stack_workers|length %}
+  rs_workers_application.yml:
+    name: rs_workers_app_yml_${CHECKSUM_RS_WORKERS_APPLICATION_YML}
+    file: {{ role_regards_stack_config }}regards/config/regards-workers/application.yml
+{% endif %}
+{% for worker in role_regards_stack_workers %}
+{% if worker.config is defined %}
+  rs_conf_{{ worker.name }}.yml:
+    name: rs_conf_{{ worker.name | truncate(20, True, '', 0) }}_${CHECKSUM_WORKER_{{ loop.index0 }}_YML}
+    file: {{ role_regards_stack_config }}regards/config/regards-workers/{{ worker.name }}.yml
+{% endif %}
+{% endfor %}
+
+################ CERTS #####################
+
+{% if role_regards_stack_ca_certificates|length > 0 %}
 {% for file in role_regards_stack_ca_certificates %}
   ca_cert_{{ file.split('.') | first }}:
-    file: "{{ role_regards_stack_config }}/regards/ca-certificates/{{ file }}"
+    name: ca_cert_{{ loop.index0 }}_${CHECKSUM_CA_CERT_{{ loop.index0 }}}
+    file: "{{ role_regards_stack_config }}regards/ca-certificates/{{ file }}"
 {% endfor %}
 {% endif %}
 
-services:
+###############################################
+################## FRONTEND ###################
+###############################################
 
+{% if role_regards_stack_mservices.front is defined %}
+  rs-front_nginx.conf:
+    name: front_nginx.conf_${CHECKSUM_RS_FRONT_NGINX_CONF}
+    file: {{ role_regards_stack_config }}regards/nginx/nginx.conf
+{% if role_regards_stack_mservices.front.show_footer|default(false)|bool %}
+  rs-front_version_footer.html:
+    name: front_version_footer_html_${CHECKSUM_RS_FRONT_VERSION_FOOTER_HTML}
+    file: {{ role_regards_stack_config }}regards/nginx/footer/regards-version-footer.html
+  rs-front_footer_cnes_logo.png:
+    name: front_version_footer_html_${CHECKSUM_RS_FRONT_FOOTER_CNES_LOGO_PNG}
+    file: {{ role_regards_stack_config }}regards/nginx/footer/imgs/CNES_Logo_Blanc_Horizontal.png
+  rs-front_footer_Regards.png:
+    name: front_version_footer_html_${CHECKSUM_RS_FRONT_FOOTER_REGARDS_PNG}
+    file: {{ role_regards_stack_config }}regards/nginx/footer/imgs/Regards.png
+{% endif %}
+{% if role_regards_stack_mservices.front.ssl is defined %}
+  front_ssl_crt:
+    name: front_ssl_crt_${CHECKSUM_RS_FRONT_SSL_CRT}
+    file: "{{ role_regards_stack_config }}regards/nginx/ssl/{{ role_regards_stack_mservices.front.ssl.crt }}"
+{% endif %}
+{% endif %}
+
+services:
 {% if role_regards_stack_mservices.config is defined %}
   rs-config:
     image: {{ role_regards_stack_registry }}/rs-config:{{ role_regards_stack_mservices.config.tag }}
@@ -47,10 +592,104 @@ services:
       - "{{ role_regards_stack_mservices.config.http }}:9031"
 {% endif %}
     volumes:
-      - {{ role_regards_stack_config }}regards/config:/config/regards:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/config:/logs
+      - type: volume
+        source: logs-config-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+    configs:
+      - source: rs-config_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /config/regards/regards-oss-backend/application.properties
+{% if role_regards_stack_mservices.access_instance is defined %}
+      - source: rs_ms_access-instance.properties
+        target: /config/regards/regards-oss-backend/rs-access-instance.properties
+{% endif %}
+{% if role_regards_stack_mservices.access_project is defined %}
+      - source: rs_ms_access-project.properties
+        target: /config/regards/regards-oss-backend/rs-access-project.properties
+{% endif %}
+{% if role_regards_stack_mservices.admin_instance is defined %}
+      - source: rs_ms_admin_instance.properties
+        target: /config/regards/regards-oss-backend/rs-admin-instance.properties
+{% endif %}
+{% if role_regards_stack_mservices.admin is defined %}
+      - source: rs_ms_admin.properties
+        target: /config/regards/regards-oss-backend/rs-admin.properties
+{% endif %}
+{% if role_regards_stack_mservices.authentication is defined %}
+      - source: rs_ms_authentication.properties
+        target: /config/regards/regards-oss-backend/rs-authentication.properties
+{% endif %}
+{% if role_regards_stack_mservices.catalog is defined %}
+      - source: rs_ms_catalog.properties
+        target: /config/regards/regards-oss-backend/rs-catalog.properties
+{% endif %}
+{% if role_regards_stack_mservices.dam is defined %}
+      - source: rs_ms_dam.properties
+        target: /config/regards/regards-oss-backend/rs-dam.properties
+{% endif %}
+{% if role_regards_stack_mservices.dataprovider is defined %}
+      - source: rs_ms_dataprovider.properties
+        target: /config/regards/regards-oss-backend/rs-dataprovider.properties
+{% endif %}
+{% if role_regards_stack_mservices.fem is defined %}
+      - source: rs_ms_fem.properties
+        target: /config/regards/regards-oss-backend/rs-fem.properties
+{% endif %}
+{% if role_regards_stack_mservices.gateway is defined %}
+      - source: rs_ms_gateway.properties
+        target: /config/regards/regards-oss-backend/rs-gateway.properties
+{% endif %}
+{% if role_regards_stack_mservices.ingest is defined %}
+      - source: rs_ms_ingest.properties
+        target: /config/regards/regards-oss-backend/rs-ingest.properties
+{% endif %}
+{% if role_regards_stack_mservices.lta_manager is defined %}
+      - source: rs_ms_lta-manager.properties
+        target: /config/regards/regards-oss-backend/rs-lta-manager.properties
+{% endif %}
+{% if role_regards_stack_mservices.notifier is defined %}
+      - source: rs_ms_notifier.properties
+        target: /config/regards/regards-oss-backend/rs-notifier.properties
+{% endif %}
+{% if role_regards_stack_mservices.order is defined %}
+      - source: rs_ms_order.properties
+        target: /config/regards/regards-oss-backend/rs-order.properties
+{% endif %}
+{% if role_regards_stack_mservices.processing is defined %}
+      - source: rs_ms_processing.properties
+        target: /config/regards/regards-oss-backend/rs-processing.properties
+{% endif %}
+{% if role_regards_stack_mservices.registry is defined %}
+      - source: rs_ms_registry.properties
+        target: /config/regards/regards-oss-backend/rs-registry.properties
+{% endif %}
+{% if role_regards_stack_mservices.storage is defined %}
+      - source: rs_ms_storage.properties
+        target: /config/regards/regards-oss-backend/rs-storage.properties
+{% endif %}
+{% if role_regards_stack_mservices.worker_manager is defined %}
+      - source: rs_ms_worker-manager.properties
+        target: /config/regards/regards-oss-backend/rs-worker-manager.properties
+{% endif %}
+{% if role_regards_stack_workers|length %}
+      - source: rs_workers_application.yml
+        target: /config/regards/regards-workers/application.yml
+{% endif %}
+{% for worker in role_regards_stack_workers %}
+{% if worker.config is defined %}
+      - source: rs_conf_{{ worker.name }}.yml
+        target: /config/regards/regards-workers/{{ worker.name }}.yml
+{% endif %}
+{% endfor %}
+{% if role_regards_stack_mservices.config.configs is defined %}
+{% for config in role_regards_stack_mservices.config.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
     logging:
 {% if role_regards_stack_mservices.config.logging is defined %}
       {{ role_regards_stack_mservices.config.logging | to_nice_yaml | indent(6) }}
@@ -83,9 +722,24 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     volumes:
-      - {{ role_regards_stack_workspace_local }}regards/logs/registry:/logs
+      - type: volume
+        source: logs-registry-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+    configs:
+      - source: rs-registry_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_registry.properties
+        target: /tmp/rs-registry.properties
+{% if role_regards_stack_mservices.registry.configs is defined %}
+{% for config in role_regards_stack_mservices.registry.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
 {% if role_regards_stack_mservices.registry.http is defined or role_regards_stack_mservices.registry.jdwp is defined or role_regards_stack_mservices.registry.jmx is defined or role_regards_stack_mservices.registry.yourkit is defined %}
     ports:
 {% if role_regards_stack_mservices.registry.http is defined %}
@@ -141,10 +795,30 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     volumes:
-      - {{ role_regards_stack_logback }}gateway:/config:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/gateway:/logs
+      - type: volume
+        source: logs-gateway-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+    configs:
+      - source: rs-gateway_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_gateway.properties
+        target: /tmp/rs-gateway.properties
+{% if role_regards_stack_mservices.gateway.configs is defined %}
+{% for config in role_regards_stack_mservices.gateway.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
+{% if role_regards_stack_ca_certificates|length > 0 %}
+{% for file in role_regards_stack_ca_certificates %}
+      - source: ca_cert_{{ file.split('.') | first }}
+        target: "/etc/ca-certificates/{{ file }}"
+{% endfor %}
+{% endif %}
 {% if role_regards_stack_mservices.gateway.http is defined or role_regards_stack_mservices.gateway.jdwp is defined or role_regards_stack_mservices.gateway.jmx is defined or role_regards_stack_mservices.gateway.yourkit is defined %}
     ports:
 {% if role_regards_stack_mservices.gateway.http is defined %}
@@ -159,13 +833,6 @@ services:
 {% if role_regards_stack_mservices.gateway.yourkit is defined %}
       - "{{ role_regards_stack_mservices.gateway.yourkit }}:10001"
 {% endif %}
-{% endif %}
-{% if role_regards_stack_ca_certificates|length > 0 %}
-    secrets:
-{% for file in role_regards_stack_ca_certificates %}
-      - source: ca_cert_{{ file.split('.') | first }}
-        target: "/etc/ca-certificates/{{ file }}"
-{% endfor %}
 {% endif %}
     logging:
 {% if role_regards_stack_mservices.gateway.logging is defined %}
@@ -206,10 +873,24 @@ services:
       - ACTIVE_YOURKIT=true
 {% endif %}
     volumes:
-      - {{ role_regards_stack_logback }}admin-instance:/config:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/admin-instance:/logs
+      - type: volume
+        source: logs-admin-instance-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+    configs:
+      - source: rs-admin-instance_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_admin_instance.properties
+        target: /tmp/rs-admin-instance.properties
+{% if role_regards_stack_mservices.admin_instance.configs is defined %}
+{% for config in role_regards_stack_mservices.admin_instance.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
 {% if role_regards_stack_mservices.admin_instance.http is defined or role_regards_stack_mservices.admin_instance.jdwp is defined or role_regards_stack_mservices.admin_instance.jmx is defined or role_regards_stack_mservices.admin_instance.yourkit is defined %}
     ports:
 {% if role_regards_stack_mservices.admin_instance.http is defined %}
@@ -265,10 +946,24 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     volumes:
-      - {{ role_regards_stack_logback }}admin:/config:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/admin:/logs
+      - type: volume
+        source: logs-admin-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+    configs:
+      - source: rs-admin_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_admin.properties
+        target: /tmp/rs-admin.properties
+{% if role_regards_stack_mservices.admin.configs is defined %}
+{% for config in role_regards_stack_mservices.admin.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
 {% if role_regards_stack_mservices.admin.http is defined or role_regards_stack_mservices.admin.jdwp is defined or role_regards_stack_mservices.admin.jmx is defined or role_regards_stack_mservices.admin.yourkit is defined %}
     ports:
 {% if role_regards_stack_mservices.admin.http is defined %}
@@ -324,11 +1019,33 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     volumes:
-      - {{ role_regards_stack_workspace_local }}regards/plugins/authentication:/plugins:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/authentication:/logs
-      - {{ role_regards_stack_logback }}authentication:/config:ro
+      - type: volume
+        source: authentication-plugins-datavolume
+        target: /plugins
+      - type: volume
+        source: logs-authentication-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+    configs:
+      - source: rs-authentication_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_authentication.properties
+        target: /tmp/rs-authentication.properties
+{% if role_regards_stack_ca_certificates|length > 0 %}
+{% for file in role_regards_stack_ca_certificates %}
+      - source: ca_cert_{{ file.split('.') | first }}
+        target: "/etc/ca-certificates/{{ file }}"
+{% endfor %}
+{% endif %}
+{% if role_regards_stack_mservices.authentication.configs is defined %}
+{% for config in role_regards_stack_mservices.authentication.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
 {% if role_regards_stack_mservices.authentication.http is defined or role_regards_stack_mservices.authentication.jdwp is defined or role_regards_stack_mservices.authentication.jmx is defined or role_regards_stack_mservices.authentication.yourkit is defined %}
     ports:
 {% if role_regards_stack_mservices.authentication.http is defined %}
@@ -343,13 +1060,6 @@ services:
 {% if role_regards_stack_mservices.authentication.yourkit is defined %}
       - "{{ role_regards_stack_mservices.authentication.yourkit }}:10001"
 {% endif %}
-{% endif %}
-{% if role_regards_stack_ca_certificates|length > 0 %}
-    secrets:
-{% for file in role_regards_stack_ca_certificates %}
-      - source: ca_cert_{{ file.split('.') | first }}
-        target: "/etc/ca-certificates/{{ file }}"
-{% endfor %}
 {% endif %}
     logging:
 {% if role_regards_stack_mservices.authentication.logging is defined %}
@@ -396,13 +1106,39 @@ services:
       - {{ volume.source }}:{{ volume.destination }}
 {% endfor %}
 {% endif %}
-      - {{ role_regards_stack_logback }}dam:/config:ro
-      - {{ role_regards_stack_workspace_local }}regards/plugins/dam:/plugins:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/dam:/logs
-      - {{ role_regards_stack_workspace_network }}regards/storage/dam:/storage
-      - {{ role_regards_stack_workspace_network }}regards/workspace:/tmp/workspace
+      - type: volume
+        source: dam-plugins-datavolume
+        target: /plugins
+      - type: volume
+        source: logs-dam-datavolume
+        target: /logs
+      - type: volume
+        source: dam-datavolume
+        target: /storage
+      - type: volume
+        source: workspace-datavolume
+        target: /tmp/workspace
       - type: tmpfs
         target: /tmp
+    configs:
+      - source: rs-dam_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_dam.properties
+        target: /tmp/rs-dam.properties
+{% if role_regards_stack_ca_certificates|length > 0 %}
+{% for file in role_regards_stack_ca_certificates %}
+      - source: ca_cert_{{ file.split('.') | first }}
+        target: "/etc/ca-certificates/{{ file }}"
+{% endfor %}
+{% endif %}
+{% if role_regards_stack_mservices.dam.configs is defined %}
+{% for config in role_regards_stack_mservices.dam.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
 {% if role_regards_stack_mservices.dam.http is defined or role_regards_stack_mservices.dam.jdwp is defined or role_regards_stack_mservices.dam.jmx is defined or role_regards_stack_mservices.dam.yourkit is defined %}
     ports:
 {% if role_regards_stack_mservices.dam.http is defined %}
@@ -417,13 +1153,6 @@ services:
 {% if role_regards_stack_mservices.dam.yourkit is defined %}
       - "{{ role_regards_stack_mservices.dam.yourkit }}:10001"
 {% endif %}
-{% endif %}
-{% if role_regards_stack_ca_certificates|length > 0 %}
-    secrets:
-{% for file in role_regards_stack_ca_certificates %}
-      - source: ca_cert_{{ file.split('.') | first }}
-        target: "/etc/ca-certificates/{{ file }}"
-{% endfor %}
 {% endif %}
     logging:
 {% if role_regards_stack_mservices.dam.logging is defined %}
@@ -465,11 +1194,33 @@ services:
       - ACTIVE_YOURKIT=true
 {% endif %}
     volumes:
-      - {{ role_regards_stack_logback }}notifier:/config:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/notifier:/logs
-      - {{ role_regards_stack_workspace_local }}regards/plugins/notifier:/plugins
+      - type: volume
+        source: notifier-plugins-datavolume
+        target: /plugins
+      - type: volume
+        source: logs-notifier-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+    configs:
+      - source: rs-notifier_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_notifier.properties
+        target: /tmp/rs-notifier.properties
+{% if role_regards_stack_ca_certificates|length > 0 %}
+{% for file in role_regards_stack_ca_certificates %}
+      - source: ca_cert_{{ file.split('.') | first }}
+        target: "/etc/ca-certificates/{{ file }}"
+{% endfor %}
+{% endif %}
+{% if role_regards_stack_mservices.notifier.configs is defined %}
+{% for config in role_regards_stack_mservices.notifier.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
 {% if role_regards_stack_mservices.notifier.http is defined or role_regards_stack_mservices.notifier.jdwp is defined or role_regards_stack_mservices.notifier.jmx is defined or role_regards_stack_mservices.notifier.yourkit is defined %}
     ports:
 {% if role_regards_stack_mservices.notifier.http is defined %}
@@ -484,13 +1235,6 @@ services:
 {% if role_regards_stack_mservices.notifier.yourkit is defined %}
       - "{{ role_regards_stack_mservices.notifier.yourkit }}:10001"
 {% endif %}
-{% endif %}
-{% if role_regards_stack_ca_certificates|length > 0 %}
-    secrets:
-{% for file in role_regards_stack_ca_certificates %}
-      - source: ca_cert_{{ file.split('.') | first }}
-        target: "/etc/ca-certificates/{{ file }}"
-{% endfor %}
 {% endif %}
     logging:
 {% if role_regards_stack_mservices.notifier.logging is defined %}
@@ -537,13 +1281,35 @@ services:
       - {{ volume.source }}:{{ volume.destination }}
 {% endfor %}
 {% endif %}
-      - {{ role_regards_stack_logback }}fem:/config:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/fem:/logs
-      - {{ role_regards_stack_workspace_local }}regards/plugins/fem:/plugins:ro
-      - {{ role_regards_stack_workspace_network }}regards/workspace:/tmp/workspace
-      - {{ role_regards_stack_workspace_network }}regards/input:/input
+      - type: volume
+        source: fem-plugins-datavolume
+        target: /plugins
+      - type: volume
+        source: logs-fem-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+{% for data_input in role_regards_stack_volume_data_inputs %}
+      - type: volume
+        source: {{ data_input.name }}
+        target: {{ data_input.destination }}
+{% endfor %}
+      - type: volume
+        source: workspace-datavolume
+        target: /tmp/workspace
+    configs:
+      - source: rs-fem_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_fem.properties
+        target: /tmp/rs-fem.properties
+{% if role_regards_stack_mservices.fem.configs is defined %}
+{% for config in role_regards_stack_mservices.fem.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
 {% if role_regards_stack_mservices.fem.http is defined or role_regards_stack_mservices.fem.jdwp is defined or role_regards_stack_mservices.fem.jmx is defined or role_regards_stack_mservices.fem.yourkit is defined %}
     ports:
 {% if role_regards_stack_mservices.fem.http is defined %}
@@ -599,12 +1365,30 @@ services:
       - ACTIVE_YOURKIT=true
 {% endif %}
     volumes:
-      - {{ role_regards_stack_logback }}catalog:/config:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/catalog:/logs
-      - {{ role_regards_stack_workspace_local }}regards/plugins/catalog:/plugins:ro
-      - {{ role_regards_stack_workspace_network }}regards/workspace:/tmp/workspace
+      - type: volume
+        source: catalog-plugins-datavolume
+        target: /plugins
+      - type: volume
+        source: logs-catalog-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+      - type: volume
+        source: workspace-datavolume
+        target: /tmp/workspace
+    configs:
+      - source: rs-catalog_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_catalog.properties
+        target: /tmp/rs-catalog.properties
+{% if role_regards_stack_mservices.catalog.configs is defined %}
+{% for config in role_regards_stack_mservices.catalog.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
 {% if role_regards_stack_mservices.catalog.http is defined or role_regards_stack_mservices.catalog.jdwp is defined or role_regards_stack_mservices.catalog.jmx is defined or role_regards_stack_mservices.catalog.yourkit is defined %}
     ports:
 {% if role_regards_stack_mservices.catalog.http is defined %}
@@ -659,10 +1443,24 @@ services:
       - ACTIVE_YOURKIT=true
 {% endif %}
     volumes:
-      - {{ role_regards_stack_logback }}access-instance:/config:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/access-instance:/logs
+      - type: volume
+        source: logs-access-instance-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+    configs:
+      - source: rs-access-instance_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_access-instance.properties
+        target: /tmp/rs-access-instance.properties
+{% if role_regards_stack_mservices.access_instance.configs is defined %}
+{% for config in role_regards_stack_mservices.access_instance.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
 {% if role_regards_stack_mservices.access_instance.http is defined or role_regards_stack_mservices.access_instance.jdwp is defined or role_regards_stack_mservices.access_instance.jmx is defined or role_regards_stack_mservices.access_instance.yourkit is defined %}
     ports:
 {% if role_regards_stack_mservices.access_instance.http is defined %}
@@ -716,10 +1514,24 @@ services:
       - ACTIVE_YOURKIT=true
 {% endif %}
     volumes:
-      - {{ role_regards_stack_logback }}access-project:/config:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/access-project:/logs
+      - type: volume
+        source: logs-access-project-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+    configs:
+      - source: rs-access-project_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_access-project.properties
+        target: /tmp/rs-access-project.properties
+{% if role_regards_stack_mservices.access_project.configs is defined %}
+{% for config in role_regards_stack_mservices.access_project.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_mservices.access_project.http is defined or role_regards_stack_mservices.access_project.jdwp is defined or role_regards_stack_mservices.access_project.jmx is defined or role_regards_stack_mservices.access_project.yourkit is defined %}
@@ -775,22 +1587,45 @@ services:
       - "{{ role_regards_stack_mservices.front.port }}:8080"
 {% endif %}
     volumes:
-      - "{{ role_regards_stack_workspace_network }}regards/front:/var/www/public/:ro"
-      - "{{ role_regards_stack_workspace_local }}regards/logs/front:/var/log/nginx"
-      - "{{ role_regards_stack_config }}regards/nginx/nginx.conf:/etc/nginx/nginx.conf:ro"
-{% if role_regards_stack_mservices.front.show_footer|default(false)|bool %}
-      - "{{ role_regards_stack_config }}regards/nginx/footer:/var/www/footer:ro"
-{% endif %}
+      - type: volume
+        source: logs-front-datavolume
+        target: /var/log/nginx
       - type: tmpfs
         target: /var/cache/nginx
       - type: tmpfs
         target: /tmp
       - type: tmpfs
         target: /var/www/conf
+{% if role_regards_stack_mservices.front.volumes is defined %}
+{% for vol in role_regards_stack_mservices.front.volumes %}
+      - type: volume
+        source: {{ vol.name }}
+        target: {{ vol.destination }}
+{% endfor %}
+{% endif %}
+    configs:
+      - source: rs-front_nginx.conf
+        target: /etc/nginx/nginx.conf
+{% if role_regards_stack_mservices.front.show_footer|default(false)|bool %}
+      - source: rs-front_version_footer.html
+        target: /var/www/footer/regards-version-footer.html
+      - source: rs-front_footer_cnes_logo.png
+        target: /var/www/footer/imgs/CNES_Logo_Blanc_Horizontal.png
+      - source: rs-front_footer_Regards.png
+        target: /var/www/footer/imgs/Regards.png
+{% endif %}
 {% if role_regards_stack_mservices.front.ssl is defined %}
-    secrets:
       - source: front_ssl_crt
         target: /etc/ssl/server.crt
+{% endif %}
+{% if role_regards_stack_mservices.front.configs is defined %}
+{% for config in role_regards_stack_mservices.front.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
+{% if role_regards_stack_mservices.front.ssl is defined %}
+    secrets:
       - source: front_ssl_key
         target: /etc/ssl/server.key
 {% endif %}
@@ -854,20 +1689,45 @@ services:
       - {{ volume.source }}:{{ volume.destination }}
 {% endfor %}
 {% endif %}
-      - {{ role_regards_stack_logback }}storage:/config
-      - {{ role_regards_stack_workspace_local }}regards/logs/storage:/logs
-      - {{ role_regards_stack_workspace_local }}regards/plugins/storage:/plugins
-      - {{ role_regards_stack_workspace_network }}regards/storage/onlines:/storages
-      - {{ role_regards_stack_workspace_network }}regards/storage/cache:/cache
-      - {{ role_regards_stack_workspace_network }}regards/input:/input
-      - {{ role_regards_stack_workspace_network }}regards/workspace:/tmp/workspace
+      - type: volume
+        source: storage-plugins-datavolume
+        target: /plugins
+      - type: volume
+        source: logs-storage-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+{% for data_input in role_regards_stack_volume_data_inputs %}
+      - type: volume
+        source: {{ data_input.name }}
+        target: {{ data_input.destination }}
+{% endfor %}
+      - type: volume
+        source: workspace-datavolume
+        target: /tmp/workspace
+      - type: volume
+        source: online-datavolume
+        target: /storages
+      - type: volume
+        source: cache-datavolume
+        target: /cache
+    configs:
+      - source: rs-storage_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_storage.properties
+        target: /tmp/rs-storage.properties
 {% if role_regards_stack_ca_certificates|length > 0 %}
-    secrets:
 {% for file in role_regards_stack_ca_certificates %}
       - source: ca_cert_{{ file.split('.') | first }}
         target: "/etc/ca-certificates/{{ file }}"
+{% endfor %}
+{% endif %}
+{% if role_regards_stack_mservices.storage.configs is defined %}
+{% for config in role_regards_stack_mservices.storage.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
 {% endfor %}
 {% endif %}
     logging:
@@ -930,15 +1790,35 @@ services:
       - {{ volume.source }}:{{ volume.destination }}
 {% endfor %}
 {% endif %}
-      - {{ role_regards_stack_logback }}order:/config:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/order:/logs
-      - {{ role_regards_stack_workspace_network }}regards/workspace:/tmp/workspace
-      - {{ role_regards_stack_workspace_network }}regards/processing:/processing
+      - type: volume
+        source: logs-order-datavolume
+        target: /logs
 {% if role_regards_stack_mservices.order.yourkit is defined %}
       - {{ role_regards_stack_workspace_local }}regards/yourkitSnap:/?/Snapshots
 {% endif %}
       - type: tmpfs
         target: /tmp
+{% if role_regards_stack_mservices.processing is defined %}
+      - type: volume
+        source: processing-datavolume
+        target: /processing
+{% endif %}
+      - type: volume
+        source: workspace-datavolume
+        target: /tmp/workspace
+    configs:
+      - source: rs-order_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_order.properties
+        target: /tmp/rs-order.properties
+{% if role_regards_stack_mservices.order.configs is defined %}
+{% for config in role_regards_stack_mservices.order.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
     logging:
 {% if role_regards_stack_mservices.order.logging is defined %}
       {{ role_regards_stack_mservices.order.logging | to_nice_yaml | indent(6) }}
@@ -1001,13 +1881,35 @@ services:
       - {{ volume.source }}:{{ volume.destination }}
 {% endfor %}
 {% endif %}
-      - {{ role_regards_stack_logback }}processing:/config:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/processing:/logs
-      - {{ role_regards_stack_workspace_local }}regards/plugins/processing:/plugins
-      - {{ role_regards_stack_workspace_network }}regards/processing:/processing
-      - {{ role_regards_stack_workspace_network }}regards/input:/input
+      - type: volume
+        source: processing-plugins-datavolume
+        target: /plugins
+      - type: volume
+        source: logs-processing-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+{% for data_input in role_regards_stack_volume_data_inputs %}
+      - type: volume
+        source: {{ data_input.name }}
+        target: {{ data_input.destination }}
+{% endfor %}
+      - type: volume
+        source: processing-datavolume
+        target: /processing
+    configs:
+      - source: rs-processing_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_processing.properties
+        target: /tmp/rs-processing.properties
+{% if role_regards_stack_mservices.processing.configs is defined %}
+{% for config in role_regards_stack_mservices.processing.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
     logging:
 {% if role_regards_stack_mservices.processing.logging is defined %}
       {{ role_regards_stack_mservices.processing.logging | to_nice_yaml | indent(6) }}
@@ -1068,13 +1970,35 @@ services:
       - {{ volume.source }}:{{ volume.destination }}
 {% endfor %}
 {% endif %}
-      - {{ role_regards_stack_logback }}ingest:/config:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/ingest:/logs
-      - {{ role_regards_stack_workspace_local }}regards/plugins/ingest:/plugins
-      - {{ role_regards_stack_workspace_network }}regards/input:/input
-      - {{ role_regards_stack_workspace_network }}regards/workspace:/tmp/workspace
+      - type: volume
+        source: ingest-plugins-datavolume
+        target: /plugins
+      - type: volume
+        source: logs-ingest-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+{% for data_input in role_regards_stack_volume_data_inputs %}
+      - type: volume
+        source: {{ data_input.name }}
+        target: {{ data_input.destination }}
+{% endfor %}
+      - type: volume
+        source: workspace-datavolume
+        target: /tmp/workspace
+    configs:
+      - source: rs-ingest_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_ingest.properties
+        target: /tmp/rs-ingest.properties
+{% if role_regards_stack_mservices.ingest.configs is defined %}
+{% for config in role_regards_stack_mservices.ingest.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
     logging:
 {% if role_regards_stack_mservices.ingest.logging is defined %}
       {{ role_regards_stack_mservices.ingest.logging | to_nice_yaml | indent(6) }}
@@ -1135,13 +2059,35 @@ services:
       - {{ volume.source }}:{{ volume.destination }}
 {% endfor %}
 {% endif %}
-      - {{ role_regards_stack_logback }}dataprovider:/config:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/dataprovider:/logs
-      - {{ role_regards_stack_workspace_local }}regards/plugins/dataprovider:/plugins
-      - {{ role_regards_stack_workspace_network }}regards/input:/input
-      - {{ role_regards_stack_workspace_network }}regards/workspace:/tmp/workspace
+      - type: volume
+        source: dataprovider-plugins-datavolume
+        target: /plugins
+      - type: volume
+        source: logs-dataprovider-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+{% for data_input in role_regards_stack_volume_data_inputs %}
+      - type: volume
+        source: {{ data_input.name }}
+        target: {{ data_input.destination }}
+{% endfor %}
+      - type: volume
+        source: workspace-datavolume
+        target: /tmp/workspace
+    configs:
+      - source: rs-dataprovider_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_dataprovider.properties
+        target: /tmp/rs-dataprovider.properties
+{% if role_regards_stack_mservices.dataprovider.configs is defined %}
+{% for config in role_regards_stack_mservices.dataprovider.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
     logging:
 {% if role_regards_stack_mservices.dataprovider.logging is defined %}
       {{ role_regards_stack_mservices.dataprovider.logging | to_nice_yaml | indent(6) }}
@@ -1202,10 +2148,24 @@ services:
       - {{ volume.source }}:{{ volume.destination }}
 {% endfor %}
 {% endif %}
-      - {{ role_regards_stack_logback }}worker-manager:/config:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/worker-manager:/logs
+      - type: volume
+        source: logs-worker-manager-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+    configs:
+      - source: rs-worker-manager_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_worker-manager.properties
+        target: /tmp/rs-worker-manager.properties
+{% if role_regards_stack_mservices.worker_manager.configs is defined %}
+{% for config in role_regards_stack_mservices.worker_manager.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
     logging:
 {% if role_regards_stack_mservices.worker_manager.logging is defined %}
       {{ role_regards_stack_mservices.worker_manager.logging | to_nice_yaml | indent(6) }}
@@ -1261,10 +2221,24 @@ services:
 {% endif %}
 {% endif %}
     volumes:
-      - {{ role_regards_stack_logback }}lta-manager:/config:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/lta-manager:/logs
+      - type: volume
+        source: logs-lta-manager-datavolume
+        target: /logs
       - type: tmpfs
         target: /tmp
+    configs:
+      - source: rs-lta-manager_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_lta-manager.properties
+        target: /tmp/rs-lta-manager.properties
+{% if role_regards_stack_mservices.lta_manager.configs is defined %}
+{% for config in role_regards_stack_mservices.lta_manager.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
     logging:
 {% if role_regards_stack_mservices.lta_manager.logging is defined %}
       {{ role_regards_stack_mservices.lta_manager.logging | to_nice_yaml | indent(6) }}

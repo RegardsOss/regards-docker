@@ -26,8 +26,8 @@
     src: regards-version-footer.html
     dest: "{{ role_regards_front_footer_target_conf }}"
     mode: '0644'
-    owner: "{{ role_regards_front_footer_container_run_user }}"
-    group: "{{ role_regards_front_footer_container_run_group }}"
+    owner: "{{ role_regards_front_footer_container_root_user }}"
+    group: "{{ role_regards_front_footer_container_root_group }}"
   when: role_regards_front_footer_show_footer
 
 - name: Send images files
@@ -35,6 +35,6 @@
     src: "imgs/"
     dest: "{{ role_regards_front_footer_conf_local_imgs_folder }}"
     mode: '0644'
-    owner: "{{ role_regards_front_footer_container_run_user }}"
-    group: "{{ role_regards_front_footer_container_run_group }}"
+    owner: "{{ role_regards_front_footer_container_root_user }}"
+    group: "{{ role_regards_front_footer_container_root_group }}"
   when: role_regards_front_footer_show_footer

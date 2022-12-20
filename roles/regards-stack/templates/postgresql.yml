@@ -1,6 +1,35 @@
 version: '3.7'
-services:
 
+# Config name must contains less than 32 [a-zA-Z0-9-_.] caracters
+{% if role_regards_stack_cots.postgres is defined %}
+configs:
+  rs-postgres_init.sql:
+    name: postgres_init_sql_${CHECKSUM_RS_POSTGRES_INIT_SQL}
+    file: {{ role_regards_stack_config }}postgres/init.sql
+  rs-postgres_postgresql.conf:
+    name: postgres_postgresql_conf_${CHECKSUM_RS_POSTGRES_POSTGRESQL_CONF}
+    file: {{ role_regards_stack_config }}postgres/postgresql.conf
+{% endif %}
+
+volumes:
+  data-postgres-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_postgres_data.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_postgres_data.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_postgres_data.get('device_postfix', 'postgresql/') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}postgresql/
+{% endif %}
+
+services:
 {% if role_regards_stack_cots.postgres is defined %}
   rs-postgres:
     image: {{ role_regards_stack_registry }}/regards-database:{{ role_regards_stack_cots.postgres.tag | default("latest") }}
@@ -24,14 +53,26 @@ services:
     environment:
       - POSTGRES_PASSWORD={{ role_regards_stack_config_postgres.password }}
       - POSTGRES_USER={{ role_regards_stack_config_postgres.user }}
+      - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
-      - {{ role_regards_stack_workspace_local }}postgresql:/var/lib/postgresql/data
-      - {{ role_regards_stack_config }}postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-      - {{ role_regards_stack_config }}postgres/postgresql.conf:/etc/postgresql.conf:ro
+      - type: volume
+        source: data-postgres-datavolume
+        target: /var/lib/postgresql/data/pgdata
       - type: tmpfs
         target: /tmp
       - type: tmpfs
         target: /run/postgresql
+    configs:
+      - source: rs-postgres_init.sql
+        target: /docker-entrypoint-initdb.d/init.sql
+      - source: rs-postgres_postgresql.conf
+        target: /etc/postgresql.conf
+{% if role_regards_stack_cots.postgres.configs is defined %}
+{% for config in role_regards_stack_cots.postgres.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
 {% if role_regards_stack_cots.postgres.client is defined %}
     ports:
       - "{{ role_regards_stack_cots.postgres.client }}:5432"

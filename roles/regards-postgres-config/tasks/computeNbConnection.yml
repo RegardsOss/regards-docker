@@ -1,0 +1,10 @@
+---
+- name: "[Instance][{{ mservice.key }}] Compute Postgres nb connections"
+  ansible.builtin.set_fact:
+    postgres_nb_connections: "{{ postgres_nb_connections|int + role_regards_postgres_config_nb_connections_by_tenant|int }}"
+  when: mservice.key in role_regards_postgres_config_mservices_instance
+
+- name: "[Projet][{{ mservice.key }}] Compute Postgres nb connections"
+  ansible.builtin.set_fact:
+    postgres_nb_connections: "{{ postgres_nb_connections|int + (role_regards_postgres_config_nb_connections_by_tenant|int * role_regards_postgres_config_nb_tenant|int * mservice.value.get('replicas', 1)|int) }}"
+  when: mservice.key not in role_regards_postgres_config_mservices_instance and mservice.key not in role_regards_postgres_config_mservices_no_connection

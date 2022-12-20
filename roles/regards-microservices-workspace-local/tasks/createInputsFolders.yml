@@ -1,0 +1,11 @@
+---
+- name: "Create input folder {{ data_input.name }}"
+  ansible.builtin.file:
+    path: "{{ data_input.source }}"
+    state: directory
+    mode: '2750'
+    owner: "{{ role_regards_microservices_workspace_local_workdir_container_run_user }}"
+    group: "{{ role_regards_microservices_workspace_local_workdir_container_run_group }}"
+    setype: "{{ role_regards_microservices_workspace_local_workdir_setype }}"
+    seuser: "{{ role_regards_microservices_workspace_local_workdir_seuser }}"
+  when: data_input.local is defined and data_input.local

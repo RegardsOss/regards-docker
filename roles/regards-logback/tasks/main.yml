@@ -1,3 +1,19 @@
 ---
-- ansible.builtin.include_tasks: init.yml
-- ansible.builtin.include_tasks: config.yml
+- name: Create logback main folder
+  ansible.builtin.file:
+    path: "{{ role_regards_logback_workdir }}"
+    state: directory
+    mode: '0750'
+    owner: "{{ role_regards_logback_container_root_user }}"
+    group: "{{ role_regards_logback_container_root_group }}"
+    setype: "{{ role_regards_logback_setype }}"
+    seuser: "{{ role_regards_logback_seuser }}"
+
+- name: Send config files
+  ansible.builtin.copy:
+    src: files/
+    dest: "{{ role_regards_logback_workdir }}/"
+    mode: '0770'
+    directory_mode: '0770'
+    owner: "{{ role_regards_logback_container_root_user }}"
+    group: "{{ role_regards_logback_container_root_group }}"

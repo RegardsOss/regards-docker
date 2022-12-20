@@ -3,7 +3,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: '0750'
+    mode: '0770'
     owner: "{{ role_regards_init_master_container_root_user }}"
     group: "{{ role_regards_init_master_container_root_group }}"
     setype: "{{ role_regards_init_master_setype }}"
@@ -11,7 +11,6 @@
   with_items:
     - "{{ role_regards_init_master_config }}"
     - "{{ role_regards_init_master_stack }}"
-    # legacy
     - "{{ role_regards_init_master_cli }}"
   become: true
 
@@ -49,7 +48,7 @@
     ansible_python_interpreter: "env python{{ python_version }}"
   when: recreate_regards_network|bool
 
-- name: Add dev CLI (legacy)
+- name: Add dev CLI
   ansible.builtin.template:
     src: "{{ item }}"
     dest: "{{ role_regards_init_master_cli }}"
@@ -58,6 +57,8 @@
     group: "{{ role_regards_init_master_container_root_group }}"
   with_items:
     - status.sh
+    - .swarm_config_secrets_checksum.sh
+    - .swarm_remove_volumes.sh
     - deploy.sh
     - update.sh
     - logs.sh
@@ -78,26 +79,6 @@
     group: "{{ role_regards_init_master_container_root_group }}"
     setype: "{{ role_regards_init_master_setype }}"
     seuser: "{{ role_regards_init_master_seuser }}"
-  become: true
-
-- name: Add dev CLI into etc
-  ansible.builtin.template:
-    src: "{{ item }}"
-    dest: "{{ role_regards_init_master_cli_system_install }}"
-    mode: '0750'
-    owner: root
-    group: "{{ role_regards_init_master_container_root_group }}"
-  with_items:
-    - status.sh
-    - deploy.sh
-    - update.sh
-    - logs.sh
-    - reboot.sh
-    - exec.sh
-    - perf.sh
-    - health.sh
-    - shutdown.sh
-    - regenerate-ca.sh
   become: true
 
 - name: Add to bashrc

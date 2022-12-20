@@ -1,6 +1,58 @@
 version: '3.7'
-services:
 
+# Config name must contains less than 32 [a-zA-Z0-9-_.] caracters
+{% if role_regards_stack_cots.elasticsearch is defined %}
+configs:
+  rs-elasticsearch_elasticsearch.yml:
+    name: elasticsearch_config_file_${CHECKSUM_RS_ELASTICSEARCH_ELASTICSEARCH_YML}
+    file: {{ role_regards_stack_config }}elasticsearch/elasticsearch.yml
+{% endif %}
+
+{% if role_regards_stack_cots.elasticsearch is defined %}
+volumes:
+  data-es-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_elasticsearch_data.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_elasticsearch_data.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_elasticsearch_data.get('device_postfix', 'elasticsearch/data') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}elasticsearch/data
+{% endif %}
+
+  backup-es-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_elasticsearch_backup.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_elasticsearch_backup.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_elasticsearch_backup.get('device_postfix', 'elasticsearch/backup') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}elasticsearch/backup
+{% endif %}
+
+  tmpjna-es-datavolume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}elasticsearch/tmpjna
+{% endif %}
+
+services:
 {% if role_regards_stack_cots.elasticsearch is defined %}
   rs-elasticsearch:
     image: {{ role_regards_stack_registry }}/regards-elasticsearch:{{ role_regards_stack_cots.elasticsearch.tag | default("latest") }}
@@ -32,19 +84,22 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     volumes:
-{% if role_regards_stack_cots.elasticsearch.global_service is defined %}
-      - {{ role_regards_stack_workspace_local }}elasticsearch/data:/usr/share/elasticsearch/data
-      - {{ role_regards_stack_workspace_local }}elasticsearch/backup:/usr/share/elasticsearch/backup
-{% else %}
-      - {{ role_regards_stack_workspace_network }}elasticsearch/data:/usr/share/elasticsearch/data
-      - {{ role_regards_stack_workspace_network }}elasticsearch/backup:/usr/share/elasticsearch/backup
-{% endif %}
-      - {{ role_regards_stack_workspace_local }}elasticsearch/tmpjna:/tmpjna
-      - {{ role_regards_stack_config }}elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - type: volume
+        source: data-es-datavolume
+        target: /usr/share/elasticsearch/data/esdata
+      - type: volume
+        source: backup-es-datavolume
+        target: /usr/share/elasticsearch/backup
+      - type: volume
+        source: tmpjna-es-datavolume
+        target: /tmpjna
       - type: tmpfs
         target: /tmp
       - type: tmpfs
         target: /usr/share/elasticsearch/logs
+    configs:
+      - source: rs-elasticsearch_elasticsearch.yml
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
 {% if role_regards_stack_cots.elasticsearch.http is defined or role_regards_stack_cots.elasticsearch.client is defined %}
     ports:
 {% if role_regards_stack_cots.elasticsearch.http is defined %}
@@ -57,8 +112,16 @@ services:
     environment:
       - "node.name=rs-elasticsearch-{{ '{{' }}.Node.Hostname{{ '}}' }}"
       - cluster.name={{ role_regards_stack_cots_configuration.elasticsearch.cluster_name }}
-      - bootstrap.memory_lock=false
+      - bootstrap.memory_lock=true
+      - ES_PATH_DATA=/usr/share/elasticsearch/data/esdata
       - "ES_JAVA_OPTS=-Xms{{ role_regards_stack_cots.elasticsearch.memoryLimit | default("2000m") }} -Xmx{{ role_regards_stack_cots.elasticsearch.memoryLimit | default("2000m") }} -Djna.tmpdir=/tmpjna"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536 # maximum number of open files for the Elasticsearch user, set to at least 65536 on modern systems
+        hard: 65536
     logging:
 {% if role_regards_stack_cots.elasticsearch.logging is defined %}
       {{ role_regards_stack_cots.elasticsearch.logging | to_nice_yaml | indent(6) }}

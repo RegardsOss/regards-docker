@@ -4,8 +4,11 @@
 role_regards_mconfig_workdir: "{{ group_workdir_local }}{{ group_stack_name }}/config/regards/config/"
 
 # Docker users
-role_regards_mconfig_container_run_group: "{{ group_container_run_group }}"
-role_regards_mconfig_container_run_user: "{{ group_container_run_user }}"
+role_regards_mconfig_container_root_user: "{{ group_container_root_user }}"
+role_regards_mconfig_container_root_group: "{{ group_container_root_group }}"
+
+role_regards_mconfig_setype: "{{ group_setype }}"
+role_regards_mconfig_seuser: "{{ group_seuser }}"
 
 # Global config used by µservices
 role_regards_mconfig_config_mservices: "{{ group_config_mservices }}"
@@ -28,10 +31,6 @@ role_regards_mconfig_mservice_jwt_key_rs512: "{{ role_regards_mconfig_config_mse
 role_regards_mconfig_mservice_access_token_validity: "{{ role_regards_mconfig_config_mservices.access_token_validity | default('3600') }}"
 role_regards_mconfig_mservice_cipher_iv: "{{ role_regards_mconfig_config_mservices.cipher_iv | default('1234567812345678') }}"
 role_regards_mconfig_mservice_order_jwt_secret: "{{ role_regards_mconfig_config_mservices.order_jwt_secret | default('~~~~~!!!!!!!!!!!0123456789abcdefghijklmnopqrstuvwxyz!!!!!!!!!!!~~~~~') }}"
-
-
-role_regards_mconfig_setype: "{{ group_setype }}"
-role_regards_mconfig_seuser: "{{ group_seuser }}"
 
 global_ms_default:
   database_min_pool_size: 2

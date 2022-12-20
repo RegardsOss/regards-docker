@@ -1,6 +1,63 @@
 version: '3.7'
-services:
 
+# Config name must contains less than 32 [a-zA-Z0-9-_.] caracters
+configs:
+{% if role_regards_stack_cots.elasticsearch_logs is defined %}
+  rs-elasticsearch-logs_elasticsearch.yml:
+    name: elasticsearch_logs_config_file_${CHECKSUM_RS_ELASTICSEARCH_LOGS_ELASTICSEARCH_LOGS_YML}
+    file: {{ role_regards_stack_config }}elasticsearch/elasticsearch-logs.yml
+{% endif %}
+{% if role_regards_stack_cots.fluent is defined %}
+  rs-fluent_fluent.conf:
+    name: fluent_config_file_${CHECKSUM_RS_FLUENT_FLUENT_CONF}
+    file: {{ role_regards_stack_config }}fluentd/fluent.conf
+{% endif %}
+
+{% if role_regards_stack_cots.elasticsearch_logs is defined %}
+volumes:
+  data-es-logs-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_elasticsearch_logs_data.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_elasticsearch_logs_data.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_elasticsearch_logs_data.get('device_postfix', 'elasticsearch/data-logs') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}elasticsearch/data-logs
+{% endif %}
+
+  backup-es-logs-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_volume_elasticsearch_logs_backup.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_volume_elasticsearch_logs_backup.nfs %}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_elasticsearch_logs_backup.get('device_postfix', 'elasticsearch/backup-logs') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}elasticsearch/backup-logs
+{% endif %}
+
+  tmpjna-es-logs-datavolume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}elasticsearch/tmpjna-logs
+{% endif %}
+
+services:
 {% if role_regards_stack_cots.elasticsearch_logs is defined %}
   rs-logs-elasticsearch:
     image: {{role_regards_stack_registry}}/regards-elasticsearch:{{ role_regards_stack_cots.elasticsearch_logs.tag | default("latest") }}
@@ -32,19 +89,22 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     volumes:
-{% if role_regards_stack_cots.elasticsearch_logs.global_service is defined %}
-      - {{ role_regards_stack_workspace_local }}elasticsearch/data-logs:/usr/share/elasticsearch/data
-      - {{ role_regards_stack_workspace_local }}elasticsearch/backup-logs:/usr/share/elasticsearch/backup
-{% else %}
-      - {{ role_regards_stack_workspace_network }}elasticsearch/data-logs:/usr/share/elasticsearch/data
-      - {{ role_regards_stack_workspace_network }}elasticsearch/backup-logs:/usr/share/elasticsearch/backup
-{% endif %}
-      - {{ role_regards_stack_workspace_local }}elasticsearch/tmpjna-logs:/tmpjna
-      - {{ role_regards_stack_config }}elasticsearch/elasticsearch-logs.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - type: volume
+        source: data-es-logs-datavolume
+        target: /usr/share/elasticsearch/data/esdata
+      - type: volume
+        source: backup-es-logs-datavolume
+        target: /usr/share/elasticsearch/backup
+      - type: volume
+        source: tmpjna-es-logs-datavolume
+        target: /tmpjna
       - type: tmpfs
         target: /tmp
       - type: tmpfs
         target: /usr/share/elasticsearch/logs
+    configs:
+      - source: rs-elasticsearch-logs_elasticsearch.yml
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
 {% if role_regards_stack_cots.elasticsearch_logs.http is defined or role_regards_stack_cots.elasticsearch_logs.client is defined %}
     ports:
 {% if role_regards_stack_cots.elasticsearch_logs.http is defined %}
@@ -57,8 +117,16 @@ services:
     environment:
       - "node.name=rs-logs-elasticsearch-{{ '{{' }}.Node.Hostname{{ '}}' }}"
       - cluster.name={{ role_regards_stack_cots_configuration.elasticsearch_logs.cluster_name }}
-      - bootstrap.memory_lock=false
+      - bootstrap.memory_lock=true
+      - ES_PATH_DATA=/usr/share/elasticsearch/data/esdata
       - "ES_JAVA_OPTS=-Xms{{ role_regards_stack_cots.elasticsearch_logs.memoryLimit | default("500m") }} -Xmx{{ role_regards_stack_cots.elasticsearch_logs.memoryLimit | default("500m") }} -Djna.tmpdir=/tmpjna"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536 # maximum number of open files for the Elasticsearch user, set to at least 65536 on modern systems
+        hard: 65536
     logging:
 {% if role_regards_stack_cots.elasticsearch_logs.logging is defined %}
       {{ role_regards_stack_cots.elasticsearch_logs.logging | to_nice_yaml | indent(6) }}
@@ -95,24 +163,11 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     volumes:
-      - {{ role_regards_stack_config }}fluentd/fluent.conf:/fluentd/etc/fluent.conf:ro
-      - {{ role_regards_stack_workspace_local }}regards/logs/config:/logs/config
-      - {{ role_regards_stack_workspace_local }}regards/logs/registry:/logs/registry
-      - {{ role_regards_stack_workspace_local }}regards/logs/gateway:/logs/gateway
-      - {{ role_regards_stack_workspace_local }}regards/logs/admin-instance:/logs/admin-instance
-      - {{ role_regards_stack_workspace_local }}regards/logs/admin:/logs/admin
-      - {{ role_regards_stack_workspace_local }}regards/logs/authentication:/logs/authentication
-      - {{ role_regards_stack_workspace_local }}regards/logs/dam:/logs/dam
-      - {{ role_regards_stack_workspace_local }}regards/logs/notifier:/logs/notifier
-      - {{ role_regards_stack_workspace_local }}regards/logs/fem:/logs/fem
-      - {{ role_regards_stack_workspace_local }}regards/logs/catalog:/logs/catalog
-      - {{ role_regards_stack_workspace_local }}regards/logs/access-instance:/logs/access-instance
-      - {{ role_regards_stack_workspace_local }}regards/logs/access-project:/logs/access-project
-      - {{ role_regards_stack_workspace_local }}regards/logs/front:/logs/front
-      - {{ role_regards_stack_workspace_local }}regards/logs/storage:/logs/storage
-      - {{ role_regards_stack_workspace_local }}regards/logs/order:/logs/order
-      - {{ role_regards_stack_workspace_local }}regards/logs/ingest:/logs/ingest
-      - {{ role_regards_stack_workspace_local }}regards/logs/dataprovider:/logs/dataprovider
+{% for mservice in role_regards_stack_volume_mservices_logs %}
+      - type: volume
+        source: logs-{{ mservice }}-datavolume
+        target: /logs/{{ mservice }}
+{% endfor %}
 {% for worker in role_regards_stack_workers %}
       - {{ role_regards_stack_workspace_local }}regards/workers/{{ worker.name }}/logs:/logs/{{ worker.name }}
 {% endfor %}
@@ -120,6 +175,9 @@ services:
         target: /tmp
       - type: tmpfs
         target: /fluentd/logs
+    configs:
+      - source: rs-fluent_fluent.conf
+        target: /fluentd/etc/fluent.conf
     logging:
 {% if role_regards_stack_cots.fluent.logging is defined %}
       {{ role_regards_stack_cots.fluent.logging | to_nice_yaml | indent(6) }}

@@ -1,0 +1,5 @@
+role_regards_legacy_remove_config_every_node_stack_name: "{{ group_stack_name }}"
+role_regards_legacy_remove_config_every_node_rootdir_to_remove: "{{ group_workdir_local }}{{group_stack_name}}/config"
+
+role_regards_legacy_remove_config_every_node_plugins_rootdir_to_remove: "{{ group_workdir_local }}{{group_stack_name}}/workspace/regards/plugins"
+role_regards_legacy_remove_config_every_node_has_plugins: "{{ (group_docker_mounts | default({})).get('regards', {}).get('plugins', {}).nfs is defined }}"

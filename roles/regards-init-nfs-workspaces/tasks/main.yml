@@ -1,0 +1,6 @@
+---
+- name: Iterate over NFS servers
+  ansible.builtin.include_tasks: initNfs.yml
+  loop: "{{ role_regards_init_nfs_workspaces_top_level_nfs_servers }}"
+  loop_control:
+    loop_var: nfs_server

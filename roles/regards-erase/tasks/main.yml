@@ -1,6 +1,6 @@
 ---
-  - name: Exterminate REGARDS from the server
-    pause: prompt='Please confirm you want to exterminate REGARDS and all related files! Press return to continue. Press Ctrl+c and then "a" to abort'
+  - name: Stop REGARDS from the server
+    pause: prompt='Please confirm you want to stop REGARDS and remove all related files! Press return to continue. Press Ctrl+c and then "a" to abort'
 
   - name: Shutdown REGARDS
     ansible.builtin.command: "docker stack rm {{ role_regards_erase_stack_name }}"
@@ -17,7 +17,7 @@
     ansible.builtin.set_fact:
       delete_regards_network: "{{ docker_network_name_info.exists == true }}"
 
-  - name: Remove regards network
+  - name: Remove regards network (may fail, relaunch playbook when that happens)
     docker_network:
       name: "{{ role_regards_erase_docker_network_name  }}"
       state: absent

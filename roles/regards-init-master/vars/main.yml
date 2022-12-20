@@ -10,8 +10,6 @@ role_regards_init_master_cli: "{{ group_workdir_local }}{{ group_stack_name }}/c
 
 role_regards_init_master_cli_system_install: "/opt/regards/{{ group_stack_name }}/cli/"
 
-role_regards_init_master_workdir_network: "{{ group_workdir_network }}"
-
 role_regards_init_master_container_root_user: "{{ group_container_root_user }}"
 role_regards_init_master_container_root_group: "{{ group_container_root_group }}"
 
@@ -32,3 +30,32 @@ role_regards_init_public_url: "{{ group_docker_mservices.front.protocol }}://{{ 
 
 # Workers
 role_regards_init_workers: "{{ group_docker_workers | default([]) }}"
+
+role_regards_init_ca_certificates: "{{ group_config_mservices.get('ca_certificates', []) }}"
+
+role_regards_init_top_level_configs: "{{  (group_docker_mounts | default({})).get('configs', []) }}"
+role_regards_init_top_level_secrets: "{{  (group_docker_mounts | default({})).get('secrets', []) }}"
+role_regards_init_top_level_volumes: "{{ (group_docker_mounts | default({})).get('volumes', []) }}"
+role_regards_init_top_level_regards: "{{  (group_docker_mounts | default({})).get('regards', {}) }}"
+
+role_regards_init_volume_mservices_logs:
+  - config
+  - registry
+  - gateway
+  - admin-instance
+  - admin
+  - authentication
+  - dam
+  - notifier
+  - fem
+  - catalog
+  - access-instance
+  - access-project
+  - storage
+  - order
+  - processing
+  - ingest
+  - dataprovider
+  - worker-manager
+  - lta-manager
+  - front

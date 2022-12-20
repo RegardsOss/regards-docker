@@ -1,0 +1,32 @@
+---
+role_regards_logs_workspace_local_local_logs: "{{ group_workdir_local }}{{group_stack_name}}/workspace/regards/logs/"
+
+
+role_regards_logs_workspace_local_container_root_user: "{{ group_container_root_user }}"
+role_regards_logs_workspace_local_container_root_group: "{{ group_container_root_group }}"
+role_regards_logs_workspace_local_container_run_user: "{{ group_container_run_user }}"
+role_regards_logs_workspace_local_container_run_group: "{{ group_container_run_group }}"
+role_regards_logs_workspace_local_setype: "{{ group_setype }}"
+role_regards_logs_workspace_local_seuser: "{{ group_seuser }}"
+
+role_regards_logs_workspace_local_logs_directories:
+  - config
+  - registry
+  - gateway
+  - admin-instance
+  - admin
+  - authentication
+  - dam
+  - notifier
+  - fem
+  - catalog
+  - access-instance
+  - access-project
+  - front
+  - storage
+  - order
+  - ingest
+  - dataprovider
+  - processing
+  - worker-manager
+  - lta-manager

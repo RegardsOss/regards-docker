@@ -9,7 +9,6 @@
     setype: "{{ role_regards_workers_setype }}"
     seuser: "{{ role_regards_workers_seuser }}"
   with_items: "{{ role_regards_workers }}"
-  become: true
 
 - name: Create REGARDS Workers logs directories
   ansible.builtin.file:
@@ -21,7 +20,6 @@
     setype: "{{ role_regards_workers_setype }}"
     seuser: "{{ role_regards_workers_seuser }}"
   with_items: "{{ role_regards_workers }}"
-  become: true
 
 - name: Iterate over workers configuration to initialize volumes
   ansible.builtin.include_tasks: createWorkerVolumes.yml

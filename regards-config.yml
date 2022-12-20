@@ -1,17 +1,13 @@
 ---
-- name: Refresh the REGARDS with all the conf within the Ansible project
-  hosts: regards_nodes
+- name: Refresh SWARM configs and secrets files on master node
+  hosts: master
   become: true
-
   roles:
-    - regards-logback
-    - regards-fluentd
+    - regards-front-footer
     - regards-mconfig
-    - regards-front
-
+    - regards-mounts-secrets-configs
 
 - name: Launch stack
   hosts: master
-
   roles:
     - regards-stack

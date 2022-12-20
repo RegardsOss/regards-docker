@@ -1,0 +1,3 @@
+---
+- ansible.builtin.include_tasks: config.yml
+  when: role_regards_postgres_config_is_defined|bool

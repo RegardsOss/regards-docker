@@ -1,0 +1,18 @@
+---
+- name: Create fluentd config folder
+  ansible.builtin.file:
+    path: "{{ role_regards_fluentd_config_conf_local }}"
+    state: directory
+    mode: '0770'
+    owner: "{{ role_regards_fluentd_config_container_root_user }}"
+    group: "{{ role_regards_fluentd_config_container_root_group }}"
+    setype: "{{ role_regards_fluentd_config_setype }}"
+    seuser: "{{ role_regards_fluentd_config_seuser }}"
+
+- name: Copy configuraton
+  ansible.builtin.template:
+    src: fluent.conf
+    dest: "{{ role_regards_fluentd_config_conf_local }}"
+    mode: '0770'
+    owner: "{{ role_regards_fluentd_config_container_root_user }}"
+    group: "{{ role_regards_fluentd_config_container_root_group }}"

@@ -1,0 +1,7 @@
+---
+- name: Iterate over NFS servers
+  ansible.builtin.include_tasks: testNfs.yml
+  loop: "{{ role_regards_plugins_workspace_nfs_top_level_nfs_servers }}"
+  loop_control:
+    loop_var: nfs_server
+  when: role_regards_plugins_workspace_nfs_active|bool

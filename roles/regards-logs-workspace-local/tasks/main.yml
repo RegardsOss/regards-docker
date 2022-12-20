@@ -1,0 +1,21 @@
+---
+- name: Create logs folder
+  ansible.builtin.file:
+    path: "{{ role_regards_logs_workspace_local_local_logs }}"
+    state: directory
+    mode: '2750'
+    owner: "{{ role_regards_logs_workspace_local_container_root_user }}"
+    group: "{{ role_regards_logs_workspace_local_container_root_group }}"
+    setype: "{{ role_regards_logs_workspace_local_setype }}"
+    seuser: "{{ role_regards_logs_workspace_local_seuser }}"
+
+- name: Create microservices logs directories
+  ansible.builtin.file:
+    path: "{{ role_regards_logs_workspace_local_local_logs }}{{ item }}"
+    state: directory
+    mode: '2750'
+    owner: "{{ role_regards_logs_workspace_local_container_run_user }}"
+    group: "{{ role_regards_logs_workspace_local_container_run_group }}"
+    setype: "{{ role_regards_logs_workspace_local_setype }}"
+    seuser: "{{ role_regards_logs_workspace_local_seuser }}"
+  with_items: "{{ role_regards_logs_workspace_local_logs_directories }}"

@@ -4,7 +4,7 @@
   ansible.builtin.file:
     path: "{{ role_regards_ca_certificates_destination }}"
     state: directory
-    mode: '2750'
+    mode: '2770'
     owner: "{{ role_regards_ca_certificates_container_root_user }}"
     group: "{{ role_regards_ca_certificates_container_root_group }}"
     setype: "{{ role_regards_ca_certificates_setype }}"
@@ -14,7 +14,8 @@
   ansible.builtin.copy:
     src: "{{ role_regards_ca_certificates_location_inside_playbook }}/"
     dest: "{{ role_regards_ca_certificates_destination }}/"
-    mode: '0440'
+    mode: '0770'
+    directory_mode: '0770'
     force: yes
     owner: "{{ role_regards_ca_certificates_container_root_user }}"
     group: "{{ role_regards_ca_certificates_container_root_group }}"

@@ -4,11 +4,10 @@ role_regards_stack_stack_name: "{{ group_stack_name }}"
 
 # Folder structure
 role_regards_stack_workspace_local: "{{ group_workdir_local }}{{ group_stack_name }}/workspace/"
-role_regards_stack_workspace_network: "{{ group_workdir_network }}{{ group_stack_name }}/workspace/"
-role_regards_stack_workdir_network: "{{ group_workdir_network }}"
 role_regards_stack_config: "{{ group_workdir_local }}{{ group_stack_name }}/config/"
 role_regards_stack_logback: "{{ role_regards_stack_config }}regards/logback/"
 role_regards_stack_stack: "{{ group_workdir_local }}{{ group_stack_name }}/stack/"
+role_regards_stack_cli: "{{ group_workdir_local }}{{ group_stack_name }}/cli/"
 
 # Files owners
 role_regards_stack_container_root_user: "{{ group_container_root_user }}"
@@ -30,9 +29,6 @@ role_regards_stack_workers: "{{ group_docker_workers | default([]) }}"
 role_regards_stack_workers_configs: "{{group_docker_workers_configs | default([]) }}"
 role_regards_stack_workers_secrets: "{{group_docker_workers_secrets | default([]) }}"
 
-role_regards_stack_workers_secrets_location: "{{ group_workdir_local }}{{ group_stack_name }}/config/regards/workers/secrets"
-role_regards_stack_workers_configs_location: "{{ group_workdir_local }}{{ group_stack_name }}/config/regards/workers/configs"
-
 role_regards_stack_mservices_admin_image_name: "{{ (group_docker_mservices.admin | default({})).get('imageName', 'rs-admin') }}"
 role_regards_stack_mservices_admin_instance_image_name: "{{ (group_docker_mservices.admin_instance | default({})).get('imageName', 'rs-admin-instance') }}"
 
@@ -49,17 +45,70 @@ role_regards_stack_config_postgres:
 rabbitmq_erlang_cookie_default: MY-SECRET-KEY-123
 
 role_regards_stack_config_rabbitmq_erlang_cookie: "{{ (role_regards_stack_cots | default({})).get('rabbitmq', {}).get('erlang_cookie', rabbitmq_erlang_cookie_default) }}"
+role_regards_stack_rabbitmq_manual_reversion: "{{ (role_regards_stack_cots | default({})).get('rabbitmq', {}).get('manual_revision', '1') }}"
 
 role_regards_stack_public_url: "{{ group_docker_mservices.front.protocol }}:\\/\\/{{ group_docker_mservices.front.host }}:{{ group_docker_mservices.front.public_port | default(group_docker_mservices.front.port) }}"
-
-# Fluent conf
-# When true, all microservices write logs on the same network file system
-role_regards_stack_all_logs_inside_same_network_storage: "{{ group_workdir_network == group_workdir_local }}"
 
 # Minio
 role_regards_stack_minio_public_url: "http://{{ group_docker_mservices.front.host }}"
 
 role_regards_stack_ca_certificates: "{{ group_config_mservices.get('ca_certificates', []) }}"
 
-# Top level volumes
-role_regards_stack_top_level_volumes: "{{ group_docker_top_level_volumes | default([]) }}"
+# Top level volumes / configs / secrets and REGARDS related volumes
+role_regards_stack_top_level_nfs_servers: "{{ (group_docker_mounts | default({})).get('nfs', []) }}"
+role_regards_stack_top_level_volumes: "{{ (group_docker_mounts | default({})).get('volumes', []) }}"
+role_regards_stack_top_level_configs: "{{ (group_docker_mounts | default({})).get('configs', []) }}"
+role_regards_stack_top_level_secrets: "{{ (group_docker_mounts | default({})).get('secrets', []) }}"
+role_regards_stack_top_level_regards: "{{ (group_docker_mounts | default({})).get('regards', {}) }}"
+
+role_regards_stack_volume_data_inputs: "{{ role_regards_stack_top_level_regards.get('data_inputs', []) }}"
+
+role_regards_stack_volume_processing: "{{ role_regards_stack_top_level_regards.get('processing', {}) }}"
+role_regards_stack_volume_dam: "{{ role_regards_stack_top_level_regards.get('dam', {}) }}"
+role_regards_stack_volume_storage_online: "{{ role_regards_stack_top_level_regards.get('storage', {}).get('online', {}) }}"
+role_regards_stack_volume_storage_cache: "{{ role_regards_stack_top_level_regards.get('storage', {}).get('cache', {}) }}"
+
+role_regards_stack_volume_workspace: "{{ role_regards_stack_top_level_regards.get('workspace', {}) }}"
+role_regards_stack_volume_logs: "{{ role_regards_stack_top_level_regards.get('logs', {}) }}"
+role_regards_stack_volume_plugins: "{{ role_regards_stack_top_level_regards.get('plugins', {}) }}"
+
+# Fluent conf
+# When true, all microservices write logs on the same network file system
+role_regards_stack_all_logs_inside_same_network_storage: "{{ role_regards_stack_volume_logs.nfs is defined }}"
+
+role_regards_stack_volume_mservices_logs:
+  - config
+  - registry
+  - gateway
+  - admin-instance
+  - admin
+  - authentication
+  - dam
+  - notifier
+  - fem
+  - catalog
+  - access-instance
+  - access-project
+  - storage
+  - order
+  - processing
+  - ingest
+  - dataprovider
+  - worker-manager
+  - lta-manager
+  - front
+
+role_regards_stack_volume_elasticsearch: "{{ (group_docker_mounts | default({})).get('elasticsearch', {}) }}"
+role_regards_stack_volume_elasticsearch_data: "{{ role_regards_stack_volume_elasticsearch.get('data', {}) }}"
+role_regards_stack_volume_elasticsearch_backup: "{{ role_regards_stack_volume_elasticsearch.get('backup', {}) }}"
+
+role_regards_stack_volume_elasticsearch_logs: "{{ (group_docker_mounts | default({})).get('elasticsearch_logs', {}) }}"
+role_regards_stack_volume_elasticsearch_logs_data: "{{ role_regards_stack_volume_elasticsearch_logs.get('data', {}) }}"
+role_regards_stack_volume_elasticsearch_logs_backup: "{{ role_regards_stack_volume_elasticsearch_logs.get('backup', {}) }}"
+
+role_regards_stack_volume_rabbitmq_data: "{{ (group_docker_mounts | default({})).get('rabbitmq', {}) }}"
+role_regards_stack_volume_s3_minio_data: "{{ (group_docker_mounts | default({})).get('s3_minio', {}) }}"
+role_regards_stack_volume_postgres_data: "{{ (group_docker_mounts | default({})).get('postgresql', {}) }}"
+
+role_regards_stack_top_level_secrets_location: "{{ group_workdir_local }}{{ group_stack_name }}/config/mounted/secrets"
+role_regards_stack_top_level_configs_location: "{{ group_workdir_local }}{{ group_stack_name }}/config/mounted/configs"
