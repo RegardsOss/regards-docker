@@ -1,0 +1,13 @@
+---
+role_regards_haproxy_config_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/haproxy/"
+
+role_regards_haproxy_config_container_root_user: "{{ group_container_root_user }}"
+role_regards_haproxy_config_container_root_group: "{{ group_container_root_group }}"
+
+role_regards_haproxy_config_setype: "{{ group_setype }}"
+role_regards_haproxy_config_seuser: "{{ group_seuser }}"
+
+role_regards_haproxy_config_haproxy_defined: "{{ group_docker_cots.haproxy is defined }}"
+
+# Elastic configuration
+role_regards_haproxy_config_elasticsearch: "{{ group_docker_cots.get('elasticsearch', {}) }}"

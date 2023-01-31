@@ -1,0 +1,10 @@
+---
+# Folder structure
+role_regards_stack_network_stack: "{{ group_workdir_local }}{{ group_stack_name }}/stack/"
+
+# Files owners
+role_regards_stack_network_container_root_user: "{{ group_container_root_user }}"
+role_regards_stack_network_container_root_group: "{{ group_container_root_group }}"
+
+# Docker conf
+role_regards_stack_network_docker_network_name: "{{ group_docker_network_name }}"

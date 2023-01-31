@@ -235,11 +235,13 @@ role_regards_mconfig_eureka:
 # ----------------------------------
 
 elastic_default:
+  hosts: ""
   host: rs-elasticsearch
   cluster: regards
   port: 9200
 
 role_regards_mconfig_elastic:
+  hosts: "{{ (group_config_mservices.elastic | default({})).get('hosts', elastic_default.hosts) }}" 
   host: "{{ (group_config_mservices.elastic | default({})).get('host', elastic_default.host) }}"
   cluster: "{{ (group_config_mservices.elastic | default({})).get('cluster', elastic_default.cluster) }}"
   port: "{{ (group_config_mservices.elastic | default({})).get('port', elastic_default.port) }}"
@@ -261,6 +263,7 @@ role_regards_mconfig_amqp:
   http: "{{ (group_config_mservices.amqp | default({})).get('http', amqp_default.http )}}"
   user: "{{ (group_config_mservices.amqp | default({})).get('user', amqp_default.user )}}"
   password: "{{ (group_config_mservices.amqp | default({})).get('password', amqp_default.password )}}"
+  ssl: "{{ (group_config_mservices.amqp | default({})).ssl is defined }}"
 
 # ----------------------------------
 # PostgreSQL configuration

@@ -1,0 +1,186 @@
+version: '3.7'
+
+# Config name must contains less than 32 [a-zA-Z0-9-_.] caracters
+{% if role_regards_stack_elasticsearch_active|bool %}
+configs:
+  rs-elasticsearch_elasticsearch.yml:
+    name: elasticsearch_config_file_${CHECKSUM_RS_ELASTICSEARCH_ELASTICSEARCH_YML}
+    file: {{ role_regards_stack_elasticsearch_config }}elasticsearch/elasticsearch.yml
+
+volumes:
+  data-es-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_elasticsearch_volume_elasticsearch_data.nfs is defined %}
+{% for nfs_server in role_regards_stack_elasticsearch_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_elasticsearch_volume_elasticsearch_data.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_elasticsearch_volume_elasticsearch_data.get('device_postfix', 'elasticsearch/data') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_elasticsearch_workspace_local }}elasticsearch/data
+{% endif %}
+
+  backup-es-datavolume:
+    driver: local
+    driver_opts:
+{% if role_regards_stack_elasticsearch_volume_elasticsearch_backup.nfs is defined %}
+      type: nfs
+{% for nfs_server in role_regards_stack_elasticsearch_top_level_nfs_servers %}
+{% if nfs_server.name == role_regards_stack_elasticsearch_volume_elasticsearch_backup.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_elasticsearch_volume_elasticsearch_backup.get('device_postfix', 'elasticsearch/backup') }}"
+{% endif %}
+{% endfor %}
+{% else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_elasticsearch_workspace_local }}elasticsearch/backup
+{% endif %}
+
+  tmpjna-es-datavolume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: {{ role_regards_stack_elasticsearch_workspace_local }}elasticsearch/tmpjna
+{% endif %}
+
+services:
+{% if role_regards_stack_elasticsearch_active|bool %}
+  rs-elasticsearch:
+    image: {{ role_regards_stack_elasticsearch_registry }}/regards-elasticsearch:{{ role_regards_stack_elasticsearch_cots_elasticsearch.tag | default("latest") }}
+{% if (role_regards_stack_elasticsearch_cots_elasticsearch.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_elasticsearch_cots_elasticsearch.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
+    user: "{{ role_regards_stack_elasticsearch_container_run_uid }}:{{ role_regards_stack_elasticsearch_container_run_gid }}"
+{% if role_regards_stack_elasticsearch_cots_elasticsearch.global_service is defined %}
+    hostname: "rs-elasticsearch-{{ '{{' }}.Node.Hostname{{ '}}' }}"
+{% else %}
+    hostname: rs-elasticsearch
+{% endif %}
+    read_only: true
+{% if role_regards_stack_elasticsearch_enable_cots_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -f -X GET 'localhost:9200/_cluster/health' | jq '.status' | grep -q -e 'yellow' -e 'green' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+{% endif %}
+{% if role_regards_stack_elasticsearch_cots_elasticsearch.node_label_placement_constraint is defined or role_regards_stack_elasticsearch_cots_elasticsearch.global_service is defined or role_regards_stack_elasticsearch_enable_cots_resource_limits is defined %}
+    deploy:
+{% if role_regards_stack_elasticsearch_enable_cots_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_elasticsearch_resource_limits.elasticsearch.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_elasticsearch_resource_limits.elasticsearch.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
+{% if role_regards_stack_elasticsearch_cots_elasticsearch.global_service is defined %}
+      mode: global
+      endpoint_mode: dnsrr
+{% endif %}
+{% if role_regards_stack_elasticsearch_cots_elasticsearch.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_elasticsearch_cots_elasticsearch.node_label_placement_constraint.key }} == {{ role_regards_stack_elasticsearch_cots_elasticsearch.node_label_placement_constraint.value }}
+{% endif %}
+{% endif %}
+    networks:
+      - {{ role_regards_stack_elasticsearch_docker_network_name }}
+    volumes:
+      - type: volume
+        source: data-es-datavolume
+        target: /usr/share/elasticsearch/data/esdata
+      - type: volume
+        source: backup-es-datavolume
+        target: /usr/share/elasticsearch/backup
+      - type: volume
+        source: tmpjna-es-datavolume
+        target: /tmpjna
+      - type: tmpfs
+        target: /tmp
+      - type: tmpfs
+        target: /usr/share/elasticsearch/logs
+    configs:
+      - source: rs-elasticsearch_elasticsearch.yml
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+{% if not role_regards_stack_elasticsearch_cots_elasticsearch.global_service is defined %}
+{% if role_regards_stack_elasticsearch_cots_elasticsearch.http is defined or role_regards_stack_elasticsearch_cots_elasticsearch.client is defined %}
+    ports:
+{% if role_regards_stack_elasticsearch_cots_elasticsearch.http is defined %}
+      - "{{ role_regards_stack_elasticsearch_cots_elasticsearch.http }}:9200"
+{% endif %}
+{% if role_regards_stack_elasticsearch_cots_elasticsearch.client is defined %}
+      - "{{ role_regards_stack_elasticsearch_cots_elasticsearch.client }}:9300"
+{% endif %}
+{% endif %}
+{% endif %}
+    environment:
+      - "node.name=rs-elasticsearch-{{ '{{' }}.Node.Hostname{{ '}}' }}"
+      - cluster.name={{ role_regards_stack_elasticsearch_cots_configuration_elasticsearch.elasticsearch.cluster_name }}
+      - bootstrap.memory_lock=true
+      - ES_PATH_DATA=/usr/share/elasticsearch/data/esdata
+      - "ES_JAVA_OPTS=-Xms{{ role_regards_stack_elasticsearch_resource_limits.elasticsearch.reservations.memory }} -Xmx{{ role_regards_stack_elasticsearch_resource_limits.elasticsearch.reservations.memory }} -Djna.tmpdir=/tmpjna"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536 # maximum number of open files for the Elasticsearch user, set to at least 65536 on modern systems
+        hard: 65536
+    logging:
+{% if role_regards_stack_elasticsearch_cots_elasticsearch.logging is defined %}
+      {{ role_regards_stack_elasticsearch_cots_elasticsearch.logging | to_nice_yaml | indent(6) }}
+{% else %}
+      options:
+        max-size: "10m"
+        max-file: "10"
+{% endif %}
+{% endif %}
+
+{% if role_regards_stack_elasticsearch_kibana_active|bool %}
+  rs-kibana:
+    image: {{ role_regards_stack_elasticsearch_registry }}/regards-kibana:{{ role_regards_stack_elasticsearch_cots_kibana.tag | default("latest") }}
+{%if (role_regards_stack_elasticsearch_cots_kibana.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_elasticsearch_cots_kibana.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
+    user: "{{ role_regards_stack_elasticsearch_container_run_uid }}:{{ role_regards_stack_elasticsearch_container_run_gid }}"
+    hostname: rs-kibana
+    read_only: true
+    networks:
+      - {{ role_regards_stack_elasticsearch_docker_network_name }}
+    volumes:
+      - type: tmpfs
+        target: /usr/share/kibana/data/
+{% if role_regards_stack_elasticsearch_cots_kibana.http is defined %}
+    ports:
+      - "{{ role_regards_stack_elasticsearch_cots_kibana.http }}:5601"
+{% endif %}
+    logging:
+{% if role_regards_stack_elasticsearch_cots_kibana.logging is defined %}
+      {{ role_regards_stack_elasticsearch_cots_kibana.logging | to_nice_yaml | indent(6) }}
+{% else %}
+      options:
+        max-size: "10m"
+        max-file: "10"
+{% endif %}
+{% if role_regards_stack_elasticsearch_cots_kibana.node_label_placement_constraint is defined %}
+    deploy:
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_elasticsearch_cots_kibana.node_label_placement_constraint.key }} == {{ role_regards_stack_elasticsearch_cots_kibana.node_label_placement_constraint.value }}
+{% endif %}
+{% endif %}

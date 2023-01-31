@@ -17,6 +17,17 @@ services:
     hostname: {{ worker.name }}
     read_only: true
     deploy:
+{% if worker.resources is defined %}
+      resources:
+{% if worker.resources.limits is defined %}
+        limits:
+          {{ worker.resources.limits | to_nice_yaml | indent(10) }}
+{% endif %}
+{% if worker.resources.reservations is defined %}
+        reservations:
+          {{ worker.resources.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
+{% endif %}
       replicas: {{ worker.replicas | default(1) }}
 {% if worker.node_label_placement_constraint is defined %}
       placement:

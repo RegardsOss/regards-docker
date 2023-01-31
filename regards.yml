@@ -37,6 +37,7 @@
     - regards-fluentd-config
     - regards-postgres-config
     - regards-elasticsearch-config
+    - regards-haproxy-config
     - regards-rabbitmq-config
     - regards-mconfig
     - regards-logback

@@ -1,0 +1,1 @@
+role_regards_stack_start_cli: "{{ group_workdir_local }}{{ group_stack_name }}/cli/"

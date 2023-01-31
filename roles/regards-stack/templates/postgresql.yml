@@ -16,9 +16,9 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_postgres_data.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_postgres_data.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_postgres_data.get('device_postfix', 'postgresql/') }}"
 {% endif %}

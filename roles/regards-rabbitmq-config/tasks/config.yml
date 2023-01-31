@@ -11,9 +11,10 @@
 
 - name: Create RabbitMQ definitions config file
   ansible.builtin.copy:
-    dest: "{{ role_regards_rabbitmq_config_conf_local }}/definitions.json"
+    dest: "{{ role_regards_rabbitmq_config_conf_local }}/definitions_{{ role_regards_rabbitmq_config_definition_manual_revision }}.json"
     content: "{{ role_regards_rabbitmq_config_definition | to_nice_json }}"
     mode: '0770'
+    force: false
     owner: "{{ role_regards_rabbitmq_config_container_root_user }}"
     group: "{{ role_regards_rabbitmq_config_container_root_group }}"
     setype: "{{ role_regards_rabbitmq_config_setype }}"

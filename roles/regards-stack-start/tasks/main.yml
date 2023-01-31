@@ -1,0 +1,6 @@
+---
+- name: Run REGARDS
+  ansible.builtin.shell: "{{ role_regards_stack_start_cli }}deploy.sh"
+  register: deploy
+  changed_when: deploy.rc != 0
+  failed_when: deploy.rc != 0

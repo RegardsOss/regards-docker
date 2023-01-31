@@ -1,0 +1,32 @@
+---
+- name: Install REGARDS on master node
+  hosts: master
+  roles:
+    - regards-init-master
+
+- name: Install REGARDS local workspaces on every nodes
+  hosts: regards_nodes:!swarm_manager_only_nodes
+  become: true
+  roles:
+    - regards-elasticsearch-workspace-local
+
+- name: Initiate NFS workspaces 
+  hosts: slaves[0]
+  roles:
+    - regards-init-nfs-workspaces
+
+- name: Install SWARM configs and secrets files on master node
+  hosts: master
+  become: true
+  roles:
+    - regards-elasticsearch-config
+    - regards-haproxy-config
+    - regards-mounts-secrets-configs
+
+- name: Launch stack
+  hosts: master
+  roles:
+    - regards-stack-elasticsearch
+    - regards-stack-haproxy
+    - regards-stack-network
+    - regards-stack-start

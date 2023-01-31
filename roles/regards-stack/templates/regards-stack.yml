@@ -20,9 +20,9 @@ volumes:
       o: bind
       device: {{ data_input.source }}
 {% else %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == data_input.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ data_input.device_postfix }}"
 {% endif %}
@@ -35,9 +35,9 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_processing.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_processing.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_processing.get('device_postfix', 'regards/processing') }}"
 {% endif %}
@@ -54,9 +54,9 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_dam.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_dam.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_dam.get('device_postfix', 'regards/storage/dam') }}"
 {% endif %}
@@ -72,9 +72,9 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_workspace.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_workspace.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_workspace.get('device_postfix', 'regards/workspace') }}"
 {% endif %}
@@ -90,9 +90,9 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_storage_online.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_storage_online.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_storage_online.get('device_postfix', 'regards/storage/onlines') }}"
 {% endif %}
@@ -107,9 +107,9 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_storage_cache.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_storage_cache.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_storage_cache.get('device_postfix', 'regards/storage/cache') }}"
 {% endif %}
@@ -127,9 +127,9 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_logs.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_logs.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_logs.get('device_postfix', 'regards/logs/') }}{{ mservice }}"
 {% endif %}
@@ -148,9 +148,9 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_plugins.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/authentication') }}"
 {% endif %}
@@ -167,9 +167,9 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_plugins.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/catalog') }}"
 {% endif %}
@@ -186,9 +186,9 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_plugins.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/dam') }}"
 {% endif %}
@@ -205,9 +205,9 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_plugins.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/dataprovider') }}"
 {% endif %}
@@ -224,9 +224,9 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_plugins.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/fem') }}"
 {% endif %}
@@ -243,9 +243,9 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_plugins.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/ingest') }}"
 {% endif %}
@@ -262,9 +262,9 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_plugins.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/notifier') }}"
 {% endif %}
@@ -281,9 +281,9 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_plugins.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/processing') }}"
 {% endif %}
@@ -300,9 +300,9 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_plugins.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_plugins.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_plugins.get('device_postfix', 'regards/plugins/storage') }}"
 {% endif %}
@@ -525,7 +525,7 @@ configs:
 {% for worker in role_regards_stack_workers %}
 {% if worker.config is defined %}
   rs_conf_{{ worker.name }}.yml:
-    name: rs_conf_{{ worker.name | truncate(20, True, '', 0) }}_${CHECKSUM_WORKER_{{ loop.index0 }}_YML}
+    name: rs_conf_${CHECKSUM_WORKER_{{ worker.name | hash('sha1') }}_YML}
     file: {{ role_regards_stack_config }}regards/config/regards-workers/{{ worker.name }}.yml
 {% endif %}
 {% endfor %}
@@ -535,7 +535,7 @@ configs:
 {% if role_regards_stack_ca_certificates|length > 0 %}
 {% for file in role_regards_stack_ca_certificates %}
   ca_cert_{{ file.split('.') | first }}:
-    name: ca_cert_{{ loop.index0 }}_${CHECKSUM_CA_CERT_{{ loop.index0 }}}
+    name: ca_cert_${CHECKSUM_CA_CERT_{{ file | hash('sha1') }}}
     file: "{{ role_regards_stack_config }}regards/ca-certificates/{{ file }}"
 {% endfor %}
 {% endif %}
@@ -579,11 +579,28 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-config
     read_only: true
-{% if role_regards_stack_mservices.config.node_label_placement_constraint is defined %}
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9031/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
+{% if role_regards_stack_mservices.config.node_label_placement_constraint is defined or role_regards_stack_enable_mservices_resource_limits %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.config.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.config.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
+{% if role_regards_stack_mservices.config.node_label_placement_constraint is defined %}
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_mservices.config.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.config.node_label_placement_constraint.value }}
+{% endif %}
 {% endif %}
     networks: 
       - {{ role_regards_stack_docker_network_name }}
@@ -713,11 +730,28 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-registry
     read_only: true
-{% if role_regards_stack_mservices.registry.node_label_placement_constraint is defined %}
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9032/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
+{% if role_regards_stack_mservices.registry.node_label_placement_constraint is defined or role_regards_stack_enable_mservices_resource_limits %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.registry.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.registry.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
+{% if role_regards_stack_mservices.registry.node_label_placement_constraint is defined %}
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_mservices.registry.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.registry.node_label_placement_constraint.value }}
+{% endif %}
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
@@ -778,7 +812,22 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-gateway
     read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9030/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 7m
+{% endif %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.gateway.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.gateway.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
       replicas: {{ role_regards_stack_mservices.gateway.replicas | default(1) }}
 {% if role_regards_stack_mservices.gateway.node_label_placement_constraint is defined %}
       placement:
@@ -856,11 +905,28 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-admin-instance
     read_only: true
-{% if role_regards_stack_mservices.admin_instance.node_label_placement_constraint is defined %}
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9037/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
+{% if role_regards_stack_mservices.admin_instance.node_label_placement_constraint is defined or role_regards_stack_enable_mservices_resource_limits %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.admin_instance.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.admin_instance.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
+{% if role_regards_stack_mservices.admin_instance.node_label_placement_constraint is defined %}
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_mservices.admin_instance.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.admin_instance.node_label_placement_constraint.value }}
+{% endif %}
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
@@ -928,7 +994,22 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-admin
     read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9033/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.admin.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.admin.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
       replicas: {{ role_regards_stack_mservices.admin.replicas | default(1) }}
 {% if role_regards_stack_mservices.admin.node_label_placement_constraint is defined %}
       placement:
@@ -1001,7 +1082,22 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-authentication
     read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9034/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.authentication.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.authentication.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
       replicas: {{ role_regards_stack_mservices.authentication.replicas | default(1) }}
 {% if role_regards_stack_mservices.authentication.node_label_placement_constraint is defined %}
       placement:
@@ -1083,7 +1179,22 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-dam
     read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9035/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.dam.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.dam.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
       replicas: {{ role_regards_stack_mservices.dam.replicas | default(1) }}
 {% if role_regards_stack_mservices.dam.node_label_placement_constraint is defined %}
       placement:
@@ -1176,7 +1287,22 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-notifier
     read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9039/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.notifier.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.notifier.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
       replicas: {{ role_regards_stack_mservices.notifier.replicas | default(1) }}
 {% if role_regards_stack_mservices.notifier.node_label_placement_constraint is defined %}
       placement:
@@ -1258,7 +1384,22 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-fem
     read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9038/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.fem.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.fem.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
       replicas: {{ role_regards_stack_mservices.fem.replicas | default(1) }}
 {% if role_regards_stack_mservices.fem.node_label_placement_constraint is defined %}
       placement:
@@ -1313,7 +1454,7 @@ services:
 {% if role_regards_stack_mservices.fem.http is defined or role_regards_stack_mservices.fem.jdwp is defined or role_regards_stack_mservices.fem.jmx is defined or role_regards_stack_mservices.fem.yourkit is defined %}
     ports:
 {% if role_regards_stack_mservices.fem.http is defined %}
-      - "{{ role_regards_stack_mservices.fem.http }}:9035"
+      - "{{ role_regards_stack_mservices.fem.http }}:9038"
 {% endif %}
 {% if role_regards_stack_mservices.fem.jdwp is defined %}
       - "{{ role_regards_stack_mservices.fem.jdwp }}:10500"
@@ -1347,7 +1488,22 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-catalog
     read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9036/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.catalog.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.catalog.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
       replicas: {{ role_regards_stack_mservices.catalog.replicas | default(1) }}
 {% if role_regards_stack_mservices.catalog.node_label_placement_constraint is defined %}
       placement:
@@ -1426,11 +1582,28 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-access-instance
     read_only: true
-{% if role_regards_stack_mservices.access_instance.node_label_placement_constraint is defined %}
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9040/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
+{% if role_regards_stack_mservices.access_instance.node_label_placement_constraint is defined or role_regards_stack_enable_mservices_resource_limits %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.access_instance.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.access_instance.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
+{% if role_regards_stack_mservices.access_instance.node_label_placement_constraint is defined %}
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_mservices.access_instance.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.access_instance.node_label_placement_constraint.value }}
+{% endif %}
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
@@ -1498,7 +1671,22 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-access-project
     read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9041/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.access_project.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.access_project.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
       replicas: {{ role_regards_stack_mservices.access_project.replicas | default(1) }}
 {% if role_regards_stack_mservices.access_project.node_label_placement_constraint is defined %}
       placement:
@@ -1572,6 +1760,13 @@ services:
     hostname: rs-front
     read_only: true
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.front.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.front.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
       replicas: {{ role_regards_stack_mservices.front.replicas | default(1) }}
 {% if role_regards_stack_mservices.front.node_label_placement_constraint is defined %}
       placement:
@@ -1651,7 +1846,22 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-storage
     read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9042/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.storage.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.storage.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
       replicas: {{ role_regards_stack_mservices.storage.replicas | default(1) }}
 {% if role_regards_stack_mservices.storage.node_label_placement_constraint is defined %}
       placement:
@@ -1752,7 +1962,22 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-order
     read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9043/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.order.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.order.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
       replicas: {{ role_regards_stack_mservices.order.replicas | default(1) }}
 {% if role_regards_stack_mservices.order.node_label_placement_constraint is defined %}
       placement:
@@ -1841,7 +2066,22 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-processing
     read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9043/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.processing.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.processing.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
       replicas: {{ role_regards_stack_mservices.processing.replicas | default(1) }}
 {% if role_regards_stack_mservices.processing.node_label_placement_constraint is defined %}
       placement:
@@ -1932,7 +2172,22 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-ingest
     read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9044/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.ingest.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.ingest.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
       replicas: {{ role_regards_stack_mservices.ingest.replicas | default(1) }}
 {% if role_regards_stack_mservices.ingest.node_label_placement_constraint is defined %}
       placement:
@@ -2021,7 +2276,22 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-dataprovider
     read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9045/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.dataprovider.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.dataprovider.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
       replicas: {{ role_regards_stack_mservices.dataprovider.replicas | default(1) }}
 {% if role_regards_stack_mservices.dataprovider.node_label_placement_constraint is defined %}
       placement:
@@ -2110,7 +2380,22 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-worker-manager
     read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9047/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+{% endif %}
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.worker_manager.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.worker_manager.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
       replicas: {{ role_regards_stack_mservices.worker_manager.replicas | default(1) }}
 {% if role_regards_stack_mservices.worker_manager.node_label_placement_constraint is defined %}
       placement:
@@ -2189,6 +2474,13 @@ services:
     hostname: rs-lta-manager
     read_only: true
     deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.lta_manager.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.lta_manager.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
       replicas: {{ role_regards_stack_mservices.lta_manager.replicas | default(1) }}
 {% if role_regards_stack_mservices.lta_manager.node_label_placement_constraint is defined %}
       placement:
@@ -2248,8 +2540,3 @@ services:
         max-file: "10"
 {% endif %}
 {% endif %}
-
-networks:
-  {{ role_regards_stack_docker_network_name }}:
-    external: true
-    name: {{ role_regards_stack_docker_network_name }}

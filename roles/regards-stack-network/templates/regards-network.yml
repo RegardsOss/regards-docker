@@ -1,0 +1,6 @@
+version: '3.7'
+
+networks:
+  {{ role_regards_stack_network_docker_network_name }}:
+    external: true
+    name: {{ role_regards_stack_network_docker_network_name }}

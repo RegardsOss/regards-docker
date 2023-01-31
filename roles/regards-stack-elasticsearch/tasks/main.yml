@@ -1,0 +1,10 @@
+---
+- name: Generate elastic stack file
+  ansible.builtin.template:
+    src: elastic.yml
+    dest: "{{ role_regards_stack_elasticsearch_stack }}"
+    mode: '0740'
+    owner: "{{ role_regards_stack_elasticsearch_container_root_user }}"
+    group: "{{ role_regards_stack_elasticsearch_container_root_group }}"
+  become: true
+  when: role_regards_stack_elasticsearch_active|bool or role_regards_stack_elasticsearch_kibana_active|bool

@@ -22,9 +22,14 @@ fi
 source {{ role_regards_init_master_cli }}.swarm_config_secrets_checksum.sh
 
 docker stack deploy \
+  -c {{ role_regards_init_master_stack }}regards-network.yml \
+{% if role_regards_init_master_mservices_active|bool %}
   -c {{ role_regards_init_master_stack }}global-mounts.yml \
   -c {{ role_regards_init_master_stack }}regards-stack.yml \
+{% endif %}
+{% if role_regards_init_master_cots.elasticsearch is defined %}
   -c {{ role_regards_init_master_stack }}elastic.yml \
+{% endif %}
 {% if role_regards_init_master_cots.elasticsearch_logs is defined or role_regards_init_master_cots.kibana_logs is defined or role_regards_init_master_cots.fluent is defined %}
   -c {{ role_regards_init_master_stack }}logs.yml \
 {% endif %}
@@ -45,6 +50,9 @@ docker stack deploy \
 {% endif %}
 {% if role_regards_init_master_cots.rabbitmq is defined %}
   -c {{ role_regards_init_master_stack }}rabbitmq.yml \
+{% endif %}
+{% if role_regards_init_master_cots.haproxy is defined %}
+  -c {{ role_regards_init_master_stack }}haproxy.yml \
 {% endif %}
   --with-registry-auth \
   --prune \

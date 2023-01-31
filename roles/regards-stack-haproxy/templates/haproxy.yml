@@ -1,0 +1,39 @@
+version: '3.7'
+
+# Config name must contains less than 32 [a-zA-Z0-9-_.] caracters
+configs:
+  rs-haproxy_haproxy.cfg:
+    name: haproxy_config_file_${CHECKSUM_RS_HAPROXY_CONFIG_YML}
+    file: {{ role_regards_stack_haproxy_config }}haproxy/haproxy.cfg
+
+services:
+  rs-haproxy:
+    image: {{ role_regards_stack_haproxy_registry }}/regards-haproxy:{{ role_regards_stack_haproxy_cots.haproxy.tag | default("latest") }}
+    user: "{{ role_regards_stack_haproxy_container_run_uid }}:{{ role_regards_stack_haproxy_container_run_gid }}"
+    read_only: true
+    deploy:
+{% if role_regards_stack_haproxy_enable_cots_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_haproxy_resource_limits.haproxy.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_haproxy_resource_limits.haproxy.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
+      mode: global
+    networks:
+      - {{ role_regards_stack_haproxy_docker_network_name }}
+{% if role_regards_stack_haproxy_cots_haproxy.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_haproxy_cots_haproxy.node_label_placement_constraint.key }} == {{ role_regards_stack_haproxy_cots_haproxy.node_label_placement_constraint.value }}
+{% endif %}
+    configs:
+      - source: rs-haproxy_haproxy.cfg
+        target: /usr/local/etc/haproxy/haproxy.cfg
+    ports:
+{% if role_regards_stack_haproxy_cots_elasticsearch.http is defined and role_regards_stack_haproxy_cots_elasticsearch.global_service is defined %}
+      - "{{ role_regards_stack_haproxy_cots_elasticsearch.http }}:9200"
+{% endif %}
+{% if role_regards_stack_haproxy_cots_elasticsearch.client is defined and role_regards_stack_haproxy_cots_elasticsearch.global_service is defined %}
+      - "{{ role_regards_stack_haproxy_cots_elasticsearch.client }}:9300"
+{% endif %}

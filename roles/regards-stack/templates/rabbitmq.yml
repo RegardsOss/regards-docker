@@ -4,21 +4,34 @@ version: '3.7'
 configs:
   rs-rabbitmq_definitions.json:
     # Hacky solution: this file changes everytime a password inside this file is generated, so this is disconnected
-    # from file change. Operators must use rabbitmq.manual_reversion to make this config file refreshed
-    name: rabbitmq_definitions_json_{{ role_regards_stack_rabbitmq_manual_reversion }}
-    file: {{ role_regards_stack_config }}rabbitmq/definitions.json
+    # from file change. Operators must use rabbitmq.manual_revision to make this config file refreshed
+    name: rabbitmq_definitions_json_{{ role_regards_stack_rabbitmq_manual_revision }}
+    file: {{ role_regards_stack_config }}rabbitmq/definitions_{{ role_regards_stack_rabbitmq_manual_revision }}.json
   rs-rabbitmq_rabbitmq.conf:
     name: rabbitmq_rabbitmq_conf_${CHECKSUM_RS_RABBITMQ_RABBITMQ_CONF}
     file: {{ role_regards_stack_config }}rabbitmq/rabbitmq.conf
 
+{% if role_regards_stack_rabbitmq_ssl_active|bool %}
+  rs-rabbitmq_ssl.ca:
+    name: rabbitmq_ssl_key_${CHECKSUM_RS_RABBITMQ_SSL_CA}
+    file: {{ role_regards_stack_rabbitmq_folder_certificates }}{{ role_regards_stack_rabbitmq_ssl_certificates_conf.ca }}
+  rs-rabbitmq_ssl.cert:
+    name: rabbitmq_ssl_key_${CHECKSUM_RS_RABBITMQ_SSL_CERT}
+    file: {{ role_regards_stack_rabbitmq_folder_certificates }}{{ role_regards_stack_rabbitmq_ssl_certificates_conf.cert }}
+
+secrets:
+  rs-rabbitmq_ssl.key:
+    name: rabbitmq_ssl_key_${CHECKSUM_RS_RABBITMQ_SSL_KEY}
+    file: {{ role_regards_stack_rabbitmq_folder_certificates }}{{ role_regards_stack_rabbitmq_ssl_certificates_conf.key }}
+{% endif %}
 volumes:
   data-rabbitmq-datavolume:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_rabbitmq_data.nfs is defined %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == role_regards_stack_volume_rabbitmq_data.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_rabbitmq_data.get('device_postfix', 'rabbitmq') }}"
 {% endif %}
@@ -45,17 +58,38 @@ services:
     hostname: rs-rabbitmq
 {% endif %}
     read_only: true
+{% if role_regards_stack_enable_cots_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmqctl status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+{% endif %}
     volumes:
       - type: volume
         source: data-rabbitmq-datavolume
         target: /var/lib/rabbitmq/mnesia/
       - type: tmpfs
+{% if role_regards_stack_cots.rabbitmq.get("legacy", True)|bool %}
         target: /var/log/rabbitmq/log/
+{% else %}
+        target: /var/log/rabbitmq/
+{% endif %}
     configs:
       - source: rs-rabbitmq_definitions.json
         target: /etc/rabbitmq/definitions.json
       - source: rs-rabbitmq_rabbitmq.conf
         target: /etc/rabbitmq/rabbitmq.conf
+{% if role_regards_stack_rabbitmq_ssl_active|bool %}
+      - source: rs-rabbitmq_ssl.ca
+        target: "/etc/ca-certificates/{{ role_regards_stack_rabbitmq_ssl_certificates_conf.ca }}"
+      - source: rs-rabbitmq_ssl.cert
+        target: "/etc/ca-certificates/{{ role_regards_stack_rabbitmq_ssl_certificates_conf.cert }}"    
+    secrets:
+      - source: rs-rabbitmq_ssl.key
+        target: "/etc/ca-certificates/{{ role_regards_stack_rabbitmq_ssl_certificates_conf.key }}" 
+{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_cots.rabbitmq.http is defined or role_regards_stack_cots.rabbitmq.client is defined and role_regards_stack_cots.rabbitmq.global_service is defined == false %}
@@ -66,9 +100,19 @@ services:
 {% if role_regards_stack_cots.rabbitmq.http is defined %}
       - "{{ role_regards_stack_cots.rabbitmq.http }}:15672"
 {% endif %}
+{% if role_regards_stack_cots.rabbitmq.client_ssl is defined %}
+      - "{{ role_regards_stack_cots.rabbitmq.client_ssl }}:5671"
 {% endif %}
-{% if role_regards_stack_cots.rabbitmq.node_label_placement_constraint is defined or role_regards_stack_cots.rabbitmq.global_service is defined %}
+{% endif %}
+{% if role_regards_stack_cots.rabbitmq.node_label_placement_constraint is defined or role_regards_stack_cots.rabbitmq.global_service is defined or role_regards_stack_enable_cots_resource_limits %}
     deploy:
+{% if role_regards_stack_enable_cots_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.rabbitmq.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.rabbitmq.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
 {% if role_regards_stack_cots.rabbitmq.global_service is defined %}
       mode: global
 {% endif %}
@@ -80,6 +124,6 @@ services:
 {% endif %}
 {% if role_regards_stack_cots.rabbitmq.global_service is defined %}
     environment:
-      - RABBITMQ_USE_LONGNAME=true
+      - RABBITMQ_USE_LONGNAME={{ role_regards_stack_config_rabbitmq_use_longname|bool | ternary('true', 'false') }}
       - RABBITMQ_ERLANG_COOKIE={{ role_regards_stack_config_rabbitmq_erlang_cookie }}
 {% endif %}

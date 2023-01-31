@@ -23,7 +23,9 @@ cluster.initial_master_nodes:
 {%         endfor %}
 {%       endif %}
 {%     else %}
+{%       if not (hostname in hostvars[hostname]['groups'].get('swarm_manager_only_nodes', [])) %}
   - rs-elasticsearch-{{ hostvars[hostname]['ansible_host'] }}
+{%       endif %}
 {%     endif %}
 {%   endfor %}
 

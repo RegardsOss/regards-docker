@@ -1,0 +1,52 @@
+---
+# Stack infos
+role_regards_stack_elasticsearch_stack_name: "{{ group_stack_name }}"
+
+# Folder structure
+role_regards_stack_elasticsearch_workspace_local: "{{ group_workdir_local }}{{ group_stack_name }}/workspace/"
+role_regards_stack_elasticsearch_config: "{{ group_workdir_local }}{{ group_stack_name }}/config/"
+role_regards_stack_elasticsearch_stack: "{{ group_workdir_local }}{{ group_stack_name }}/stack/"
+role_regards_stack_elasticsearch_cli: "{{ group_workdir_local }}{{ group_stack_name }}/cli/"
+
+# Files owners
+role_regards_stack_elasticsearch_container_root_user: "{{ group_container_root_user }}"
+role_regards_stack_elasticsearch_container_root_group: "{{ group_container_root_group }}"
+
+# Docker users
+role_regards_stack_elasticsearch_container_run_uid: "{{ group_container_run_uid }}"
+role_regards_stack_elasticsearch_container_run_gid: "{{ group_container_run_gid }}"
+
+# Docker conf
+role_regards_stack_elasticsearch_docker_network_name: "{{ group_docker_network_name }}"
+role_regards_stack_elasticsearch_registry: "{{ group_docker_registry }}"
+
+# Elasticsearch
+role_regards_stack_elasticsearch_active: "{{ group_docker_cots.elasticsearch is defined }}"
+role_regards_stack_elasticsearch_cots_configuration_elasticsearch: "{{ group_docker_cots_configuration }}"
+role_regards_stack_elasticsearch_cots_elasticsearch: "{{ group_docker_cots.get('elasticsearch', {}) }}"
+
+# Kibana
+role_regards_stack_elasticsearch_kibana_active: "{{ group_docker_cots.kibana is defined }}"
+role_regards_stack_elasticsearch_cots_kibana: "{{  group_docker_cots.get('kibana', {}) }}"
+
+# Top level volumes / configs / secrets and REGARDS related volumes
+role_regards_stack_elasticsearch_top_level_nfs_servers: "{{ (group_docker_mounts | default({})).get('nfs', []) }}"
+
+role_regards_stack_elasticsearch_volume_elasticsearch: "{{ (group_docker_mounts | default({})).get('elasticsearch', {}) }}"
+role_regards_stack_elasticsearch_volume_elasticsearch_data: "{{ role_regards_stack_elasticsearch_volume_elasticsearch.get('data', {}) }}"
+role_regards_stack_elasticsearch_volume_elasticsearch_backup: "{{ role_regards_stack_elasticsearch_volume_elasticsearch.get('backup', {}) }}"
+
+# Healthcheck
+role_regards_stack_elasticsearch_enable_cots_healthcheck: "{{ (group_docker_cots_configuration | default({})).get('enable_healthcheck', false) | bool }}"
+
+# Resource limits
+role_regards_stack_elasticsearch_enable_cots_resource_limits: "{{ (group_docker_cots_configuration | default({})).get('enable_resource_limits', false) | bool }}"
+
+role_regards_stack_elasticsearch_resource_limits:
+  elasticsearch:
+    limits:
+      cpus: '4'
+      memory: "{{ role_regards_stack_elasticsearch_cots_elasticsearch.get('containerLimit', '4000m') }}"
+    reservations:
+      cpus: '1'
+      memory: "{{ role_regards_stack_elasticsearch_cots_elasticsearch.get('memoryLimit', '2000m') }}"

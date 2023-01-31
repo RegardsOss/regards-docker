@@ -2,5 +2,7 @@
 - name: Iterate over NFS servers
   ansible.builtin.include_tasks: initNfs.yml
   loop: "{{ role_regards_init_nfs_workspaces_top_level_nfs_servers }}"
+  # skipping NFS initialisation when we detect ro (Read only) in its config
+  when: not 'ro,' in nfs_server.config.o
   loop_control:
     loop_var: nfs_server

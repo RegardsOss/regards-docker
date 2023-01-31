@@ -1,18 +1,23 @@
 ---
+- name: "Remove container that creates plugin on NFS {{ nfs_server.name }}"
+  docker_container:
+    name: "create-plugin-on-nfs"
+    state: absent
+
 - name: "Create a tmp volume to initiate plugins upon {{ nfs_server.name }}"
   docker_volume:
     name: plugin_tmp_nfs
     recreate: always
     driver_options:
-      type: nfs
+      type: "{{ nfs_server.config.type | default('nfs') }}"
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_plugins_workspace_nfs_mount_conf.get('device_postfix', 'regards/plugins/') }}"
   vars:
     ansible_python_interpreter: "env python{{ python_version }}"
 
-- name: Run plugins container
+- name: "Run plugins container"
   docker_container:
-    name: "{{ item.image }}"
+    name: "create-plugin-on-nfs"
     image: "{{ role_regards_plugins_workspace_nfs_docker_registry }}/{{ item.image }}:{{ item.tag }}"
     pull: true
     detach: false

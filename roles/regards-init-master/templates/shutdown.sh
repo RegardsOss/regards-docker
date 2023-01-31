@@ -5,7 +5,7 @@ if [ "$response" = "y" ] ; then
   echo "Shutdown in progress for stack {{ role_regards_init_master_stack_name }} ..."
   docker stack rm {{ role_regards_init_master_stack_name }}
   # Encode the script before sending it threw SSH
-  SWARM_REMOVE_VOLUMES=$(base64 -w0 .swarm_remove_volumes.sh)
+  SWARM_REMOVE_VOLUMES=$(base64 -w0 {{ role_regards_init_master_cli }}.swarm_remove_volumes.sh)
 
 {% for hostname in groups['all'] %}
 {%   if (groups['swarm_manager_only_nodes'] is defined) and (hostname in groups['swarm_manager_only_nodes']) %}

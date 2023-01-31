@@ -9,9 +9,20 @@
   with_items:
     - regards-stack.yml
     - global-mounts.yml
-    - elastic.yml
     - rabbitmq.yml
   become: true
+
+- name: Generate elastic stack file using external role
+  ansible.builtin.include_role:
+    name: regards-stack-elasticsearch
+
+- name: Generate haproxy stack file using external role
+  ansible.builtin.include_role:
+    name: regards-stack-haproxy
+
+- name: Generate haproxy stack file using external role
+  ansible.builtin.include_role:
+    name: regards-stack-network
 
 - name: Generate logs.yml
   ansible.builtin.template:
@@ -73,8 +84,6 @@
   become: true
   when: role_regards_stack_workers | length > 0
 
-- name: Run REGARDS
-  ansible.builtin.shell: "{{ role_regards_stack_cli }}deploy.sh"
-  register: deploy
-  changed_when: deploy.rc != 0
-  failed_when: deploy.rc != 0
+- name: Run REGARDS using external role
+  ansible.builtin.include_role:
+    name: regards-stack-start

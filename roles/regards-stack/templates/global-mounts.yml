@@ -4,7 +4,7 @@ version: '3.7'
 configs:
 {% for config in role_regards_stack_top_level_configs %}
   conf_{{ config.file }}:
-    name: conf_{{ loop.index0 }}_${CHECKSUM_TOP_LEVEL_CONFIG_FILE_{{ loop.index0 }}}
+    name: conf_${CHECKSUM_TOP_LEVEL_CONFIG_FILE_{{ (role_regards_stack_top_level_configs_location + "/" + config.path + "/" + config.file) | hash('sha1') }}}
     file: "{{ role_regards_stack_top_level_configs_location }}/{{ config.path }}/{{ config.file }}"
 {% endfor %}
 {% endif %}
@@ -13,7 +13,7 @@ configs:
 secrets:
 {% for secret in role_regards_stack_top_level_secrets %}
   secret_{{ secret.file }}:
-    name: {{ secret.file }}${CHECKSUM_TOP_LEVEL_SECRET_FILE_{{ loop.index0 }}}
+    name: secret_${CHECKSUM_TOP_LEVEL_SECRET_FILE_{{ (role_regards_stack_top_level_secrets_location + "/" + secret.path + "/" + secret.file) | hash('sha1') }}}
     file: "{{ role_regards_stack_top_level_secrets_location }}/{{ secret.path }}/{{ secret.file }}"
 {% endfor %}
 {% endif %}
@@ -30,9 +30,9 @@ volumes:
       o: bind
       device: {{ top_level_volume.source }}
 {% else %}
-      type: nfs
 {% for nfs_server in role_regards_stack_top_level_nfs_servers %}
 {% if nfs_server.name == top_level_volume.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ top_level_volume.device_postfix }}"
 {% endif %}

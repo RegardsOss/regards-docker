@@ -23,15 +23,18 @@ role_regards_init_master_seuser: "{{ group_seuser }}"
 role_regards_init_master_registry: "{{ group_docker_registry }}"
 role_regards_init_master_stack_name: "{{ group_stack_name }}"
 
-role_regards_init_master_mservices: "{{ group_docker_mservices }}"
+role_regards_init_master_mservices: "{{ group_docker_mservices | default({}) }}"
+role_regards_init_master_mservices_active: "{{ role_regards_init_master_mservices|length > 0 }}"
 role_regards_init_master_cots: "{{ group_docker_cots }}"
 
-role_regards_init_public_url: "{{ group_docker_mservices.front.protocol }}://{{ group_docker_mservices.front.host }}:{{ group_docker_mservices.front.public_port | default(group_docker_mservices.front.port) }}"
+role_regards_init_front: "{{ role_regards_init_master_mservices.get('front', {}) }}"
+role_regards_init_public_url: "{{ role_regards_init_front.protocol | default('http') }}://{{ role_regards_init_front.host | default('localhost') }}:{{ role_regards_init_front.public_port | default(role_regards_init_front.get('port','8080')) }}"
 
 # Workers
 role_regards_init_workers: "{{ group_docker_workers | default([]) }}"
 
-role_regards_init_ca_certificates: "{{ group_config_mservices.get('ca_certificates', []) }}"
+role_regards_init_config_mservices: "{{ group_config_mservices | default({}) }}"
+role_regards_init_ca_certificates: "{{ role_regards_init_config_mservices.get('ca_certificates', []) }}"
 
 role_regards_init_top_level_configs: "{{  (group_docker_mounts | default({})).get('configs', []) }}"
 role_regards_init_top_level_secrets: "{{  (group_docker_mounts | default({})).get('secrets', []) }}"
@@ -59,3 +62,7 @@ role_regards_init_volume_mservices_logs:
   - worker-manager
   - lta-manager
   - front
+
+role_regards_init_master_rabbitmq_ssl_active: "{{ group_docker_cots_configuration.get('rabbitmq', {}).ssl is defined }}"
+role_regards_init_master_rabbitmq_folder_certificates: "{{ group_workdir_local }}{{ group_stack_name }}/config/rabbitmq/ca-certificates/"
+role_regards_init_master_rabbitmq_ssl_certificates_conf: "{{ group_docker_cots_configuration.get('rabbitmq', {}).get('ssl', {}) }}"

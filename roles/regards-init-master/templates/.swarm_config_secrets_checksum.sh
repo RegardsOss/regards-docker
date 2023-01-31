@@ -10,6 +10,8 @@ function create_env
   export "$1=$(get_checksum $2)"
 }
 
+{% if role_regards_init_master_mservices_active|bool %}
+
 ###############################################
 ################## FRONTEND ###################
 ###############################################
@@ -28,7 +30,6 @@ create_env CHECKSUM_RS_FRONT_SSL_CRT {{ role_regards_init_master_config }}regard
 create_env CHECKSUM_RS_FRONT_SSL_KEY {{ role_regards_init_master_config }}regards/nginx/ssl/{{ role_regards_init_master_mservices.front.ssl.crt }}
 {% endif %}
 {% endif %}
-
 
 ###################################################
 ################## MICROSERVICE ###################
@@ -131,9 +132,12 @@ create_env CHECKSUM_RS_WORKER_MANAGER_LOGBACK_XML {{ role_regards_init_master_co
 create_env CHECKSUM_RS_MS_WORKER_MANAGER_PROPERTIES {{ role_regards_init_master_config }}regards/config/regards-oss-backend/rs-worker-manager.properties
 {% endif %}
 
+# End FRONTEND & MICROSERVICES
+{% endif %}
+
 ################# CA CERTS ####################
 {% for file in role_regards_init_ca_certificates %}
-create_env CHECKSUM_CA_CERT_{{ loop.index0 }} {{ role_regards_init_master_config }}regards/ca-certificates/{{ file }}
+create_env CHECKSUM_CA_CERT_{{ file | hash('sha1') }} {{ role_regards_init_master_config }}regards/ca-certificates/{{ file }}
 {% endfor %}
 
 
@@ -146,7 +150,7 @@ create_env CHECKSUM_RS_WORKERS_APPLICATION_YML {{ role_regards_init_master_confi
 
 {% for worker in role_regards_init_workers %}
 {% if worker.config is defined %}
-create_env CHECKSUM_WORKER_{{ loop.index0 }}_YML {{ role_regards_init_master_config }}regards/config/regards-workers/{{ worker.name }}.yml
+create_env CHECKSUM_WORKER_{{ worker.name | hash('sha1')  }}_YML {{ role_regards_init_master_config }}regards/config/regards-workers/{{ worker.name }}.yml
 {% endif %}
 {% endfor %}
 {% endif %}
@@ -163,12 +167,23 @@ create_env CHECKSUM_RS_POSTGRES_POSTGRESQL_CONF {{ role_regards_init_master_conf
 
 ################# RabbitMQ ####################
 {% if role_regards_init_master_cots.rabbitmq is defined %}
-create_env CHECKSUM_RS_RABBITMQ_DEFINITION_JSON {{ role_regards_init_master_config }}rabbitmq/definitions.json
 create_env CHECKSUM_RS_RABBITMQ_RABBITMQ_CONF {{ role_regards_init_master_config }}rabbitmq/rabbitmq.conf
+{% endif %}
+
+# checksum ssl
+
+{% if role_regards_init_master_rabbitmq_ssl_active|bool %}
+create_env CHECKSUM_RS_RABBITMQ_SSL_CA {{ role_regards_init_master_rabbitmq_folder_certificates }}{{ role_regards_init_master_rabbitmq_ssl_certificates_conf.ca }}
+create_env CHECKSUM_RS_RABBITMQ_SSL_CERT {{ role_regards_init_master_rabbitmq_folder_certificates }}{{ role_regards_init_master_rabbitmq_ssl_certificates_conf.cert }}
+create_env CHECKSUM_RS_RABBITMQ_SSL_KEY {{ role_regards_init_master_rabbitmq_folder_certificates }}{{ role_regards_init_master_rabbitmq_ssl_certificates_conf.key }}
 {% endif %}
 
 {% if role_regards_init_master_cots.elasticsearch is defined %}
 create_env CHECKSUM_RS_ELASTICSEARCH_ELASTICSEARCH_YML {{ role_regards_init_master_config }}elasticsearch/elasticsearch.yml
+{% endif %}
+
+{% if role_regards_init_master_cots.haproxy is defined %}
+create_env CHECKSUM_RS_HAPROXY_CONFIG_YML {{ role_regards_init_master_config }}haproxy/haproxy.cfg
 {% endif %}
 
 {% if role_regards_init_master_cots.elasticsearch_logs is defined %}
@@ -185,7 +200,7 @@ create_env CHECKSUM_RS_FLUENT_FLUENT_CONF {{ role_regards_init_master_config }}f
 
 {% if role_regards_init_top_level_configs|length %}
 {% for config in role_regards_init_top_level_configs %}
-create_env CHECKSUM_TOP_LEVEL_CONFIG_FILE_{{ loop.index0 }} {{ role_regards_init_master_config }}mounted/configs/{{ config.path }}/{{ config.file }}
+create_env CHECKSUM_TOP_LEVEL_CONFIG_FILE_{{ (role_regards_init_master_config + "mounted/configs/" + config.path + "/" + config.file) | hash('sha1') }} {{ role_regards_init_master_config }}mounted/configs/{{ config.path }}/{{ config.file }}
 {% endfor %}
 {% endif %}
 
@@ -195,6 +210,6 @@ create_env CHECKSUM_TOP_LEVEL_CONFIG_FILE_{{ loop.index0 }} {{ role_regards_init
 
 {% if role_regards_init_top_level_secrets|length %}
 {% for secret in role_regards_init_top_level_secrets %}
-create_env CHECKSUM_TOP_LEVEL_SECRET_FILE_{{ loop.index0 }} {{ role_regards_init_master_config }}mounted/secrets/{{ secret.path }}/{{ secret.file }}
+create_env CHECKSUM_TOP_LEVEL_SECRET_FILE_{{ (role_regards_init_master_config + "mounted/secrets/" + secret.path + "/" + secret.file) | hash('sha1') }} {{ role_regards_init_master_config }}mounted/secrets/{{ secret.path }}/{{ secret.file }}
 {% endfor %}
 {% endif %}

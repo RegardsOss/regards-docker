@@ -8,6 +8,12 @@ role_regards_rabbitmq_config_container_root_group: "{{ group_container_root_grou
 role_regards_rabbitmq_config_setype: "{{ group_setype }}"
 role_regards_rabbitmq_config_seuser: "{{ group_seuser }}"
 
+# Certificates
+role_regards_rabbitmq_config_ssl_active: "{{ group_docker_cots_configuration.get('rabbitmq', {}).ssl is defined }}"
+role_regards_rabbitmq_config_folder_certificates: "{{ group_workdir_local }}{{ group_stack_name }}/config/rabbitmq/ca-certificates/"
+role_regards_rabbitmq_config_ssl_certificates_conf: "{{ group_docker_cots_configuration.get('rabbitmq', {}).get('ssl', {}) }}"
+role_regards_rabbitmq_config_ssl_location_inside_playbook: "{{ inventory_dir }}/group_vars/regards_nodes/files/rabbitmq-ssl/"
+
 # ----------------------------------
 # RabbitMQ generation of definitions.json
 # This files contains REGARDS user, custom users, users rights and shovel if required
@@ -66,3 +72,5 @@ role_regards_rabbitmq_config_definition:
   queues: []
   exchanges: []
   bindings: []
+
+role_regards_rabbitmq_config_definition_manual_revision: "{{ role_regards_rabbitmq_config_config_rabbitmq.get('manual_revision', '1') }}"

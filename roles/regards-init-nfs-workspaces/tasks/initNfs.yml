@@ -1,10 +1,15 @@
 ---
+- name: "Remove container that creates required folders on NFS {{ nfs_server.name }}"
+  docker_container:
+    name: "create-directories-on-nfs"
+    state: absent
+
 - name: "Create a tmp volume to initiate {{ nfs_server.name }}"
   docker_volume:
     name: tmp_nfs
     recreate: always
     driver_options:
-      type: nfs
+      type: "{{ nfs_server.config.type | default('nfs') }}"
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}"
   vars:
@@ -33,7 +38,7 @@
 
 - name: "Initiate required folders on NFS {{ nfs_server.name }}"
   docker_container:
-    name: "create-directories-on-{{ nfs_server.name }}"
+    name: "create-directories-on-nfs"
     image: "{{ role_regards_init_nfs_workspaces_registry }}/regards-bash:{{ role_regards_init_nfs_workspaces_image_version }}"
     pull: true
     command: bash /scripts/start.sh

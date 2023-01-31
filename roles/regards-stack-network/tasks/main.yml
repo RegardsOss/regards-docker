@@ -1,0 +1,9 @@
+---
+- name: Generate network declaration stack file
+  ansible.builtin.template:
+    src: "regards-network.yml"
+    dest: "{{ role_regards_stack_network_stack }}"
+    mode: '0740'
+    owner: "{{ role_regards_stack_network_container_root_user }}"
+    group: "{{ role_regards_stack_network_container_root_group }}"
+  become: true
