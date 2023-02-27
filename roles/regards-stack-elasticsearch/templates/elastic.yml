@@ -70,7 +70,7 @@ services:
     read_only: true
 {% if role_regards_stack_elasticsearch_enable_cots_healthcheck %}
     healthcheck:
-      test: ["CMD-SHELL", "curl -s -f -X GET 'localhost:9200/_cluster/health' | jq '.status' | grep -q -e 'yellow' -e 'green' || exit 1"]
+      test: ["CMD-SHELL", "curl -s -f -X GET 'localhost:9200' | jq '.cluster_uuid' | grep -q -e '_na_' || curl -s -f -X GET 'localhost:9200/_cluster/health?local=true' | jq '.status' | grep -q -e 'yellow' -e 'green' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -114,7 +114,7 @@ services:
     configs:
       - source: rs-elasticsearch_elasticsearch.yml
         target: /usr/share/elasticsearch/config/elasticsearch.yml
-{% if not role_regards_stack_elasticsearch_cots_elasticsearch.global_service is defined %}
+{% if not role_regards_stack_elasticsearch_cots_elasticsearch.global_service is defined and not role_regards_stack_elasticsearch_haproxy_active %}
 {% if role_regards_stack_elasticsearch_cots_elasticsearch.http is defined or role_regards_stack_elasticsearch_cots_elasticsearch.client is defined %}
     ports:
 {% if role_regards_stack_elasticsearch_cots_elasticsearch.http is defined %}
@@ -160,6 +160,14 @@ services:
     user: "{{ role_regards_stack_elasticsearch_container_run_uid }}:{{ role_regards_stack_elasticsearch_container_run_gid }}"
     hostname: rs-kibana
     read_only: true
+{% if role_regards_stack_elasticsearch_enable_cots_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -I localhost:5601/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 2m
+{% endif %}
     networks:
       - {{ role_regards_stack_elasticsearch_docker_network_name }}
     volumes:

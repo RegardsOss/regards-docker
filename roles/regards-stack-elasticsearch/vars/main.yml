@@ -29,6 +29,9 @@ role_regards_stack_elasticsearch_cots_elasticsearch: "{{ group_docker_cots.get('
 role_regards_stack_elasticsearch_kibana_active: "{{ group_docker_cots.kibana is defined }}"
 role_regards_stack_elasticsearch_cots_kibana: "{{  group_docker_cots.get('kibana', {}) }}"
 
+# HAproxy
+role_regards_stack_elasticsearch_haproxy_active: "{{ group_docker_cots.haproxy is defined }}"
+
 # Top level volumes / configs / secrets and REGARDS related volumes
 role_regards_stack_elasticsearch_top_level_nfs_servers: "{{ (group_docker_mounts | default({})).get('nfs', []) }}"
 

@@ -266,6 +266,11 @@ role_regards_mconfig_amqp:
   ssl: "{{ (group_config_mservices.amqp | default({})).ssl is defined }}"
 
 # ----------------------------------
+# S3 servers configuration
+# ----------------------------------
+role_regards_mconfig_s3_servers: "{{ group_config_mservices.s3 | default([])}}"
+
+# ----------------------------------
 # PostgreSQL configuration
 # ----------------------------------
 postgres_default:
@@ -292,7 +297,7 @@ role_regards_mconfig_postgres:
     user: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('user', postgres_default.user )}}"
     password: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('password', postgres_default.password )}}"
 
-role_regards_mconfig_public_url: "{{ group_docker_mservices.front.protocol }}://{{ group_docker_mservices.front.host }}:{{ group_docker_mservices.front.public_port | default(group_docker_mservices.front.port) }}"
+role_regards_mconfig_public_url: "{{ group_docker_mservices.front.public_protocol | default(group_docker_mservices.front.protocol) }}://{{ group_docker_mservices.front.public_host | default(group_docker_mservices.front.host) }}:{{ group_docker_mservices.front.public_port | default(group_docker_mservices.front.port) }}"
 
 # ----------------------------------
 # Microservice list

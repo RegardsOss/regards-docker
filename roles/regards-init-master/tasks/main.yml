@@ -68,6 +68,7 @@
     - health.sh
     - shutdown.sh
     - regenerate-ca.sh
+    - configure-log-level.sh
   become: true
 
 - name: Create REGARDS basic structure

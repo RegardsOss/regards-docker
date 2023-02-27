@@ -1,6 +1,8 @@
 {% if role_regards_elasticsearch_config_elasticsearch.global_service is defined %}
 # Specify the interface to use between elasticsearches, otherwise it uses eth1
 network.host: _eth0_
+# Also exposes localhost for healthcheck
+network.bind_host: [_local_,_eth0_]
 {% else %}
 network.host: 0.0.0.0
 {% endif %}

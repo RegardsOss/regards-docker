@@ -13,5 +13,7 @@ docker pull {{ role_regards_init_master_registry }}/${1}:${2}
 # Get the ID of that image
 declare -r image=`docker image inspect --format '{{ '{{' }} index  .RepoDigests 0 {{ '}}' }}' {{ role_regards_init_master_registry }}/${1}:${2}`
 # Update the server and the image used
-docker service update --image ${image} --with-registry-auth {{ role_regards_init_master_stack_name }}_${1}
+docker service update --image ${image} \
+--health-interval=10s --health-retries=20 --health-start-period=30s \
+--with-registry-auth {{ role_regards_init_master_stack_name }}_${1}
 echo "Update succeeded !"

@@ -31,9 +31,9 @@ services:
       - source: rs-haproxy_haproxy.cfg
         target: /usr/local/etc/haproxy/haproxy.cfg
     ports:
-{% if role_regards_stack_haproxy_cots_elasticsearch.http is defined and role_regards_stack_haproxy_cots_elasticsearch.global_service is defined %}
+{% if role_regards_stack_haproxy_cots_elasticsearch.http is defined %}
       - "{{ role_regards_stack_haproxy_cots_elasticsearch.http }}:9200"
 {% endif %}
-{% if role_regards_stack_haproxy_cots_elasticsearch.client is defined and role_regards_stack_haproxy_cots_elasticsearch.global_service is defined %}
+{% if role_regards_stack_haproxy_cots_elasticsearch.client is defined %}
       - "{{ role_regards_stack_haproxy_cots_elasticsearch.client }}:9300"
 {% endif %}

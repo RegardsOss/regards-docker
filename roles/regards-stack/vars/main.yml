@@ -136,45 +136,46 @@ role_regards_stack_resource_limits:
     reservations:
       cpus: '1'
       memory: "{{ role_regards_stack_cots.get('rabbitmq', {}).get('memoryLimit', '2000m') }}"
-# Microservices
+  # Microservices
+  # CPU limit is tailored to handle microservice boot time
   config:
     limits:
-      cpus: '0.50'
+      cpus: '3'
       memory: 512mb
     reservations:
       cpus: '0.25'
       memory: 128mb
   registry:
     limits:
-      cpus: '0.50'
+      cpus: '3'
       memory: 512mb
     reservations:
       cpus: '0.25'
       memory: 128mb
   gateway:
     limits:
-      cpus: '2'
+      cpus: '3'
       memory: 1024mb
     reservations:
       cpus: '0.25'
       memory: 256mb
   admin_instance:
     limits:
-      cpus: '1'
+      cpus: '3'
       memory: 768mb
     reservations:
       cpus: '0.50'
       memory: 512mb
   admin:
     limits:
-      cpus: '1'
+      cpus: '3'
       memory: 1024mb
     reservations:
       cpus: '0.50'
       memory: 512mb
   authentication:
     limits:
-      cpus: '0.50'
+      cpus: '3'
       memory: 768mb
     reservations:
       cpus: '0.25'
@@ -209,14 +210,14 @@ role_regards_stack_resource_limits:
       memory: 1024mb
   access_instance:
     limits:
-      cpus: '0.50'
+      cpus: '3'
       memory: 768mb
     reservations:
       cpus: '0.25'
       memory: 512mb
   access_project:
     limits:
-      cpus: '1'
+      cpus: '3'
       memory: 768mb
     reservations:
       cpus: '0.25'
