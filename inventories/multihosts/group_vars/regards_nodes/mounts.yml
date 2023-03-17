@@ -1,0 +1,25 @@
+# Define volumes, REGARDS volumes, configs and secrets
+group_docker_mounts:
+  # Define NFS configurations used by REGARDS volumes
+  nfs: []
+  # Allows some files inside <inventory>/group_vars/regards_nodes/files/... to be attached 
+  # to frontend / workers containers as Secret file (read only) 
+  secrets: []
+  # Allows some files inside <inventory>/group_vars/regards_nodes/files/... to be attached 
+  # to frontend / workers containers as Config file (read only) 
+  configs: []
+  volumes: []
+  regards:
+    # Common inputs folder for dataprovider, fem, ingest and storage
+    data_inputs: []
+    # For DAM documents
+    dam:
+    storage:
+      # For online local storages
+      online:
+      # For STORAGE cache
+      cache:
+    # Common microservices workspace directory
+    workspace:
+    # Microservices plugins directory
+    plugins:

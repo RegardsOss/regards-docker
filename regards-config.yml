@@ -1,13 +1,14 @@
 ---
-- name: Refresh SWARM configs and secrets files on master node
+- name: Refresh SWARM configs and secrets files on master node and deploy stack files
   hosts: master
   become: true
   roles:
     - regards-front-footer
     - regards-mconfig
     - regards-mounts-secrets-configs
+    - regards-stack
 
-- name: Launch stack
+- name: Deploy REGARDS using Swarm
   hosts: master
   roles:
-    - regards-stack
+    - regards-stack-start

@@ -27,7 +27,7 @@
     - regards-init-nfs-workspaces
     - regards-plugins-workspace-nfs
 
-- name: Install SWARM configs and secrets files on master node
+- name: Install SWARM configs and secrets files on master node and deploy stack files
   hosts: master
   become: true
   roles:
@@ -43,8 +43,9 @@
     - regards-logback
     - regards-mounts-secrets-configs
     - regards-ca-certificates
+    - regards-stack
 
-- name: Launch stack
+- name: Deploy REGARDS using Swarm
   hosts: master
   roles:
-    - regards-stack
+    - regards-stack-start

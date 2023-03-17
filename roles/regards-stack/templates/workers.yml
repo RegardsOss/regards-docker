@@ -36,11 +36,16 @@ services:
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
-{%if (worker.configuration | default({})).environment is defined %}
+{%if (worker.configuration | default({})).environment is defined or worker.jdwp is defined %}
     environment:
+{% if worker.jdwp is defined %}
+      - BPL_DEBUG_ENABLED=true
+{% endif %}
+{%if (worker.configuration | default({})).environment is defined %}
 {% for key, value in worker.configuration.environment.items() %}
       {{ key }}: "{{value}}"
 {% endfor %}
+{% endif %}
 {% endif %}
     volumes:
       - {{ role_regards_stack_workspace_local }}regards/workers/{{ worker.name }}/logs:/logs
@@ -73,7 +78,7 @@ services:
 {% endif %}
 {% if worker.jdwp is defined %}
     ports:
-      - "{{ worker.jdwp }}:10500"
+      - "{{ worker.jdwp }}:8000"
 {% endif %}
     logging:
 {% if worker.logging is defined %}

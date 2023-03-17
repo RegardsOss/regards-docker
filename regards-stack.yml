@@ -1,5 +1,11 @@
 ---
-- name: Refresh the REGARDS with all the conf within the Ansible project
+- name: Install SWARM stack files
   hosts: master
+  become: true
   roles:
     - regards-stack
+
+- name: Deploy REGARDS using Swarm
+  hosts: master
+  roles:
+    - regards-stack-start

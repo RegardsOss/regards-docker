@@ -1,10 +1,33 @@
 #!/bin/bash -e
 # Check health status for specified project using Spring Boot Actuator
 
+
+# end ##################################################################
+function end
+{
+  if [ $result_ok = "false" ] 
+  then
+    printf >&2 "[\033[31mN/A\033[m]\tREGARDS not available\n"
+    curl -I $url --noproxy '*' --insecure
+  fi
+}
+
+# abort on nonzero exitstatus
+set -o errexit
+# don't hide errors within pipes
+set -o pipefail
+
+typeset result_ok=false
+
+trap end EXIT
+
+# main ##################################################################
+
 # Param 1 : url to check
 function healthCheck
 {   
-    echo $(curl -s -I $1 --noproxy '*' --insecure | grep HTTP | cut -d' ' -f2)
+    resultCurl=$(curl -s -I $1 --noproxy '*' --insecure)
+    echo $resultCurl | grep HTTP | cut -d' ' -f2
 }
 
 # Param 1 : HTTP status
@@ -64,3 +87,8 @@ display "${status}" "{{ mservice }}"
 
 {% endif %}
 {% endfor %}
+
+
+result_ok=true
+
+exit 0

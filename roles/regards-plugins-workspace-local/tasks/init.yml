@@ -41,6 +41,10 @@
     # For now, let's just retry few times before killing install
     restart_retries: 10
     restart_policy: on-failure
+  register: plugin_output
+  # Display the task as Changed on ansible log only when there is "Plugin successfully copied" inside the log
+  failed_when: plugin_output.failed
+  changed_when: (plugin_output.container is defined and 'copied' in plugin_output.container.Output) or (plugin_output.ansible_facts is defined and 'copied' in plugin_output.ansible_facts.docker_container.Output)
   with_items:
     - "{{ role_regards_plugins_workspace_local_plugins }}"
   vars:

@@ -10,7 +10,6 @@
     - regards-stack.yml
     - global-mounts.yml
     - rabbitmq.yml
-  become: true
 
 - name: Generate elastic stack file using external role
   ansible.builtin.include_role:
@@ -31,7 +30,6 @@
     mode: '0740'
     owner: "{{ role_regards_stack_container_root_user }}"
     group: "{{ role_regards_stack_container_root_group }}"
-  become: true
   when: role_regards_stack_cots.elasticsearch_logs is defined or role_regards_stack_cots.kibana_logs is defined or role_regards_stack_cots.fluent is defined
 
 - name: Generate doc.yml
@@ -41,7 +39,6 @@
     mode: '0740'
     owner: "{{ role_regards_stack_container_root_user }}"
     group: "{{ role_regards_stack_container_root_group }}"
-  become: true
   when: role_regards_stack_cots.doc is defined
 
 - name: Generate s3-minio.yml
@@ -51,7 +48,6 @@
     mode: '0740'
     owner: "{{ role_regards_stack_container_root_user }}"
     group: "{{ role_regards_stack_container_root_group }}"
-  become: true
   when: role_regards_stack_cots.s3_minio is defined
 
 - name: Generate mail.yml
@@ -61,7 +57,6 @@
     mode: '0740'
     owner: "{{ role_regards_stack_container_root_user }}"
     group: "{{ role_regards_stack_container_root_group }}"
-  become: true
   when: role_regards_stack_cots.maildev is defined
 
 - name: Generate postgresql.yml
@@ -71,7 +66,6 @@
     mode: '0740'
     owner: "{{ role_regards_stack_container_root_user }}"
     group: "{{ role_regards_stack_container_root_group }}"
-  become: true
   when: role_regards_stack_cots.postgres is defined or role_regards_stack_cots.phppgadmin is defined
 
 - name: Generate workers.yml
@@ -81,9 +75,4 @@
     mode: '0740'
     owner: "{{ role_regards_stack_container_root_user }}"
     group: "{{ role_regards_stack_container_root_group }}"
-  become: true
   when: role_regards_stack_workers | length > 0
-
-- name: Run REGARDS using external role
-  ansible.builtin.include_role:
-    name: regards-stack-start

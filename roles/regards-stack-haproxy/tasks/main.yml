@@ -6,5 +6,4 @@
     mode: '0740'
     owner: "{{ role_regards_stack_haproxy_container_root_user }}"
     group: "{{ role_regards_stack_haproxy_container_root_group }}"
-  become: true
   when: role_regards_stack_haproxy_cots.haproxy is defined

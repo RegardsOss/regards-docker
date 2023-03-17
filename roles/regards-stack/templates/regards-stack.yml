@@ -842,7 +842,18 @@ services:
       - ACTIVE_YOURKIT=true
 {% endif %}
     networks:
-      - {{ role_regards_stack_docker_network_name }}
+      {{ role_regards_stack_docker_network_name }}:
+{% if (role_regards_stack_mservices.gateway.configuration | default({})).external_networks is defined %}
+{% for external_network in role_regards_stack_mservices.gateway.configuration.external_networks %}
+      {{ external_network.network }}:
+{% if external_network.aliases is defined %}
+        aliases:
+{% for alias in external_network.aliases %}
+          - {{ alias }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
     volumes:
       - type: volume
         source: logs-gateway-datavolume
@@ -1113,7 +1124,18 @@ services:
       - ACTIVE_YOURKIT=true
 {% endif %}
     networks:
-      - {{ role_regards_stack_docker_network_name }}
+      {{ role_regards_stack_docker_network_name }}:
+{% if (role_regards_stack_mservices.authentication.configuration | default({})).external_networks is defined %}
+{% for external_network in role_regards_stack_mservices.authentication.configuration.external_networks %}
+      {{ external_network.network }}:
+{% if external_network.aliases is defined %}
+        aliases:
+{% for alias in external_network.aliases %}
+          - {{ alias }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
     volumes:
       - type: volume
         source: authentication-plugins-datavolume
@@ -1511,7 +1533,18 @@ services:
           - node.labels.{{ role_regards_stack_mservices.catalog.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.catalog.node_label_placement_constraint.value }}
 {% endif %}
     networks:
-      - {{ role_regards_stack_docker_network_name }}
+      {{ role_regards_stack_docker_network_name }}:
+{% if (role_regards_stack_mservices.catalog.configuration | default({})).external_networks is defined %}
+{% for external_network in role_regards_stack_mservices.catalog.configuration.external_networks %}
+      {{ external_network.network }}:
+{% if external_network.aliases is defined %}
+        aliases:
+{% for alias in external_network.aliases %}
+          - {{ alias }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
     environment:
       - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.catalog.jdwp is defined %}
@@ -1782,7 +1815,18 @@ services:
           - node.labels.{{ role_regards_stack_mservices.front.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.front.node_label_placement_constraint.value }}
 {% endif %}
     networks:
-      - {{ role_regards_stack_docker_network_name }}
+      {{ role_regards_stack_docker_network_name }}:
+{% if (role_regards_stack_mservices.front.configuration | default({})).external_networks is defined %}
+{% for external_network in role_regards_stack_mservices.front.configuration.external_networks %}
+      {{ external_network.network }}:
+{% if external_network.aliases is defined %}
+        aliases:
+{% for alias in external_network.aliases %}
+          - {{ alias }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
     environment:
       - GATEWAY_PUBLIC_URL={{ role_regards_stack_public_url }}
 {% if role_regards_stack_mservices.front.port is defined %}

@@ -15,18 +15,18 @@
   roles:
     - regards-init-nfs-workspaces
 
-- name: Install SWARM configs and secrets files on master node
+- name: Install SWARM configs and secrets files on master node and deploy stack files
   hosts: master
   become: true
   roles:
     - regards-elasticsearch-config
     - regards-haproxy-config
     - regards-mounts-secrets-configs
-
-- name: Launch stack
-  hosts: master
-  roles:
     - regards-stack-elasticsearch
     - regards-stack-haproxy
     - regards-stack-network
+
+- name: Deploy REGARDS using Swarm
+  hosts: master
+  roles:
     - regards-stack-start

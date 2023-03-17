@@ -6,4 +6,3 @@
     mode: '0740'
     owner: "{{ role_regards_stack_network_container_root_user }}"
     group: "{{ role_regards_stack_network_container_root_group }}"
-  become: true

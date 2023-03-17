@@ -4,3 +4,12 @@ networks:
   {{ role_regards_stack_network_docker_network_name }}:
     external: true
     name: {{ role_regards_stack_network_docker_network_name }}
+{% if role_regards_stack_network_config_mservices.external_networks is defined %}
+{% for external_network in role_regards_stack_network_config_mservices.external_networks %}
+  {{ external_network.network }}:
+    external: true
+{% if external_network.name is defined %}
+    name: {{ external_network.name }}
+{% endif %}
+{% endfor %}
+{% endif %}
