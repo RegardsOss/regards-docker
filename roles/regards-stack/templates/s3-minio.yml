@@ -45,6 +45,12 @@ services:
     environment:
       - "MINIO_SERVER_URL={{ role_regards_stack_minio_public_url }}:{{ role_regards_stack_cots.s3_minio.client }}"
 {% endif %}
+{% if role_regards_stack_cots.s3_minio.node_label_placement_constraint is defined %}
+    deploy:
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_cots.s3_minio.node_label_placement_constraint.key }} == {{ role_regards_stack_cots.s3_minio.node_label_placement_constraint.value }}
+{% endif %}
     logging:
 {% if role_regards_stack_cots.s3_minio.logging is defined %}
       {{ role_regards_stack_cots.s3_minio.logging | to_nice_yaml | indent(6) }}

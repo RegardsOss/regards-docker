@@ -1846,7 +1846,7 @@ services:
 {% if role_regards_stack_mservices.front.volumes is defined %}
 {% for vol in role_regards_stack_mservices.front.volumes %}
       - type: volume
-        source: {{ vol.name }}
+        source: {{ vol.source }}
         target: {{ vol.destination }}
 {% endfor %}
 {% endif %}

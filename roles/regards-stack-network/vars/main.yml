@@ -10,4 +10,4 @@ role_regards_stack_network_container_root_group: "{{ group_container_root_group 
 role_regards_stack_network_docker_network_name: "{{ group_docker_network_name }}"
 
 # Global config used by µservices
-role_regards_stack_network_config_mservices: "{{ group_config_mservices }}"
+role_regards_stack_network_config_mservices: "{{ group_config_mservices | default({}) }}"

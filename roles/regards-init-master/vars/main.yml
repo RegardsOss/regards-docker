@@ -64,5 +64,6 @@ role_regards_init_volume_mservices_logs:
   - front
 
 role_regards_init_master_rabbitmq_ssl_active: "{{ group_docker_cots_configuration.get('rabbitmq', {}).ssl is defined }}"
+role_regards_init_master_rabbitmq_global_active: "{{ role_regards_init_master_cots.get('rabbitmq', {}).global_service is defined }}"
 role_regards_init_master_rabbitmq_folder_certificates: "{{ group_workdir_local }}{{ group_stack_name }}/config/rabbitmq/ca-certificates/"
 role_regards_init_master_rabbitmq_ssl_certificates_conf: "{{ group_docker_cots_configuration.get('rabbitmq', {}).get('ssl', {}) }}"

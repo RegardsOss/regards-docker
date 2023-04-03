@@ -1,6 +1,7 @@
 ---
-role_regards_plugins_workspace_nfs_run_uid: "{{ group_container_run_uid }}"
-role_regards_plugins_workspace_nfs_run_gid: "{{ group_container_run_gid }}"
+# We're outside namespace - recompute run user and group
+role_regards_plugins_workspace_nfs_run_uid: "{{ group_container_run_uid|int + name_space_uid|int }}"
+role_regards_plugins_workspace_nfs_run_gid: "{{ group_container_run_gid|int + name_space_gid|int }}"
 
 role_regards_plugins_workspace_nfs_top_level_nfs_servers: "{{  (group_docker_mounts | default({})).get('nfs', []) }}"
 

@@ -10,6 +10,11 @@ configs:
   rs-rabbitmq_rabbitmq.conf:
     name: rabbitmq_rabbitmq_conf_${CHECKSUM_RS_RABBITMQ_RABBITMQ_CONF}
     file: {{ role_regards_stack_config }}rabbitmq/rabbitmq.conf
+{% if role_regards_stack_cots.rabbitmq.global_service is defined %}
+  rs-rabbitmq_erlang_cookie:
+    name: rabbitmq_erlang_cookie_${CHECKSUM_RS_RABBITMQ_ERLANG_COOKIE}
+    file: {{ role_regards_stack_config }}rabbitmq/erlang.cookie
+{% endif %}
 
 {% if role_regards_stack_rabbitmq_ssl_active|bool %}
   rs-rabbitmq_ssl.ca:
@@ -29,13 +34,13 @@ volumes:
     driver: local
     driver_opts:
 {% if role_regards_stack_volume_rabbitmq_data.nfs is defined %}
-{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
-{% if nfs_server.name == role_regards_stack_volume_rabbitmq_data.nfs %}
+{%   for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{%     if nfs_server.name == role_regards_stack_volume_rabbitmq_data.nfs %}
       type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
       device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_rabbitmq_data.get('device_postfix', 'rabbitmq') }}"
-{% endif %}
-{% endfor %}
+{%     endif %}
+{%   endfor %}
 {% else %}
       type: none
       o: bind
@@ -45,11 +50,11 @@ volumes:
 services:
   rs-rabbitmq:
     image: {{ role_regards_stack_registry }}/regards-messaging:{{ role_regards_stack_cots.rabbitmq.tag | default("latest") }}
-{%if (role_regards_stack_cots.rabbitmq.configuration | default({})).labels is defined %}
+{% if (role_regards_stack_cots.rabbitmq.configuration | default({})).labels is defined %}
     labels:
-{% for key, value in role_regards_stack_cots.rabbitmq.configuration.labels.items() %}
+{%   for key, value in role_regards_stack_cots.rabbitmq.configuration.labels.items() %}
       {{ key }}: "{{value}}"
-{% endfor %}
+{%   endfor %}
 {% endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
 {% if role_regards_stack_cots.rabbitmq.global_service is defined %}
@@ -82,6 +87,13 @@ services:
         target: /etc/rabbitmq/definitions.json
       - source: rs-rabbitmq_rabbitmq.conf
         target: /etc/rabbitmq/rabbitmq.conf
+{% if role_regards_stack_cots.rabbitmq.global_service is defined %}
+      - source: rs-rabbitmq_erlang_cookie
+        target: /var/lib/rabbitmq/.erlang.cookie
+        uid: '{{ role_regards_stack_container_run_uid }}'
+        gid: '{{ role_regards_stack_container_run_gid }}'
+        mode: 0400
+{% endif %}
 {% if role_regards_stack_rabbitmq_ssl_active|bool %}
       - source: rs-rabbitmq_ssl.ca
         target: "/etc/ca-certificates/{{ role_regards_stack_rabbitmq_ssl_certificates_conf.ca }}"
@@ -95,36 +107,35 @@ services:
       - {{ role_regards_stack_docker_network_name }}
 {% if role_regards_stack_cots.rabbitmq.http is defined or role_regards_stack_cots.rabbitmq.client is defined and role_regards_stack_cots.rabbitmq.global_service is defined == false %}
     ports:
-{% if role_regards_stack_cots.rabbitmq.client is defined %}
+{%   if role_regards_stack_cots.rabbitmq.client is defined %}
       - "{{ role_regards_stack_cots.rabbitmq.client }}:5672"
-{% endif %}
-{% if role_regards_stack_cots.rabbitmq.http is defined %}
+{%   endif %}
+{%   if role_regards_stack_cots.rabbitmq.http is defined %}
       - "{{ role_regards_stack_cots.rabbitmq.http }}:15672"
-{% endif %}
-{% if role_regards_stack_cots.rabbitmq.client_ssl is defined %}
+{%   endif %}
+{%   if role_regards_stack_cots.rabbitmq.client_ssl is defined %}
       - "{{ role_regards_stack_cots.rabbitmq.client_ssl }}:5671"
-{% endif %}
+{%   endif %}
 {% endif %}
 {% if role_regards_stack_cots.rabbitmq.node_label_placement_constraint is defined or role_regards_stack_cots.rabbitmq.global_service is defined or role_regards_stack_enable_cots_resource_limits %}
     deploy:
-{% if role_regards_stack_enable_cots_resource_limits %}
+{%   if role_regards_stack_enable_cots_resource_limits %}
       resources:
         limits:
           {{ role_regards_stack_resource_limits.rabbitmq.limits | to_nice_yaml | indent(10) }}
         reservations:
           {{ role_regards_stack_resource_limits.rabbitmq.reservations | to_nice_yaml | indent(10) }}
-{% endif %}
-{% if role_regards_stack_cots.rabbitmq.global_service is defined %}
+{%   endif %}
+{%   if role_regards_stack_cots.rabbitmq.global_service is defined %}
       mode: global
-{% endif %}
-{% if role_regards_stack_cots.rabbitmq.node_label_placement_constraint is defined %}
+{%   endif %}
+{%   if role_regards_stack_cots.rabbitmq.node_label_placement_constraint is defined %}
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_cots.rabbitmq.node_label_placement_constraint.key }} == {{ role_regards_stack_cots.rabbitmq.node_label_placement_constraint.value }}
-{% endif %}
+{%   endif %}
 {% endif %}
 {% if role_regards_stack_cots.rabbitmq.global_service is defined %}
     environment:
       - RABBITMQ_USE_LONGNAME={{ role_regards_stack_config_rabbitmq_use_longname|bool | ternary('true', 'false') }}
-      - RABBITMQ_ERLANG_COOKIE={{ role_regards_stack_config_rabbitmq_erlang_cookie }}
 {% endif %}

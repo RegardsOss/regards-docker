@@ -20,6 +20,6 @@ if [ "$IS_GLOBAL_SERVICE" == "<nil>" ]; then
   docker service scale {{ role_regards_init_master_stack_name }}_${1}=${NB_REPLICAS}
 else
   docker service rm {{ role_regards_init_master_stack_name }}_${1}
-  printf >&2 "[\033[32mINFO\033[m]\tGlobal service ${1} has been removed, now readd it using ./deploy.sh\n"
-  ./deploy.sh
+  printf >&2 "[\033[32mINFO\033[m]\tGlobal service ${1} has been removed, now read it using ./deploy.sh\n"
+  ./deploy.sh --no-pull-image
 fi

@@ -170,18 +170,24 @@ create_env CHECKSUM_RS_POSTGRES_POSTGRESQL_CONF {{ role_regards_init_master_conf
 create_env CHECKSUM_RS_RABBITMQ_RABBITMQ_CONF {{ role_regards_init_master_config }}rabbitmq/rabbitmq.conf
 {% endif %}
 
-# checksum ssl
+{% if role_regards_init_master_rabbitmq_global_active|bool %}
+create_env CHECKSUM_RS_RABBITMQ_ERLANG_COOKIE {{ role_regards_init_master_config }}rabbitmq/erlang.cookie
+{% endif %}
+
 
 {% if role_regards_init_master_rabbitmq_ssl_active|bool %}
+# RabbitMQ SSL
 create_env CHECKSUM_RS_RABBITMQ_SSL_CA {{ role_regards_init_master_rabbitmq_folder_certificates }}{{ role_regards_init_master_rabbitmq_ssl_certificates_conf.ca }}
 create_env CHECKSUM_RS_RABBITMQ_SSL_CERT {{ role_regards_init_master_rabbitmq_folder_certificates }}{{ role_regards_init_master_rabbitmq_ssl_certificates_conf.cert }}
 create_env CHECKSUM_RS_RABBITMQ_SSL_KEY {{ role_regards_init_master_rabbitmq_folder_certificates }}{{ role_regards_init_master_rabbitmq_ssl_certificates_conf.key }}
 {% endif %}
 
+################# ElasticSearch ####################
 {% if role_regards_init_master_cots.elasticsearch is defined %}
 create_env CHECKSUM_RS_ELASTICSEARCH_ELASTICSEARCH_YML {{ role_regards_init_master_config }}elasticsearch/elasticsearch.yml
 {% endif %}
 
+################# HAProxy ####################
 {% if role_regards_init_master_cots.haproxy is defined %}
 create_env CHECKSUM_RS_HAPROXY_CONFIG_YML {{ role_regards_init_master_config }}haproxy/haproxy.cfg
 {% endif %}

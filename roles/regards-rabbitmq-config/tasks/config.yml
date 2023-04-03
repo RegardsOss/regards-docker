@@ -29,3 +29,14 @@
     group: "{{ role_regards_rabbitmq_config_container_root_group }}"
     setype: "{{ role_regards_rabbitmq_config_setype }}"
     seuser: "{{ role_regards_rabbitmq_config_seuser }}"
+
+- name: Generate RabbitMQ erlang cookie file
+  ansible.builtin.template:
+    src: "erlang.cookie"
+    dest: "{{ role_regards_rabbitmq_config_conf_local }}/erlang.cookie"
+    mode: '0770'
+    owner: "{{ role_regards_rabbitmq_config_container_root_user }}"
+    group: "{{ role_regards_rabbitmq_config_container_root_group }}"
+    setype: "{{ role_regards_rabbitmq_config_setype }}"
+    seuser: "{{ role_regards_rabbitmq_config_seuser }}"
+  when: role_regards_rabbitmq_config_global_active|bool

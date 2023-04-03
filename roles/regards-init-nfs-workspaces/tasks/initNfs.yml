@@ -3,6 +3,8 @@
   docker_container:
     name: "create-directories-on-nfs"
     state: absent
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"
 
 - name: "Create a tmp volume to initiate {{ nfs_server.name }}"
   docker_volume:
@@ -48,11 +50,11 @@
     read_only: true
     cleanup: true
     user: "{{ role_regards_init_nfs_workspaces_run_uid }}:{{ role_regards_init_nfs_workspaces_run_gid }}"
+    # https://www.redhat.com/sysadmin/container-permission-denied-errors
+    privileged: true
+    userns_mode: host
     # container_default_behavior: no_defaults
     log_driver: json-file
-    # For now, let's just retry few times before killing install
-    restart_retries: 10
-    restart_policy: on-failure
     volumes:
       - tmp_nfs:/shared
       - "{{ role_regards_init_nfs_workspaces_tmp_folder }}:/scripts"

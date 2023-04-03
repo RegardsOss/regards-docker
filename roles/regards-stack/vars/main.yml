@@ -43,11 +43,9 @@ role_regards_stack_config_postgres:
   password: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('user', postgres_default.password) }}"
 
 rabbitmq_default:
-  erlang_cookie: MY-SECRET-KEY-123
   use_longname: true
   manual_revision: '1'
 
-role_regards_stack_config_rabbitmq_erlang_cookie: "{{ (role_regards_stack_cots | default({})).get('rabbitmq', {}).get('erlang_cookie', rabbitmq_default.erlang_cookie) }}"
 role_regards_stack_config_rabbitmq_use_longname: "{{ (role_regards_stack_cots | default({})).get('rabbitmq', {}).get('use_longname', rabbitmq_default.use_longname) }}"
 role_regards_stack_rabbitmq_manual_revision: "{{ (role_regards_stack_cots | default({})).get('rabbitmq', {}).get('manual_revision', rabbitmq_default.manual_revision) }}"
 

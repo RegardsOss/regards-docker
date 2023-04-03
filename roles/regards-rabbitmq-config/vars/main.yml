@@ -14,6 +14,12 @@ role_regards_rabbitmq_config_folder_certificates: "{{ group_workdir_local }}{{ g
 role_regards_rabbitmq_config_ssl_certificates_conf: "{{ group_docker_cots_configuration.get('rabbitmq', {}).get('ssl', {}) }}"
 role_regards_rabbitmq_config_ssl_location_inside_playbook: "{{ inventory_dir }}/group_vars/regards_nodes/files/rabbitmq-ssl/"
 
+# Erlang cookie
+default_erlang_cookie: MY-SECRET-KEY-123
+role_regards_rabbitmq_config_erlang_cookie: "{{ (group_docker_cots | default({})).get('rabbitmq', {}).get('erlang_cookie', default_erlang_cookie) }}"
+role_regards_rabbitmq_config_global_active: "{{ (group_docker_cots | default({})).get('rabbitmq', {}).global_service is defined }}"
+
+role_regards_rabbitmq_config_allow_guest_user_connection: "{{ not (group_docker_cots | default({})).get('rabbitmq', {}).user is defined }}"
 # ----------------------------------
 # RabbitMQ generation of definitions.json
 # This files contains REGARDS user, custom users, users rights and shovel if required

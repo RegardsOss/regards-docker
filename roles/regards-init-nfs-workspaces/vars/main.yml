@@ -12,8 +12,9 @@ role_regards_init_nfs_workspaces_seuser: "{{ group_seuser }}"
 role_regards_init_nfs_workspaces_registry: "{{ group_docker_registry }}"
 role_regards_init_nfs_workspaces_image_version: "{{ (group_docker_cots.bash | default({})).get('tag', global_regards.version) }}"
 
-role_regards_init_nfs_workspaces_run_uid: "{{ group_container_run_uid }}"
-role_regards_init_nfs_workspaces_run_gid: "{{ group_container_run_gid }}"
+# We're outside namespace - recompute run user and group
+role_regards_init_nfs_workspaces_run_uid: "{{ group_container_run_uid|int + name_space_uid|int }}"
+role_regards_init_nfs_workspaces_run_gid: "{{ group_container_run_gid|int + name_space_gid|int }}"
 
 role_regards_init_nfs_workspaces_top_level_nfs_servers: "{{  (group_docker_mounts | default({})).get('nfs', []) }}"
 
