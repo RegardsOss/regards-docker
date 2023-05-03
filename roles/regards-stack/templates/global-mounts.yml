@@ -34,7 +34,7 @@ volumes:
 {% if nfs_server.name == top_level_volume.nfs %}
       type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
-      device: "{{ nfs_server.config.device_prefix }}{{ top_level_volume.device_postfix }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ top_level_volume.get('device_postfix','') }}"
 {% endif %}
 {% endfor %}
 {% endif %}

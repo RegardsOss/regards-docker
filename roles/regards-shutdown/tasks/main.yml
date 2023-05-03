@@ -1,6 +1,12 @@
 ---
+- name: Check shutdown script exists on the target host(s)
+  ansible.builtin.stat:
+    path: "{{ role_regards_shutdown_cli }}shutdown.sh"
+  register: shutdown_script
+
 - name: Shutdown REGARDS (Are you on Multinode stack ? You need SSH login without password to make this task works)
-  ansible.builtin.shell: "{{ role_regards_shutdown_cli }}shutdown.sh"
+  ansible.builtin.shell: "{{ role_regards_shutdown_cli }}shutdown.sh -y"
   register: deploy
   changed_when: deploy.rc != 0
   failed_when: deploy.rc != 0
+  when: shutdown_script.stat.exists

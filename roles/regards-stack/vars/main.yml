@@ -26,8 +26,6 @@ role_regards_stack_mservices: "{{ group_docker_mservices }}"
 role_regards_stack_cots: "{{ group_docker_cots }}"
 role_regards_stack_cots_configuration: "{{ group_docker_cots_configuration }}"
 role_regards_stack_workers: "{{ group_docker_workers | default([]) }}"
-role_regards_stack_workers_configs: "{{group_docker_workers_configs | default([]) }}"
-role_regards_stack_workers_secrets: "{{group_docker_workers_secrets | default([]) }}"
 
 role_regards_stack_mservices_admin_image_name: "{{ (group_docker_mservices.admin | default({})).get('imageName', 'rs-admin') }}"
 role_regards_stack_mservices_admin_instance_image_name: "{{ (group_docker_mservices.admin_instance | default({})).get('imageName', 'rs-admin-instance') }}"

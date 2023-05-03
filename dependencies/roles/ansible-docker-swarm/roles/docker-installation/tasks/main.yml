@@ -35,12 +35,6 @@
     owner: 'root'
     group: 'docker'
 
-- name: Remove fd:// from ExecStart to use linux sock protocol
-  lineinfile:
-    path: /lib/systemd/system/docker.service
-    regexp: '^ExecStart='
-    line: "ExecStart=/usr/bin/dockerd --containerd=/run/containerd/containerd.sock"
-
 - name: Load into kernel some modules required by Swarm
   modprobe:
     name: "{{ item }}"
@@ -118,7 +112,14 @@
     mode: '0755'
     owner: 'root'
     group: 'root'
-  when: "'docker_http_proxy' in hostvars[inventory_hostname] and 'docker_no_proxy' in hostvars[inventory_hostname]"
+
+- name: Configure Docker daemon exec start
+  template:
+    src: "override.conf"
+    dest: '/etc/systemd/system/docker.service.d/override.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
 
 - name: Configure Docker proxy
   template:

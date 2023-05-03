@@ -107,7 +107,7 @@ chmod 0770 /shared/{{ role_regards_init_nfs_workspaces_volume_logs.get('device_p
 
 ############# REGARDS FOLDER ##############
 {% for data_input in role_regards_init_nfs_workspaces_volume_data_inputs %}
-{% if data_input.nfs is defined and nfs_server.name == data_input.nfs %}
+{% if data_input.nfs is defined and nfs_server.name == data_input.nfs and data_input.device_postfix is defined %}
 mkdir -p /shared/{{ data_input.device_postfix }}
 chmod 0770 /shared/{{ data_input.device_postfix }}
 {% endif %}
@@ -115,7 +115,7 @@ chmod 0770 /shared/{{ data_input.device_postfix }}
 
 
 {% for top_level_volume in role_regards_init_nfs_workspaces_top_level_volumes %}
-{% if top_level_volume.nfs is defined and nfs_server.name == top_level_volume.nfs %}
+{% if top_level_volume.nfs is defined and nfs_server.name == top_level_volume.nfs and top_level_volume.device_postfix is defined %}
 mkdir -p /shared/{{ top_level_volume.device_postfix }}
 chmod 0770 /shared/{{ top_level_volume.device_postfix }}
 {% endif %}

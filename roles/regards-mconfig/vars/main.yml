@@ -158,12 +158,17 @@ role_regards_mconfig_notifier:
 
 order_default:
   entities_per_job: 10000
+  suborder_max_size_mb: 1000
+  max_suborders_per_user: 2
 
 role_regards_mconfig_order:
   entities_per_job: "{{ (group_docker_mservices.order | default({})).get('configuration', {}).get('entities_per_job', order_default.entities_per_job) }}"
   jobs_pool_size: "{{ (group_docker_mservices.order | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.jobs_pool_size) }}"
   database_min_pool_size: "{{ (group_docker_mservices.order | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
   database_max_pool_size: "{{ (group_docker_mservices.order | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
+
+role_regards_mconfig_mservice_order_suborder_max_size_mb: "{{ (role_regards_mconfig_config_mservices.order | default({})).get('suborder_max_size_mb', order_default.suborder_max_size_mb) }}"
+role_regards_mconfig_mservice_order_max_suborders_per_user: "{{ (role_regards_mconfig_config_mservices.order | default({})).get('max_suborders_per_user', order_default.max_suborders_per_user) }}"
 
 # ----------------------------------
 # Processing configuration
