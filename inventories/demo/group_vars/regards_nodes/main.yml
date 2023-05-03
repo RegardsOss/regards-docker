@@ -136,6 +136,8 @@ group_docker_cots:
 
 # COTS configuration
 group_docker_cots_configuration:
+  enable_healthcheck: true
+  enable_resource_limits: true
   postgres:
     nbTenant: 10
   elasticsearch:
@@ -145,6 +147,8 @@ group_docker_cots_configuration:
 
 
 group_config_mservices:
+  enable_healthcheck: true
+  enable_resource_limits: true
   init_project: "{{ global_regards.project_name }}"
   access_token_validity: 2592000
   instance_admin:
