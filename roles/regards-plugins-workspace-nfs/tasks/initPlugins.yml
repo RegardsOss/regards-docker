@@ -2,6 +2,7 @@
 - name: "Remove container that creates plugin on NFS {{ nfs_server.name }}"
   docker_container:
     name: "create-plugin-on-nfs"
+    validate_certs: "{{ role_regards_plugins_workspace_nfs_validate_certs }}"
     state: absent
   vars:
     ansible_python_interpreter: "env python{{ python_version }}"
@@ -9,6 +10,7 @@
 - name: "Create a tmp volume to initiate plugins upon {{ nfs_server.name }}"
   docker_volume:
     name: plugin_tmp_nfs
+    validate_certs: "{{ role_regards_plugins_workspace_nfs_validate_certs }}"
     recreate: always
     driver_options:
       type: "{{ nfs_server.config.type | default('nfs') }}"
@@ -20,6 +22,7 @@
 - name: "Run plugins container"
   docker_container:
     name: "create-plugin-on-nfs"
+    validate_certs: "{{ role_regards_plugins_workspace_nfs_validate_certs }}"
     image: "{{ role_regards_plugins_workspace_nfs_docker_registry }}/{{ item.image }}:{{ item.tag }}"
     pull: true
     detach: false
@@ -47,6 +50,7 @@
 - name: Remove plugin tmp volume
   docker_volume:
     name: plugin_tmp_nfs
+    validate_certs: "{{ role_regards_plugins_workspace_nfs_validate_certs }}"
     state: absent
   vars:
     ansible_python_interpreter: "env python{{ python_version }}"

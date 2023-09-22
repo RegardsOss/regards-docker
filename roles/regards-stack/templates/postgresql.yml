@@ -57,7 +57,11 @@ services:
     volumes:
       - type: volume
         source: data-postgres-datavolume
+{% if role_regards_stack_volume_postgres_data.nfs is defined %}
+        target: /var/lib/postgresql/data
+{% else %}
         target: /var/lib/postgresql/data/pgdata
+{% endif %}
       - type: tmpfs
         target: /tmp
       - type: tmpfs
@@ -77,6 +81,7 @@ services:
     ports:
       - "{{ role_regards_stack_cots.postgres.client }}:5432"
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_cots.postgres.logging is defined %}
     logging:
 {% if role_regards_stack_cots.postgres.logging is defined %}
       {{ role_regards_stack_cots.postgres.logging | to_nice_yaml | indent(6) }}
@@ -84,6 +89,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -139,6 +145,7 @@ services:
         target: /run
       - type: tmpfs
         target: /var/lib/nginx/logs/
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_cots.phppgadmin.logging is defined %}
     logging:
 {% if role_regards_stack_cots.phppgadmin.logging is defined %}
       {{ role_regards_stack_cots.phppgadmin.logging | to_nice_yaml | indent(6) }}
@@ -146,5 +153,6 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}

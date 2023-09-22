@@ -1,0 +1,5 @@
+---
+- name: Setup REGARDS users and groups prerequisites
+  hosts: docker_nodes
+  roles:
+    - setup-system

@@ -21,6 +21,17 @@
     seuser: "{{ role_regards_microservices_workspace_local_workdir_seuser }}"
   when: not role_regards_microservices_workspace_local_volume_dam.nfs is defined
 
+- name: Create DAM attachments folder
+  ansible.builtin.file:
+    path: "{{ role_regards_microservices_workspace_local_workdir_workspace_network }}regards/storage/dataset-attachments-input"
+    state: directory
+    mode: '2750'
+    owner: "{{ role_regards_microservices_workspace_local_workdir_container_run_user }}"
+    group: "{{ role_regards_microservices_workspace_local_workdir_container_run_group }}"
+    setype: "{{ role_regards_microservices_workspace_local_workdir_setype }}"
+    seuser: "{{ role_regards_microservices_workspace_local_workdir_seuser }}"
+  when: not role_regards_microservices_workspace_local_volume_dam_attachment_input.nfs is defined
+
 - name: Create online local storages folder
   ansible.builtin.file:
     path: "{{ role_regards_microservices_workspace_local_workdir_workspace_network }}regards/storage/onlines"

@@ -25,9 +25,16 @@ create_env CHECKSUM_RS_FRONT_FOOTER_CNES_LOGO_PNG {{ role_regards_init_master_co
 create_env CHECKSUM_RS_FRONT_FOOTER_REGARDS_PNG {{ role_regards_init_master_config }}regards/nginx/footer/imgs/Regards.png
 {% endif %}
 
+{% if role_regards_init_master_mservices.front.securised is defined %}
+create_env CHECKSUM_RS_FRONT_REGARDS_CONF {{ role_regards_init_master_config }}regards/nginx/regards.conf
+{% endif %}
+
 {% if role_regards_init_master_mservices.front.ssl is defined %}
 create_env CHECKSUM_RS_FRONT_SSL_CRT {{ role_regards_init_master_config }}regards/nginx/ssl/{{ role_regards_init_master_mservices.front.ssl.key }}
 create_env CHECKSUM_RS_FRONT_SSL_KEY {{ role_regards_init_master_config }}regards/nginx/ssl/{{ role_regards_init_master_mservices.front.ssl.crt }}
+{% if role_regards_init_master_mservices.front.securised is defined %}
+create_env CHECKSUM_RS_FRONT_BADHOST_CONF {{ role_regards_init_master_config }}regards/nginx/badhost.conf
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -100,6 +107,11 @@ create_env CHECKSUM_RS_MS_INGEST_PROPERTIES {{ role_regards_init_master_config }
 {% if role_regards_init_master_mservices.lta_manager is defined %}
 create_env CHECKSUM_RS_LTA_MANAGER_LOGBACK_XML {{ role_regards_init_master_config }}regards/logback/lta-manager/logback.xml
 create_env CHECKSUM_RS_MS_LTA_MANAGER_PROPERTIES {{ role_regards_init_master_config }}regards/config/regards-oss-backend/rs-lta-manager.properties
+{% endif %}
+
+{% if role_regards_init_master_mservices.delivery is defined %}
+create_env CHECKSUM_RS_DELIVERY_LOGBACK_XML {{ role_regards_init_master_config }}regards/logback/delivery/logback.xml
+create_env CHECKSUM_RS_MS_DELIVERY_PROPERTIES {{ role_regards_init_master_config }}regards/config/regards-oss-backend/rs-delivery.properties
 {% endif %}
 
 {% if role_regards_init_master_mservices.notifier is defined %}

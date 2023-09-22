@@ -89,6 +89,11 @@ chmod 0770 /shared/{{ role_regards_init_nfs_workspaces_volume_storage_cache.get(
 {% endif %}
 
 
+{% if role_regards_init_nfs_workspaces_volume_dam_attachment_input.nfs is defined and nfs_server.name == role_regards_init_nfs_workspaces_volume_dam_attachment_input.nfs %}
+mkdir -p /shared/{{ role_regards_init_nfs_workspaces_volume_dam_attachment_input.get('device_postfix', 'regards/storage/dataset-attachments-input') }}
+chmod 0770 /shared/{{ role_regards_init_nfs_workspaces_volume_dam_attachment_input.get('device_postfix', 'regards/storage/dataset-attachments-input') }}
+{% endif %}
+
 ############# MICROSERVICE LOGS FOLDER ##############
 {% if role_regards_init_nfs_workspaces_volume_logs.nfs is defined and nfs_server.name == role_regards_init_nfs_workspaces_volume_logs.nfs %}
 {% for mservice in role_regards_init_nfs_workspaces_volume_mservices_logs %}

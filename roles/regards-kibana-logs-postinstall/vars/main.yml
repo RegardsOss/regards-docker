@@ -5,6 +5,8 @@ role_regards_kibana_logs_postinstall_registry: "{{ group_docker_registry }}"
 role_regards_kibana_logs_postinstall_container_root_user: "{{ group_container_root_user }}"
 role_regards_kibana_logs_postinstall_container_root_group: "{{ group_container_root_group }}"
 
+role_regards_kibana_logs_postinstall_validate_certs: "{{ group_validate_certs | default(lookup('ansible.builtin.env', 'DOCKER_TLS_VERIFY')|default(false, true)) }}"
+
 role_regards_kibana_logs_postinstall_image_version: "{{ (group_docker_cots.bash | default({})).get('tag', global_regards.version) }}"
 
 role_regards_kibana_logs_postinstall_kibana_active: "{{ group_docker_cots.kibana_logs is defined }}"

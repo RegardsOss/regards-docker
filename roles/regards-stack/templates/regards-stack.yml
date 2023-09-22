@@ -50,22 +50,38 @@ volumes:
 {% endif %}
 {% if role_regards_stack_mservices.dam is defined %}
 ################## DAM STORAGE ###################
-  dam-datavolume:
+  dataset-attachments-storage-volume:
     driver: local
     driver_opts:
-{% if role_regards_stack_volume_dam.nfs is defined %}
-{% for nfs_server in role_regards_stack_top_level_nfs_servers %}
-{% if nfs_server.name == role_regards_stack_volume_dam.nfs %}
+{%   if role_regards_stack_volume_dam_attachment_storage.nfs is defined %}
+{%     for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{%       if nfs_server.name == role_regards_stack_volume_dam_attachment_storage.nfs %}
       type: {{ nfs_server.config.get('type', 'nfs') }}
       o: "{{ nfs_server.config.o }}"
-      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_dam.get('device_postfix', 'regards/storage/dam') }}"
-{% endif %}
-{% endfor %}
-{% else %}
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_dam_attachment_storage.get('device_postfix', 'regards/storage/dam') }}"
+{%       endif %}
+{%     endfor %}
+{%   else %}
       type: none
       o: bind
       device: {{ role_regards_stack_workspace_local }}regards/storage/dam
-{% endif %}
+{%   endif %}
+  dataset-attachments-input-volume:
+    driver: local
+    driver_opts:
+{%   if role_regards_stack_volume_dam_attachment_input.nfs is defined %}
+{%     for nfs_server in role_regards_stack_top_level_nfs_servers %}
+{%       if nfs_server.name == role_regards_stack_volume_dam_attachment_input.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_stack_volume_dam_attachment_input.get('device_postfix', 'regards/storage/dataset-attachments-input') }}"
+{%       endif %}
+{%     endfor %}
+{%   else %}
+      type: none
+      o: bind
+      device: {{ role_regards_stack_workspace_local }}regards/storage/dataset-attachments-input
+{%   endif %}
 {% endif %}
 ####################### WORKSPACE ########################
   workspace-datavolume:
@@ -414,6 +430,11 @@ configs:
     name: lta_manager_logback_xml_${CHECKSUM_RS_LTA_MANAGER_LOGBACK_XML}
     file: {{ role_regards_stack_logback }}lta-manager/logback.xml
 {% endif %}
+{% if role_regards_stack_mservices.delivery is defined %}
+  rs-delivery_logback.xml:
+    name: delivery_logback_xml_${CHECKSUM_RS_DELIVERY_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}delivery/logback.xml
+{% endif %}
 
 ############################################################
 ################## Microservices configs ###################
@@ -482,6 +503,11 @@ configs:
     name: rs_ms_lta_manager_properties_${CHECKSUM_RS_MS_LTA_MANAGER_PROPERTIES}
     file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-lta-manager.properties
 {% endif %}
+{% if role_regards_stack_mservices.delivery is defined %}
+  rs_ms_delivery.properties:
+    name: rs_ms_delivery_properties_${CHECKSUM_RS_MS_DELIVERY_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-delivery.properties
+{% endif %}
 {% if role_regards_stack_mservices.notifier is defined %}
   rs_ms_notifier.properties:
     name: rs_ms_notifier_properties_${CHECKSUM_RS_MS_NOTIFIER_PROPERTIES}
@@ -548,6 +574,16 @@ configs:
   rs-front_nginx.conf:
     name: front_nginx.conf_${CHECKSUM_RS_FRONT_NGINX_CONF}
     file: {{ role_regards_stack_config }}regards/nginx/nginx.conf
+{% if role_regards_stack_front_securised|bool %}
+  rs-front_regards.conf:
+    name: front_regards.conf_${CHECKSUM_RS_FRONT_REGARDS_CONF}
+    file: {{ role_regards_stack_config }}regards/nginx/regards.conf
+{% if role_regards_stack_mservices.front.ssl is defined %}
+  rs-front_badhost.conf:
+    name: front_regards.conf_${CHECKSUM_RS_FRONT_BADHOST_CONF}
+    file: {{ role_regards_stack_config }}regards/nginx/badhost.conf
+{% endif %}
+{% endif %}
 {% if role_regards_stack_mservices.front.show_footer|default(false)|bool %}
   rs-front_version_footer.html:
     name: front_version_footer_html_${CHECKSUM_RS_FRONT_VERSION_FOOTER_HTML}
@@ -667,6 +703,10 @@ services:
       - source: rs_ms_lta-manager.properties
         target: /config/regards/regards-oss-backend/rs-lta-manager.properties
 {% endif %}
+{% if role_regards_stack_mservices.delivery is defined %}
+      - source: rs_ms_delivery.properties
+        target: /config/regards/regards-oss-backend/rs-delivery.properties
+{% endif %}
 {% if role_regards_stack_mservices.notifier is defined %}
       - source: rs_ms_notifier.properties
         target: /config/regards/regards-oss-backend/rs-notifier.properties
@@ -707,6 +747,7 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.config.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.config.logging is defined %}
       {{ role_regards_stack_mservices.config.logging | to_nice_yaml | indent(6) }}
@@ -714,6 +755,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -789,6 +831,7 @@ services:
       - "{{ role_regards_stack_mservices.registry.yourkit }}:10001"
 {% endif %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.registry.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.registry.logging is defined %}
       {{ role_regards_stack_mservices.registry.logging | to_nice_yaml | indent(6) }}
@@ -796,6 +839,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -894,6 +938,7 @@ services:
       - "{{ role_regards_stack_mservices.gateway.yourkit }}:10001"
 {% endif %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.gateway.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.gateway.logging is defined %}
       {{ role_regards_stack_mservices.gateway.logging | to_nice_yaml | indent(6) }}
@@ -901,6 +946,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -983,6 +1029,7 @@ services:
       - "{{ role_regards_stack_mservices.admin_instance.yourkit }}:10001"
 {% endif %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.admin_instance.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.admin_instance.logging is defined %}
       {{ role_regards_stack_mservices.admin_instance.logging | to_nice_yaml | indent(6) }}
@@ -990,6 +1037,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1071,6 +1119,7 @@ services:
       - "{{ role_regards_stack_mservices.admin.yourkit }}:10001"
 {% endif %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.admin.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.admin.logging is defined %}
       {{ role_regards_stack_mservices.admin.logging | to_nice_yaml | indent(6) }}
@@ -1078,6 +1127,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1179,6 +1229,7 @@ services:
       - "{{ role_regards_stack_mservices.authentication.yourkit }}:10001"
 {% endif %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.authentication.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.authentication.logging is defined %}
       {{ role_regards_stack_mservices.authentication.logging | to_nice_yaml | indent(6) }}
@@ -1186,6 +1237,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1246,8 +1298,11 @@ services:
         source: logs-dam-datavolume
         target: /logs
       - type: volume
-        source: dam-datavolume
+        source: dataset-attachments-storage-volume
         target: /storage
+      - type: volume
+        source: dataset-attachments-input-volume
+        target: /dataset-attachments-input
       - type: volume
         source: workspace-datavolume
         target: /tmp/workspace
@@ -1287,6 +1342,7 @@ services:
       - "{{ role_regards_stack_mservices.dam.yourkit }}:10001"
 {% endif %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.dam.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.dam.logging is defined %}
       {{ role_regards_stack_mservices.dam.logging | to_nice_yaml | indent(6) }}
@@ -1294,6 +1350,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1384,6 +1441,7 @@ services:
       - "{{ role_regards_stack_mservices.notifier.yourkit }}:10001"
 {% endif %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.notifier.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.notifier.logging is defined %}
       {{ role_regards_stack_mservices.notifier.logging | to_nice_yaml | indent(6) }}
@@ -1391,6 +1449,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1488,6 +1547,7 @@ services:
       - "{{ role_regards_stack_mservices.fem.yourkit }}:10001"
 {% endif %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.fem.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.fem.logging is defined %}
       {{ role_regards_stack_mservices.fem.logging | to_nice_yaml | indent(6) }}
@@ -1495,6 +1555,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1593,6 +1654,7 @@ services:
       - "{{ role_regards_stack_mservices.catalog.yourkit }}:10001"
 {% endif %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.catalog.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.catalog.logging is defined %}
       {{ role_regards_stack_mservices.catalog.logging | to_nice_yaml | indent(6) }}
@@ -1600,6 +1662,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1682,6 +1745,7 @@ services:
       - "{{ role_regards_stack_mservices.access_instance.yourkit }}:10001"
 {% endif %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.access_instance.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.access_instance.logging is defined %}
       {{ role_regards_stack_mservices.access_instance.logging | to_nice_yaml | indent(6) }}
@@ -1689,6 +1753,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1770,6 +1835,7 @@ services:
       - "{{ role_regards_stack_mservices.access_project.yourkit }}:10001"
 {% endif %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.access_project.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.access_project.logging is defined %}
       {{ role_regards_stack_mservices.access_project.logging | to_nice_yaml | indent(6) }}
@@ -1777,6 +1843,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1853,6 +1920,14 @@ services:
     configs:
       - source: rs-front_nginx.conf
         target: /etc/nginx/nginx.conf
+{% if role_regards_stack_front_securised|bool %}
+      - source: rs-front_regards.conf
+        target: /etc/nginx/conf.d/regards.conf
+{% if role_regards_stack_mservices.front.ssl is defined %}
+      - source: rs-front_badhost.conf
+        target: /etc/nginx/conf.d/badhost.conf
+{% endif %}
+{% endif %}
 {% if role_regards_stack_mservices.front.show_footer|default(false)|bool %}
       - source: rs-front_version_footer.html
         target: /var/www/footer/regards-version-footer.html
@@ -1876,6 +1951,7 @@ services:
       - source: front_ssl_key
         target: /etc/ssl/server.key
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.front.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.front.logging is defined %}
       {{ role_regards_stack_mservices.front.logging | to_nice_yaml | indent(6) }}
@@ -1883,6 +1959,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1973,6 +2050,9 @@ services:
       - type: volume
         source: cache-datavolume
         target: /cache
+      - type: volume
+        source: dataset-attachments-input-volume
+        target: /dataset-attachments-input
     configs:
       - source: rs-storage_logback.xml
         target: /config/logback.xml
@@ -1992,6 +2072,7 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.storage.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.storage.logging is defined %}
       {{ role_regards_stack_mservices.storage.logging | to_nice_yaml | indent(6) }}
@@ -1999,6 +2080,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -2096,6 +2178,7 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.order.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.order.logging is defined %}
       {{ role_regards_stack_mservices.order.logging | to_nice_yaml | indent(6) }}
@@ -2103,6 +2186,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -2202,6 +2286,7 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.processing.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.processing.logging is defined %}
       {{ role_regards_stack_mservices.processing.logging | to_nice_yaml | indent(6) }}
@@ -2209,6 +2294,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -2306,6 +2392,7 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.ingest.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.ingest.logging is defined %}
       {{ role_regards_stack_mservices.ingest.logging | to_nice_yaml | indent(6) }}
@@ -2313,6 +2400,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
         
@@ -2410,6 +2498,7 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.dataprovider.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.dataprovider.logging is defined %}
       {{ role_regards_stack_mservices.dataprovider.logging | to_nice_yaml | indent(6) }}
@@ -2417,6 +2506,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -2503,6 +2593,7 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.worker_manager.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.worker_manager.logging is defined %}
       {{ role_regards_stack_mservices.worker_manager.logging | to_nice_yaml | indent(6) }}
@@ -2510,6 +2601,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -2583,6 +2675,7 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.lta_manager.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.lta_manager.logging is defined %}
       {{ role_regards_stack_mservices.lta_manager.logging | to_nice_yaml | indent(6) }}
@@ -2590,5 +2683,88 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
+{% endif %}
+{% endif %}
+
+{% if role_regards_stack_mservices.delivery is defined %}
+  rs-delivery:
+    image: {{ role_regards_stack_registry }}/rs-delivery:{{ role_regards_stack_mservices.delivery.tag }}
+{% if (role_regards_stack_mservices.delivery.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.delivery.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
+    user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
+    hostname: rs-delivery
+    read_only: true
+    deploy:
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        limits:
+          {{ role_regards_stack_resource_limits.delivery.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_resource_limits.delivery.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
+      replicas: {{ role_regards_stack_mservices.delivery.replicas | default(1) }}
+{% if role_regards_stack_mservices.delivery.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.delivery.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.delivery.node_label_placement_constraint.value }}
+{% endif %}
+    networks:
+      - {{ role_regards_stack_docker_network_name }}
+    environment:
+      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+{% if role_regards_stack_mservices.delivery.jdwp is defined %}
+      - ACTIVE_DEBUG=true
+{% endif %}
+{% if role_regards_stack_mservices.delivery.yourkit is defined %}
+      - ACTIVE_YOURKIT=true
+{% endif %}
+{% if role_regards_stack_mservices.delivery.http is defined or role_regards_stack_mservices.delivery.jdwp is defined or role_regards_stack_mservices.delivery.jmx is defined or role_regards_stack_mservices.delivery.yourkit is defined %}
+    ports:
+{% if role_regards_stack_mservices.delivery.http is defined %}
+      - "{{ role_regards_stack_mservices.delivery.http }}:9048"
+{% endif %}
+{% if role_regards_stack_mservices.delivery.jdwp is defined %}
+      - "{{ role_regards_stack_mservices.delivery.jdwp }}:10500"
+{% endif %}
+{% if role_regards_stack_mservices.delivery.jmx is defined %}
+      - "{{ role_regards_stack_mservices.delivery.jmx }}:18048"
+{% endif %}
+{% if role_regards_stack_mservices.delivery.yourkit is defined %}
+      - "{{ role_regards_stack_mservices.delivery.yourkit }}:10001"
+{% endif %}
+{% endif %}
+    volumes:
+      - type: volume
+        source: logs-delivery-datavolume
+        target: /logs
+      - type: tmpfs
+        target: /tmp
+    configs:
+      - source: rs-delivery_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_delivery.properties
+        target: /tmp/rs-delivery.properties
+{% if role_regards_stack_mservices.delivery.configs is defined %}
+{% for config in role_regards_stack_mservices.delivery.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.delivery.logging is defined %}
+    logging:
+{% if role_regards_stack_mservices.delivery.logging is defined %}
+      {{ role_regards_stack_mservices.delivery.logging | to_nice_yaml | indent(6) }}
+{% else %}
+      options:
+        max-size: "10m"
+        max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}

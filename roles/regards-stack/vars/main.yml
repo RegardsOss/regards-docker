@@ -64,7 +64,8 @@ role_regards_stack_top_level_regards: "{{ (group_docker_mounts | default({})).ge
 role_regards_stack_volume_data_inputs: "{{ role_regards_stack_top_level_regards.get('data_inputs', []) }}"
 
 role_regards_stack_volume_processing: "{{ role_regards_stack_top_level_regards.get('processing', {}) }}"
-role_regards_stack_volume_dam: "{{ role_regards_stack_top_level_regards.get('dam', {}) }}"
+role_regards_stack_volume_dam_attachment_storage: "{{ role_regards_stack_top_level_regards.get('dam', {}) }}"
+role_regards_stack_volume_dam_attachment_input: "{{ role_regards_stack_top_level_regards.get('storage', {}).get('dataset_attachment', {}) }}"
 role_regards_stack_volume_storage_online: "{{ role_regards_stack_top_level_regards.get('storage', {}).get('online', {}) }}"
 role_regards_stack_volume_storage_cache: "{{ role_regards_stack_top_level_regards.get('storage', {}).get('cache', {}) }}"
 
@@ -75,6 +76,11 @@ role_regards_stack_volume_plugins: "{{ role_regards_stack_top_level_regards.get(
 # Fluent conf
 # When true, all microservices write logs on the same network file system
 role_regards_stack_all_logs_inside_same_network_storage: "{{ role_regards_stack_volume_logs.nfs is defined }}"
+
+# Log configuration
+# When true, services do not define any "logging" configuration
+# As the conf to reach the log concentrator is defined in the docker daemon conf file
+role_regards_stack_initialize_default_logging: "{{ group_docker_use_log_concentrator is not defined or not group_docker_use_log_concentrator|bool }}"
 
 role_regards_stack_volume_mservices_logs:
   - config
@@ -96,6 +102,7 @@ role_regards_stack_volume_mservices_logs:
   - dataprovider
   - worker-manager
   - lta-manager
+  - delivery
   - front
 
 role_regards_stack_volume_elasticsearch_logs: "{{ (group_docker_mounts | default({})).get('elasticsearch_logs', {}) }}"
@@ -269,8 +276,17 @@ role_regards_stack_resource_limits:
       memory: 2048mb
   lta_manager:
     limits:
-      cpus: '4'
-      memory: 2560mb
+      cpus: '3'
+      memory: 1024mb
     reservations:
       cpus: '0.5'
-      memory: 2048mb
+      memory: 512mb
+  delivery:
+    limits:
+      cpus: '3'
+      memory: 1024mb
+    reservations:
+      cpus: '0.5'
+      memory: 512mb
+
+role_regards_stack_front_securised: "{{ (group_docker_mservices.front | default({})).get('securised', false) | bool }}"

@@ -1,8 +1,0 @@
-{{- $root := . -}}
-{{- $persistence := .Values.persistence -}}
-{{- $overridepersistence := dict "Values" (dict "fullnameOverride" $persistence.name "persistence" $persistence) -}}
-{{- with merge $overridepersistence $root -}}
-
-{{- template "regards-common.persistent-volume-claim" . -}}
-
-{{- end -}}

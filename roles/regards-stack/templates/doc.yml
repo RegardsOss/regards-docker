@@ -24,6 +24,7 @@ services:
         target: /var/cache/nginx
       - type: tmpfs
         target: /run
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_cots.doc.logging is defined %}
     logging:
 {% if role_regards_stack_cots.doc.logging is defined %}
       {{ role_regards_stack_cots.doc.logging | to_nice_yaml | indent(6) }}
@@ -31,5 +32,6 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}

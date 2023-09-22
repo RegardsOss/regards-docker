@@ -30,3 +30,5 @@ role_regards_logs_workspace_local_logs_directories:
   - processing
   - worker-manager
   - lta-manager
+  - delivery
+ 

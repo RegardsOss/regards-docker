@@ -21,6 +21,7 @@ role_regards_microservices_workspace_local_volume_data_inputs: "{{  role_regards
 
 role_regards_microservices_workspace_local_volume_processing: "{{  role_regards_microservices_workspace_local_top_level_regards.get('processing', {}) }}"
 role_regards_microservices_workspace_local_volume_dam: "{{  role_regards_microservices_workspace_local_top_level_regards.get('dam', {}) }}"
+role_regards_microservices_workspace_local_volume_dam_attachment_input: "{{ role_regards_microservices_workspace_local_top_level_regards.get('storage', {}).get('dataset_attachment', {}) }}"
 role_regards_microservices_workspace_local_volume_storage_online: "{{  role_regards_microservices_workspace_local_top_level_regards.get('storage', {}).get('online', {}) }}"
 role_regards_microservices_workspace_local_volume_storage_cache: "{{  role_regards_microservices_workspace_local_top_level_regards.get('storage', {}).get('cache', {}) }}"
 

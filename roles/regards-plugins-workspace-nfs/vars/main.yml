@@ -21,3 +21,5 @@ role_regards_plugins_workspace_nfs_microservice_having_plugin:
   - ingest
   - dataprovider
   - processing
+
+role_regards_plugins_workspace_nfs_validate_certs: "{{ group_validate_certs | default(lookup('ansible.builtin.env', 'DOCKER_TLS_VERIFY')|default(false, true)) }}"

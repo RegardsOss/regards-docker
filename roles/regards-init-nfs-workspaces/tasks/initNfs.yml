@@ -2,6 +2,7 @@
 - name: "Remove container that creates required folders on NFS {{ nfs_server.name }}"
   docker_container:
     name: "create-directories-on-nfs"
+    validate_certs: "{{ role_regards_init_nfs_workspaces_validate_certs }}"
     state: absent
   vars:
     ansible_python_interpreter: "env python{{ python_version }}"
@@ -9,6 +10,7 @@
 - name: "Create a tmp volume to initiate {{ nfs_server.name }}"
   docker_volume:
     name: tmp_nfs
+    validate_certs: "{{ role_regards_init_nfs_workspaces_validate_certs }}"
     recreate: always
     driver_options:
       type: "{{ nfs_server.config.type | default('nfs') }}"
@@ -41,6 +43,7 @@
 - name: "Initiate required folders on NFS {{ nfs_server.name }}"
   docker_container:
     name: "create-directories-on-nfs"
+    validate_certs: "{{ role_regards_init_nfs_workspaces_validate_certs }}"
     image: "{{ role_regards_init_nfs_workspaces_registry }}/regards-bash:{{ role_regards_init_nfs_workspaces_image_version }}"
     pull: true
     command: bash /scripts/start.sh
@@ -70,6 +73,7 @@
 - name: Remove tmp volume
   docker_volume:
     name: tmp_nfs
+    validate_certs: "{{ role_regards_init_nfs_workspaces_validate_certs }}"
     state: absent
   vars:
     ansible_python_interpreter: "env python{{ python_version }}"

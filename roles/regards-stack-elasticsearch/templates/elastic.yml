@@ -138,6 +138,7 @@ services:
       nofile:
         soft: 65536 # maximum number of open files for the Elasticsearch user, set to at least 65536 on modern systems
         hard: 65536
+{% if role_regards_stack_elasticsearch_initialize_default_logging|bool or role_regards_stack_elasticsearch_cots_elasticsearch.logging is defined %}
     logging:
 {% if role_regards_stack_elasticsearch_cots_elasticsearch.logging is defined %}
       {{ role_regards_stack_elasticsearch_cots_elasticsearch.logging | to_nice_yaml | indent(6) }}
@@ -145,6 +146,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -177,6 +179,7 @@ services:
     ports:
       - "{{ role_regards_stack_elasticsearch_cots_kibana.http }}:5601"
 {% endif %}
+{% if role_regards_stack_elasticsearch_initialize_default_logging|bool or role_regards_stack_elasticsearch_cots_kibana.logging is defined %}
     logging:
 {% if role_regards_stack_elasticsearch_cots_kibana.logging is defined %}
       {{ role_regards_stack_elasticsearch_cots_kibana.logging | to_nice_yaml | indent(6) }}
@@ -185,10 +188,20 @@ services:
         max-size: "10m"
         max-file: "10"
 {% endif %}
-{% if role_regards_stack_elasticsearch_cots_kibana.node_label_placement_constraint is defined %}
+{% endif %}
+{% if role_regards_stack_elasticsearch_cots_kibana.node_label_placement_constraint is defined or role_regards_stack_elasticsearch_enable_cots_resource_limits is defined %}
     deploy:
+{% if role_regards_stack_elasticsearch_enable_cots_resource_limits is defined %}
+      resources:
+        limits:
+          {{ role_regards_stack_elasticsearch_resource_limits.kibana.limits | to_nice_yaml | indent(10) }}
+        reservations:
+          {{ role_regards_stack_elasticsearch_resource_limits.kibana.reservations | to_nice_yaml | indent(10) }}
+{% endif %}
+{% if role_regards_stack_elasticsearch_cots_kibana.node_label_placement_constraint is defined %}
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_elasticsearch_cots_kibana.node_label_placement_constraint.key }} == {{ role_regards_stack_elasticsearch_cots_kibana.node_label_placement_constraint.value }}
+{% endif %}
 {% endif %}
 {% endif %}

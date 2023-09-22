@@ -1,1 +1,0 @@
-CONNECTION "host=postgres port=5432 dbname='worldcover' user='worldcover' password='worldcoverpassword'"

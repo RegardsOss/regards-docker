@@ -70,6 +70,7 @@ MSERVICE_TO_CONTAINER["dataprovider"]="rs-dataprovider"
 MSERVICE_TO_CONTAINER["processing"]="rs-processing"
 MSERVICE_TO_CONTAINER["worker_manager"]="rs-worker-manager"
 MSERVICE_TO_CONTAINER["lta_manager"]="rs-lta-manager"
+MSERVICE_TO_CONTAINER["delivery"]="rs-delivery"
 
 # PARAMETERS
 declare GATEWAY_URL=$(echo "{{ role_regards_init_public_url }}" | tr -d '\\')

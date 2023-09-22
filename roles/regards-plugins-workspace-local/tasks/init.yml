@@ -29,6 +29,7 @@
 - name: Run plugins container
   docker_container:
     name: "{{ item.image }}"
+    validate_certs: "{{ role_regards_plugins_workspace_local_validate_certs }}"
     image: "{{ role_regards_plugins_workspace_local_docker_registry }}/{{ item.image }}:{{ item.tag }}"
     pull: true
     cleanup: true

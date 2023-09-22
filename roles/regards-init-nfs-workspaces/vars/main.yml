@@ -9,6 +9,8 @@ role_regards_init_nfs_workspaces_container_root_group: "{{ group_container_root_
 role_regards_init_nfs_workspaces_setype: "{{ group_setype }}"
 role_regards_init_nfs_workspaces_seuser: "{{ group_seuser }}"
 
+role_regards_init_nfs_workspaces_validate_certs: "{{ group_validate_certs | default(lookup('ansible.builtin.env', 'DOCKER_TLS_VERIFY')|default(false, true)) }}"
+
 role_regards_init_nfs_workspaces_registry: "{{ group_docker_registry }}"
 role_regards_init_nfs_workspaces_image_version: "{{ (group_docker_cots.bash | default({})).get('tag', global_regards.version) }}"
 
@@ -37,6 +39,7 @@ role_regards_init_nfs_workspaces_volume_data_inputs: "{{  role_regards_init_nfs_
 
 role_regards_init_nfs_workspaces_volume_processing: "{{  role_regards_init_nfs_workspaces_top_level_regards.get('processing', {}) }}"
 role_regards_init_nfs_workspaces_volume_dam: "{{  role_regards_init_nfs_workspaces_top_level_regards.get('dam', {}) }}"
+role_regards_init_nfs_workspaces_volume_dam_attachment_input: "{{ role_regards_init_nfs_workspaces_top_level_regards.get('storage', {}).get('dataset_attachment', {}) }}"
 role_regards_init_nfs_workspaces_volume_storage_online: "{{  role_regards_init_nfs_workspaces_top_level_regards.get('storage', {}).get('online', {}) }}"
 role_regards_init_nfs_workspaces_volume_storage_cache: "{{  role_regards_init_nfs_workspaces_top_level_regards.get('storage', {}).get('cache', {}) }}"
 
@@ -65,6 +68,7 @@ role_regards_init_nfs_workspaces_volume_mservices_logs:
   - dataprovider
   - worker-manager
   - lta-manager
+  - delivery
   - front
 
 role_regards_init_nfs_workspaces_microservice_having_plugin:

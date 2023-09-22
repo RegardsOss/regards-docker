@@ -12,6 +12,7 @@
 - name: Run container to updates ES settings 
   docker_container:
     name: postinstall-elasticsearch
+    validate_certs: "{{ role_regards_elasticsearch_postinstall_validate_certs }}"
     image: "{{ role_regards_elasticsearch_postinstall_registry }}/regards-bash:{{ role_regards_elasticsearch_postinstall_image_version }}"
     pull: true
     command: bash /start.sh

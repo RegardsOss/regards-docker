@@ -28,3 +28,5 @@ role_regards_plugins_workspace_local_container_run_user: "{{ group_container_run
 role_regards_plugins_workspace_local_container_run_group: "{{ group_container_run_group }}"
 role_regards_plugins_workspace_local_setype: "{{ group_setype }}"
 role_regards_plugins_workspace_local_seuser: "{{ group_seuser }}"
+
+role_regards_plugins_workspace_local_validate_certs: "{{ group_validate_certs | default(lookup('ansible.builtin.env', 'DOCKER_TLS_VERIFY')|default(false, true)) }}"

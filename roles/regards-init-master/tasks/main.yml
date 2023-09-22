@@ -71,17 +71,6 @@
     - configure-log-level.sh
   become: true
 
-- name: Create REGARDS basic structure
-  ansible.builtin.file:
-    path: "{{ role_regards_init_master_cli_system_install }}"
-    state: directory
-    mode: '0750'
-    owner: root
-    group: "{{ role_regards_init_master_container_root_group }}"
-    setype: "{{ role_regards_init_master_setype }}"
-    seuser: "{{ role_regards_init_master_seuser }}"
-  become: true
-
 - name: Add to bashrc
   blockinfile:
     marker: "## {mark} added by ansible (autocomplete)"

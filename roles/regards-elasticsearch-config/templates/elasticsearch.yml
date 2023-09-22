@@ -9,6 +9,7 @@ network.host: 0.0.0.0
 
 discovery.seed_hosts: rs-elasticsearch
 xpack.security.enabled: false
+xpack.security.audit.enabled: true
 ingest.geoip.downloader.enabled: false
 {% if role_regards_elasticsearch_config_elasticsearch.global_service is not defined %}
 discovery.type: single-node

@@ -5,6 +5,8 @@ role_regards_elasticsearch_postinstall_registry: "{{ group_docker_registry }}"
 role_regards_elasticsearch_postinstall_container_root_user: "{{ group_container_root_user }}"
 role_regards_elasticsearch_postinstall_container_root_group: "{{ group_container_root_group }}"
 
+role_regards_elasticsearch_postinstall_validate_certs: "{{ group_validate_certs | default(lookup('ansible.builtin.env', 'DOCKER_TLS_VERIFY')|default(false, true)) }}"
+
 role_regards_elasticsearch_postinstall_number_of_replica: "{{ ((group_docker_cots.elasticsearch) | ternary(group_docker_cots.elasticsearch, {})).get('number_of_replica', 1) }}"
 
 role_regards_elasticsearch_postinstall_image_version: "{{ (group_docker_cots.bash | default({})).get('tag', global_regards.version) }}"

@@ -30,6 +30,7 @@ _script()
   rs-access-instance \
   rs-worker-manager \
   rs-lta-manager \
+  rs-delivery \
   lta-sip-generator-worker \
   swot-name-extraction-worker \
   swot-file-extraction-worker \

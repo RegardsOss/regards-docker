@@ -20,6 +20,12 @@ role_regards_stack_elasticsearch_container_run_gid: "{{ group_container_run_gid 
 role_regards_stack_elasticsearch_docker_network_name: "{{ group_docker_network_name }}"
 role_regards_stack_elasticsearch_registry: "{{ group_docker_registry }}"
 
+# Log configuration
+# When true, services do not define any "logging" configuration
+# As the conf to reach the log concentrator is defined in the docker daemon conf file
+role_regards_stack_elasticsearch_initialize_default_logging: "{{ group_docker_use_log_concentrator is not defined or not group_docker_use_log_concentrator|bool }}"
+
+
 # Elasticsearch
 role_regards_stack_elasticsearch_active: "{{ group_docker_cots.elasticsearch is defined }}"
 role_regards_stack_elasticsearch_cots_configuration_elasticsearch: "{{ group_docker_cots_configuration }}"
@@ -53,3 +59,10 @@ role_regards_stack_elasticsearch_resource_limits:
     reservations:
       cpus: '1'
       memory: "{{ role_regards_stack_elasticsearch_cots_elasticsearch.get('memoryLimit', '2000m') }}"
+  kibana:
+    limits:
+      cpus: '4'
+      memory: "{{ role_regards_stack_elasticsearch_cots_kibana.get('containerLimit', '1000m') }}"
+    reservations:
+      cpus: '1'
+      memory: "{{ role_regards_stack_elasticsearch_cots_kibana.get('memoryLimit', '800m') }}"

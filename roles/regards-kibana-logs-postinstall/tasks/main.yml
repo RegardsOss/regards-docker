@@ -17,6 +17,7 @@
 - name: Run container to init Kibana Logs dashboard
   docker_container:
     name: "postinstall-kibana-logs"
+    validate_certs: "{{ role_regards_kibana_logs_postinstall_validate_certs }}"
     image: "{{ role_regards_kibana_logs_postinstall_registry }}/regards-bash:{{ role_regards_kibana_logs_postinstall_image_version }}"
     pull: true
     command: bash /start.sh

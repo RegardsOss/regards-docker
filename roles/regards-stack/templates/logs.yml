@@ -127,6 +127,7 @@ services:
       nofile:
         soft: 65536 # maximum number of open files for the Elasticsearch user, set to at least 65536 on modern systems
         hard: 65536
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_cots.elasticsearch_logs.logging is defined %}
     logging:
 {% if role_regards_stack_cots.elasticsearch_logs.logging is defined %}
       {{ role_regards_stack_cots.elasticsearch_logs.logging | to_nice_yaml | indent(6) }}
@@ -134,6 +135,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -178,6 +180,7 @@ services:
     configs:
       - source: rs-fluent_fluent.conf
         target: /fluentd/etc/fluent.conf
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_cots.fluent.logging is defined %}
     logging:
 {% if role_regards_stack_cots.fluent.logging is defined %}
       {{ role_regards_stack_cots.fluent.logging | to_nice_yaml | indent(6) }}
@@ -185,6 +188,7 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
 
@@ -219,6 +223,7 @@ services:
     ports:
       - "{{ role_regards_stack_cots.kibana_logs.http }}:5601"
 {% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_cots.kibana_logs.logging is defined %}
     logging:
 {% if role_regards_stack_cots.kibana_logs.logging is defined %}
       {{ role_regards_stack_cots.kibana_logs.logging | to_nice_yaml | indent(6) }}
@@ -226,5 +231,6 @@ services:
       options:
         max-size: "10m"
         max-file: "10"
+{% endif %}
 {% endif %}
 {% endif %}
