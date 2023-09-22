@@ -13,7 +13,7 @@ global_stack:
 # Regards basic configuration
 global_regards:
   # Version to deploy
-  version: 1.12.0
+  version: 1.13.1
   # Name of the first initialized project
   project_name: demo
   # Files owner

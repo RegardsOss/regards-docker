@@ -104,6 +104,7 @@ group_docker_mservices:
     host: "{{ global_stack.master_node_host_name }}"
     port: 80
     tag: "{{ group_docker_tags.front }}"
+    securised: true
 
 # WORKERS
 group_docker_workers: []
@@ -149,6 +150,7 @@ group_docker_cots_configuration:
 group_config_mservices:
   enable_healthcheck: true
   enable_resource_limits: true
+  active_mail_on_admin_instance: true
   init_project: "{{ global_regards.project_name }}"
   access_token_validity: 2592000
   instance_admin:
