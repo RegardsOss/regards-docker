@@ -66,9 +66,10 @@ kernel_rhel_7_tuning_parameters:
   fs.may_detach_mounts: '1'
 
 #Logging Driver
-log_driver: false
-log_driver_type:
+log_driver_type: json-file
 log_driver_opts:
+  max-size: 10m
+  max-file: 10
 
 # Docker Network
 docker_ingress_network:

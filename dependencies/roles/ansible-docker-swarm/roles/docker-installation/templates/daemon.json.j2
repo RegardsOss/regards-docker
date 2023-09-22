@@ -10,21 +10,22 @@
 {%   endfor %}
     ],
 {% endif %}
+{% if docker_active_selinux|bool %}
+    "selinux-enabled": true,
+{% endif %}
 {% if docker_data_root is defined and docker_data_root != "" %}
     "data-root": "{{ docker_data_root }}",
 {% endif %}
 {% if docker_storage_driver is defined %}
     "storage-driver": "{{ docker_storage_driver }}",
 {% endif %}
-{% if log_driver == true %}
     "log-driver": "{{ log_driver_type }}",
     "log-opts": {
-{%   for opt in log_driver_opts %}
+{% for opt in log_driver_opts %}
         "{{ opt }}": "{{ log_driver_opts[opt] }}"{% if not loop.last %},{% endif %}
 
-{%   endfor %}
+{% endfor %}
     },
-{% endif %}
     "userns-remap": "{{ uid_map_user_name }}:{{ gid_map_group_name }}",
     "ipv6": false,
     "hosts": ["unix:///var/run/docker.sock"]

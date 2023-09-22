@@ -5,3 +5,5 @@ role_docker_installation_https_proxy: "{{ ((environment_https_proxy is defined) 
 role_docker_installation_no_proxy: "{{ ((environment_no_proxy is defined) and (environment_no_proxy != None)) | ternary(environment_no_proxy, '') }}"
 
 role_docker_network_interface_label: "{{ swarm_manager_eth | replace('ansible_','') }}"
+
+docker_active_selinux: "{{ active_selinux | default(false) }}"

@@ -31,9 +31,9 @@
   file:
     path: /etc/docker
     state: directory
-    mode: '0775'
+    mode: '0755'
     owner: 'root'
-    group: 'docker'
+    group: 'root'
 
 - name: Load into kernel some modules required by Swarm
   modprobe:
@@ -147,3 +147,31 @@
 
 - include_tasks: overrideBridgeTask.yml
   when: "'docker_gwbridge_network' in hostvars[inventory_hostname]"
+
+- name: Active audit on Docker install
+  shell: auditctl -w /usr/bin/docker -p rwxa -k docker-daemon
+  ignore_errors: true
+
+- name: Active audit on Docker install
+  shell: auditctl -w /var/lib/docker -k docker
+  ignore_errors: true
+
+- name: Active audit on Docker install
+  shell: auditctl -w /etc/docker -k docker
+  ignore_errors: true
+
+- name: Active audit on Docker install
+  shell: auditctl -w /usr/lib/systemd/system/docker.service -k docker
+  ignore_errors: true
+
+- name: Active audit on Docker install
+  shell: auditctl -w /usr/lib/systemd/system/docker.socket -k docker
+  ignore_errors: true
+
+- name: Active audit on Docker install
+  shell: auditctl -w /etc/sysconfig/docker -k docker
+  ignore_errors: true
+
+- name: Active audit on Docker install
+  shell: auditctl -w /etc/docker/daemon.json -k docker
+  ignore_errors: true
