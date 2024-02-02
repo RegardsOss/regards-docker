@@ -1,0 +1,35 @@
+---
+
+# User/group used by the dnsmasq process
+dnsmasq_user: dnsmasq
+dnsmasq_group: nobody
+
+# Provide either an interface either a listen_addr
+# Bind to interface(s)
+#dnsmasq_interface: ens192
+
+# Bind to address
+dnsmasq_listen_addr: '{{ ansible_facts.default_ipv4.address }}'
+
+# Use dnsmasq as an authoritative server (see dnsmasq "auth-server" option)
+#dnsmasq_auth_server: 
+
+# dnsmasq_domain: 
+dnsmasq_dnssec: no
+
+
+# DNSmasq upstream servers (see dnsmasq "server" option)
+dnsmasq_servers: '{{ ansible_facts.dns.nameservers }}'
+
+# Domains to NOT forward to upstream servers
+#   Each domain of this list will be added as a "server" option with no
+#   upstream server using the spec: /<domain>/
+dnsmasq_private_domains: []
+
+# DNS leases file (optional)
+#dnsmasq_dns_hosts: /etc/dns.hosts
+
+# Number of dns entries to keep in cache
+dnsmasq_cache_size: 256
+
+dnsmasq_log: no

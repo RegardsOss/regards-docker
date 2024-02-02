@@ -25,7 +25,10 @@ role_regards_front_seuser: "{{ group_seuser }}"
 role_regards_front_public_server_port: "{{ group_docker_mservices.front.public_port | default(group_docker_mservices.front.port) }}"
 # Gateway URI to address when using regards-front reverse proxy
 gateway_default:
-  host: rs-gateway
+  # We use tasks.<service name> to retrieve a different IP than just <service name>
+  # see https://forums.docker.com/t/no-route-to-host-when-contained-proxys-target-is-on-other-node-of-swarm/42526/2
+  # avoid "failed (113: No route to host) while connecting to upstream" in NGinx logs
+  host: tasks.rs-gateway
   http: 9030
 role_regards_gateway_uri: "{{ group_docker_mservices.gateway.host | default(gateway_default.host) }}:{{ group_docker_mservices.gateway.http | default(gateway_default.http) }}"
 role_regards_dns_resolver: "127.0.0.11"
@@ -35,3 +38,4 @@ role_regards_front_is_ssl_defined: "{{ group_docker_mservices.front.ssl is defin
 role_regards_front_host: "{{ group_docker_mservices.front.host }}"
 
 role_regards_front_securised: "{{ group_docker_mservices.front.securised | default(False) }}"
+role_regards_front_has_rabbitmq_admin: "{{ (group_docker_mservices.front | default({})).rabbitmq_admin is defined }}"

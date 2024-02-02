@@ -36,6 +36,12 @@
   roles:
     - ansible-docker-swarm/roles/docker-swarm-manager-only
 
+- name: Install DNSmasq on nodes
+  hosts: docker_nodes
+  become: yes
+  roles:
+    - ansible-docker-swarm/roles/docker-dnsmasq
+
 - name: Setup Regards pre-requisites
   hosts: docker_nodes
   roles:

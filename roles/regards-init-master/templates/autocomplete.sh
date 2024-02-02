@@ -1,7 +1,7 @@
 _script()
 {
   microservices="rs-storage \
-  rs-s3-minio \
+  rs-minio \
   rs-registry \
   rs-rabbitmq \
   rs-processing \
@@ -31,6 +31,9 @@ _script()
   rs-worker-manager \
   rs-lta-manager \
   rs-delivery \
+  rs-file-catalog \
+  rs-file-access \
+  rs-file-packager \
   lta-sip-generator-worker \
   swot-name-extraction-worker \
   swot-file-extraction-worker \

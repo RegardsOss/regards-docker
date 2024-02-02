@@ -1,0 +1,28 @@
+---
+- name: Create phppgadmin config folder
+  ansible.builtin.file:
+    path: "{{ role_regards_phppgadmin_config_conf_local }}"
+    state: directory
+    mode: '0770'
+    owner: "{{ role_regards_phppgadmin_config_container_root_user }}"
+    group: "{{ role_regards_phppgadmin_config_container_root_group }}"
+    setype: "{{ role_regards_phppgadmin_config_setype }}"
+    seuser: "{{ role_regards_phppgadmin_config_seuser }}"
+
+- name: Copy phppgadmin NGINX conf
+  ansible.builtin.template:
+    src: default.conf
+    dest: "{{ role_regards_phppgadmin_config_conf_local }}"
+    mode: '0770'
+    owner: "{{ role_regards_phppgadmin_config_container_root_user }}"
+    group: "{{ role_regards_phppgadmin_config_container_root_group }}"
+
+- name: Copy badhost NGINX config file when host known
+  ansible.builtin.template:
+    src: badhost.conf
+    dest: "{{ role_regards_phppgadmin_config_conf_local }}"
+    mode: '0770'
+    owner: "{{ role_regards_phppgadmin_config_container_root_user }}"
+    group: "{{ role_regards_phppgadmin_config_container_root_group }}"
+  when: role_regards_phppgadmin_is_host_defined|bool
+

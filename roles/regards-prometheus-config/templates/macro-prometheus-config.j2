@@ -1,0 +1,59 @@
+###########################################################
+# Jinja 2 Macros to generate a prometheus configuration
+#
+# @author Léo Mieulet
+###########################################################
+
+
+#########################################
+# Docker compose stack file declaration
+# conf:
+#   jobName                      name of the prometheus job
+#   sourceInfo                   infos about the source to fetch
+#             type               can be "dns_sd" or "static"
+#                                  --> dns_sd : replicated with same hostname
+#                                  --> static : only one replicate
+#             hostname           hostname of the service
+#             port               port of the service
+#             metricsPath        path on the service to fetch
+#             endpointParams     params to add when fetching endpoint
+#             scheme             http or https
+#             insecure           allow insecure TLS connections
+#   metricRelabelConfigs         prometheus conf to define the list of label to keep
+#########################################
+{%- macro initConf(conf) -%}
+
+  - job_name: '{{ conf.jobName }}'
+{%    if conf.sourceInfo.scheme is defined %}
+    scheme: {{ conf.sourceInfo.scheme }}
+{%    endif %}
+{%    if conf.sourceInfo.type == "dns_sd" %}
+    dns_sd_configs:
+    - names:
+      - 'tasks.{{ conf.sourceInfo.hostname }}'
+      type: 'A'
+      port: {{ conf.sourceInfo.port }}
+{%    endif %}
+{%    if conf.sourceInfo.type == "static" %}
+    static_configs:
+      - targets: ['{{ conf.sourceInfo.hostname }}:{{ conf.sourceInfo.port }}']
+{%    endif %}
+{%    if conf.sourceInfo.insecure is defined %}
+    tls_config:
+      insecure_skip_verify: true
+{%    endif %}
+{%    if conf.sourceInfo.metricsPath is defined %}
+    metrics_path: {{ conf.sourceInfo.metricsPath }}
+{%    endif %}
+{%    if conf.metricRelabelConfigs is defined %}
+    metric_relabel_configs:
+    {{ conf.metricRelabelConfigs | to_nice_yaml | indent(4) }}
+{%    endif %}
+{%    if conf.get('honorLabels', False)|bool %}
+    honor_labels: true
+{%    endif %}
+{%    if conf.sourceInfo.endpointParams is defined %}
+    params:
+      {{ conf.sourceInfo.endpointParams | to_nice_yaml | indent(6) }}
+{%    endif %}
+{%- endmacro -%}

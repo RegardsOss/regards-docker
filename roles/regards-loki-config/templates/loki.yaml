@@ -1,0 +1,95 @@
+# https://grafana.com/docs/loki/latest/configuration/
+# authentication
+auth_enabled: false
+server:
+  http_listen_port: 3100
+  # set 100Mb of max msg size, as 8Mb is not enough
+  # to avoid grafana requests to timeout
+  grpc_server_max_recv_msg_size: 104857600
+  grpc_server_max_send_msg_size: 104857600
+  # Only log messages with the given severity or above. Valid levels: [debug, info, warn, error]
+  # Ignore info for now to avoid grafana requests to be logged
+  log_level: warn
+  log_format: json
+
+
+common:
+  instance_interface_names:
+    - "lo"
+  path_prefix: /data
+  storage:
+    filesystem:
+      chunks_directory: /data/chunks
+      rules_directory: /data/rules
+  replication_factor: 1
+  ring:
+    instance_interface_names:
+      - "lo"
+    instance_addr: 127.0.0.1
+    kvstore:
+      store: inmemory
+
+query_range:
+  parallelise_shardable_queries: false
+  results_cache:
+    cache:
+      embedded_cache:
+        enabled: true
+        max_size_mb: 500
+        ttl: 24h
+
+chunk_store_config:
+  chunk_cache_config:
+    embedded_cache:
+      enabled: true
+      max_size_mb: 500
+      ttl: 24h
+
+limits_config:
+  split_queries_by_interval: 0
+  ingestion_rate_mb: 256
+  ingestion_burst_size_mb: 256
+  retention_period: {{ role_regards_loki_config_retention_day }}
+  query_timeout: 10m
+  max_query_lookback: {{ role_regards_loki_config_retention_day }}
+
+schema_config:
+  configs:
+    - from: 2020-10-24
+      store: boltdb-shipper
+      object_store: filesystem
+      schema: v11
+      index:
+        prefix: index_
+        period: 24h
+
+storage_config:
+  boltdb_shipper:
+    active_index_directory: /data/boltdb-shipper-active
+    cache_location: /data/boltdb-shipper-cache
+    # Can be increased for faster performance over longer query periods, uses more disk space
+    cache_ttl: 24h
+    shared_store: filesystem
+  filesystem:
+    directory: /data/storage
+
+compactor:
+  working_directory: /data/boltdb-shipper-compactor
+  shared_store: filesystem
+  compaction_interval: 10m
+  retention_enabled: true
+  retention_delete_delay: 24h
+  retention_delete_worker_count: 150
+
+analytics:
+  reporting_enabled: false
+
+# https://github.com/grafana/loki/issues/4699#issuecomment-977843834
+frontend:
+  # Maximum number of outstanding requests per tenant per frontend; requests
+  # beyond this error with HTTP 429.
+  # CLI flag: -querier.max-outstanding-requests-per-tenant
+  max_outstanding_per_tenant: 2048 # default = 100]
+
+query_scheduler:
+  max_outstanding_requests_per_tenant: 2048

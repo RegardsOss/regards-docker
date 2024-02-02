@@ -29,6 +29,9 @@ group_docker_network_ip_network: '10.11.7.'
 
 group_docker_registry: ghcr.io/regardsoss
 
+# Add here-under new property
+group_docker_use_log_concentrator: True
+
 group_docker_tags:
   cots: '{{ global_regards.version }}'
   back: '{{ global_regards.version }}'
@@ -132,16 +135,9 @@ group_docker_workers: []
 group_docker_cots:
   elasticsearch:
     tag: "{{ group_docker_tags.cots }}"
-#  elasticsearch_logs:
-#    tag: "{{ group_docker_tags.cots }}"
 #  kibana:
 #    tag: "{{ group_docker_tags.cots }}"
 #    http: 5601
-#  kibana_logs:
-#    tag: "{{ group_docker_tags.cots }}"
-#    http: 5602
-#  fluent:
-#    tag: "{{ group_docker_tags.cots }}"
   maildev:
     tag: "{{ group_docker_tags.cots }}"
     http: 5081
@@ -182,6 +178,9 @@ group_config_mservices:
   active_mail_on_admin_instance: true
   init_project: "{{ global_regards.project_name }}"
   access_token_validity: 2592000
+  password_config:
+    regex: ^.+$
+    info: Password must contains at least 1 character
   instance_admin:
     username: "{{ global_regards.admin.login }}"
     password: "{{ global_regards.admin.password }}"

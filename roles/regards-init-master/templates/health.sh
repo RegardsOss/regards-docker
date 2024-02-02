@@ -71,6 +71,9 @@ MSERVICE_TO_CONTAINER["processing"]="rs-processing"
 MSERVICE_TO_CONTAINER["worker_manager"]="rs-worker-manager"
 MSERVICE_TO_CONTAINER["lta_manager"]="rs-lta-manager"
 MSERVICE_TO_CONTAINER["delivery"]="rs-delivery"
+MSERVICE_TO_CONTAINER["file_catalog"]="rs-file-catalog"
+MSERVICE_TO_CONTAINER["file_access"]="rs-file-access"
+MSERVICE_TO_CONTAINER["file_packager"]="rs-file-packager"
 
 # PARAMETERS
 declare GATEWAY_URL=$(echo "{{ role_regards_init_public_url }}" | tr -d '\\')

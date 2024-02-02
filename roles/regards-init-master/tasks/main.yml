@@ -18,7 +18,6 @@
   docker_network_info:
     name: "{{ role_regards_init_master_docker_network_name }}"
   register: docker_network_name_info
-  become: true
   vars:
     ansible_python_interpreter: "env python{{ python_version }}"
 
@@ -30,7 +29,6 @@
   docker_network:
     name: "{{ role_regards_init_master_docker_network_name  }}"
     state: absent
-  become: true
   when: recreate_regards_network|bool
   run_once: true
   vars:
@@ -69,6 +67,7 @@
     - shutdown.sh
     - regenerate-ca.sh
     - configure-log-level.sh
+    - reservation.sh
   become: true
 
 - name: Add to bashrc
@@ -81,6 +80,7 @@
       fi
     backup: yes
   become: true
+  when: role_regards_init_master_add_autocomplete_on_root_user|bool
 
 - name: Add autocomplete script
   template:
@@ -89,4 +89,5 @@
     mode: '0750'
     owner: root
   become: true
+  when: role_regards_init_master_add_autocomplete_on_root_user|bool
 

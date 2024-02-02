@@ -1,0 +1,40 @@
+---
+
+
+- name: 'Installing dnsmasq'
+  package:
+    name: dnsmasq
+  async: 1800 # 30min
+  poll: 5
+  tags: [dnsmasq, dns-pkg]
+
+- name: 'Creating DNSmasq group'
+  group:
+    name: '{{ dnsmasq_group }}'
+  tags: [dnsmasq, dns-group]
+
+- name: 'Creating DNSmasq user'
+  user:
+    name: '{{ dnsmasq_user }}'
+    group: '{{ dnsmasq_group }}'
+    shell: /sbin/nologin
+    create_home: no
+  tags: [dnsmasq, dns-user]
+
+- name: Importing dnsmasq config
+  template:
+    src: dnsmasq.j2.conf
+    dest: /etc/dnsmasq.conf
+    owner: dnsmasq
+    group: nobody
+    mode: 0644
+  notify: Restart service
+  tags: [dnsmasq, dns-config]
+
+- name: 'Starting/enabling dnsmasq service'
+  systemd:
+    name: dnsmasq
+    state: started
+    enabled: yes
+  tags: [dnsmasq, dns-service]
+

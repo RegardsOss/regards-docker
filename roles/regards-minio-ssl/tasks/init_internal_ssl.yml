@@ -1,0 +1,34 @@
+---
+- name: Create MinIO certificates folder
+  ansible.builtin.file:
+    dest: "{{ role_regards_minio_config_certs_dir }}"
+    state: directory
+    mode: '2770'
+    owner: "{{ role_regards_minio_ssl_local_container_root_user }}"
+    group: "{{ role_regards_minio_ssl_local_container_root_group }}"
+    setype: "{{ role_regards_minio_ssl_local_setype }}"
+    seuser: "{{ role_regards_minio_ssl_local_seuser }}"
+
+- name: Copy MinIO internal private key & certificate
+  ansible.builtin.copy:
+    src: "{{ role_regards_minio_ssl_location_inside_playbook }}{{ item }}"
+    dest: "{{ role_regards_minio_config_certs_dir }}/{{ item }}"
+    mode: '0440'
+    owner: "{{ role_regards_minio_ssl_local_container_root_user }}"
+    group: "{{ role_regards_minio_ssl_local_container_root_group }}"
+    setype: "{{ role_regards_minio_ssl_local_setype }}"
+    seuser: "{{ role_regards_minio_ssl_local_seuser }}"
+  with_items: 
+    - "{{ role_regards_minio_ssl_internal_infos.crt }}"
+    - "{{ role_regards_minio_ssl_internal_infos.private_key }}"
+
+- name: Copy MinIO ca trust
+  ansible.builtin.copy:
+    src: "{{ role_regards_minio_ssl_location_inside_playbook }}{{ role_regards_minio_ssl_internal_infos.ca_trust }}"
+    dest: "{{ role_regards_minio_config_certs_dir }}/CAs/{{ role_regards_minio_ssl_internal_infos.ca_trust }}"
+    mode: '0440'
+    owner: "{{ role_regards_minio_ssl_local_container_root_user }}"
+    group: "{{ role_regards_minio_ssl_local_container_root_group }}"
+    setype: "{{ role_regards_minio_ssl_local_setype }}"
+    seuser: "{{ role_regards_minio_ssl_local_seuser }}"
+  when: role_regards_minio_ssl_internal_infos.ca_trust | length > 0

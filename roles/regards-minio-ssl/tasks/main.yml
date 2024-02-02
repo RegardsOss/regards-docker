@@ -1,0 +1,12 @@
+---
+- ansible.builtin.include_tasks: init_ca_folder.yml
+  when: role_regards_minio_ssl_active|bool
+
+- ansible.builtin.include_tasks: init_ssl.yml
+  when: role_regards_minio_ssl_active|bool
+
+- ansible.builtin.include_tasks: init_internal_ssl.yml
+  when: role_regards_minio_internal_ssl_active|bool
+
+- ansible.builtin.include_tasks: init_mc_ca.yml
+  when: role_regards_minio_mc_loc_ca_active|bool

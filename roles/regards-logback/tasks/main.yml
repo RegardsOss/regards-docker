@@ -9,11 +9,22 @@
     setype: "{{ role_regards_logback_setype }}"
     seuser: "{{ role_regards_logback_seuser }}"
 
-- name: Send config files
+- name: Send config files to output as text (legacy)
   ansible.builtin.copy:
-    src: files/
+    src: files/text/
     dest: "{{ role_regards_logback_workdir }}/"
     mode: '0770'
     directory_mode: '0770'
     owner: "{{ role_regards_logback_container_root_user }}"
     group: "{{ role_regards_logback_container_root_group }}"
+  when: not role_regards_logback_use_log_json_format|bool
+
+- name: Send config files as json
+  ansible.builtin.copy:
+    src: files/json/
+    dest: "{{ role_regards_logback_workdir }}/"
+    mode: '0770'
+    directory_mode: '0770'
+    owner: "{{ role_regards_logback_container_root_user }}"
+    group: "{{ role_regards_logback_container_root_group }}"
+  when: role_regards_logback_use_log_json_format|bool

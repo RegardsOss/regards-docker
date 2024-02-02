@@ -1,5 +1,8 @@
 ---
-role_regards_fluentd_config_is_defined: "{{ group_docker_cots.fluent is defined }}"
+role_regards_fluentd_config_fluent_legacy_is_defined: "{{ group_docker_cots.fluent is defined }}"
+role_regards_fluentd_config_fluent_is_defined: "{{ group_docker_cots.fluentd is defined }}"
+role_regards_fluentd_config_is_defined: "{{ role_regards_fluentd_config_fluent_is_defined|bool or role_regards_fluentd_config_fluent_legacy_is_defined|bool }}"
+
 role_regards_fluentd_config_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/fluentd/"
 
 role_regards_fluentd_config_container_root_user: "{{ group_container_root_user }}"
@@ -8,3 +11,4 @@ role_regards_fluentd_config_setype: "{{ group_setype }}"
 role_regards_fluentd_config_seuser: "{{ group_seuser }}"
 
 role_regards_fluentd_config_workers: "{{ group_docker_workers | default([]) }}"
+role_regards_fluentd_stack_name: "{{ group_stack_name }}"

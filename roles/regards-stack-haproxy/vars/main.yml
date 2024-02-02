@@ -37,6 +37,13 @@ role_regards_stack_haproxy_resource_limits:
     limits:
       cpus: '2'
       memory: "{{ role_regards_stack_haproxy_cots.get('haproxy', {}).get('containerLimit', '2500m') }}"
+      pids: 100000
     reservations:
       cpus: '1'
       memory: "{{ role_regards_stack_haproxy_cots.get('haproxy', {}).get('memoryLimit', '2000m') }}"
+
+
+role_regards_stack_haproxy_resource_limits_restart_policy:
+  delay: "{{ (group_docker_restart_policy | default({})).get('delay', '10s') }}"
+  max_attempts: "{{ (group_docker_restart_policy | default({})).get('max_attempts', '0') }}"
+  window: "{{ (group_docker_restart_policy | default({})).get('window', '0s') }}"

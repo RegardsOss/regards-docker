@@ -44,8 +44,8 @@ rabbitmq_default:
   use_longname: true
   manual_revision: '1'
 
-role_regards_stack_config_rabbitmq_use_longname: "{{ (role_regards_stack_cots | default({})).get('rabbitmq', {}).get('use_longname', rabbitmq_default.use_longname) }}"
-role_regards_stack_rabbitmq_manual_revision: "{{ (role_regards_stack_cots | default({})).get('rabbitmq', {}).get('manual_revision', rabbitmq_default.manual_revision) }}"
+role_regards_stack_config_rabbitmq_use_longname: "{{ group_docker_cots.get('rabbitmq', {}).get('use_longname', rabbitmq_default.use_longname) }}"
+role_regards_stack_rabbitmq_manual_revision: "{{ group_docker_cots.get('rabbitmq', {}).get('manual_revision', rabbitmq_default.manual_revision) }}"
 
 role_regards_stack_public_url: "{{ group_docker_mservices.front.protocol }}:\\/\\/{{ group_docker_mservices.front.host }}:{{ group_docker_mservices.front.public_port | default(group_docker_mservices.front.port) }}"
 
@@ -102,6 +102,9 @@ role_regards_stack_volume_mservices_logs:
   - dataprovider
   - worker-manager
   - lta-manager
+  - file-catalog
+  - file-access
+  - file-packager
   - delivery
   - front
 
@@ -110,7 +113,6 @@ role_regards_stack_volume_elasticsearch_logs_data: "{{ role_regards_stack_volume
 role_regards_stack_volume_elasticsearch_logs_backup: "{{ role_regards_stack_volume_elasticsearch_logs.get('backup', {}) }}"
 
 role_regards_stack_volume_rabbitmq_data: "{{ (group_docker_mounts | default({})).get('rabbitmq', {}) }}"
-role_regards_stack_volume_s3_minio_data: "{{ (group_docker_mounts | default({})).get('s3_minio', {}) }}"
 role_regards_stack_volume_postgres_data: "{{ (group_docker_mounts | default({})).get('postgresql', {}) }}"
 
 role_regards_stack_top_level_secrets_location: "{{ group_workdir_local }}{{ group_stack_name }}/config/mounted/secrets"
@@ -135,158 +137,229 @@ role_regards_stack_resource_limits:
   rabbitmq:
     limits:
       cpus: '4'
-      memory: "{{ role_regards_stack_cots.get('rabbitmq', {}).get('containerLimit', '2500m') }}"
+      memory: "{{ group_docker_cots.get('rabbitmq', {}).get('containerLimit', '2500m') }}"
+      pids: 100000
     reservations:
       cpus: '1'
-      memory: "{{ role_regards_stack_cots.get('rabbitmq', {}).get('memoryLimit', '2000m') }}"
+      memory: "{{ group_docker_cots.get('rabbitmq', {}).get('memoryLimit', '2000m') }}"
+  phppgadmin:
+    limits:
+      cpus: "{{ group_docker_cots.get('phppgadmin', {}).get('cpuLimit', '0.5') }}"
+      memory: "{{ group_docker_cots.get('phppgadmin', {}).get('memoryLimit', '256m') }}"
+      pids: 100000
+    reservations:
+      cpus: "{{ group_docker_cots.get('phppgadmin', {}).get('cpuReserved', '0.01') }}"
+      memory: "{{ group_docker_cots.get('phppgadmin', {}).get('memoryReserved', '32m') }}"
+  postgres:
+    limits:
+      cpus: "{{ group_docker_cots.get('postgres', {}).get('cpuLimit', '1') }}"
+      memory: "{{ group_docker_cots.get('postgres', {}).get('memoryLimit', '1G') }}"
+      pids: 100000
+    reservations:
+      cpus: "{{ group_docker_cots.get('postgres', {}).get('cpuReserved', '0.5') }}"
+      memory: "{{ group_docker_cots.get('postgres', {}).get('memoryReserved', '256M') }}"
   # Microservices
   # CPU limit is tailored to handle microservice boot time
   config:
     limits:
-      cpus: '3'
-      memory: 512mb
+      cpus: "{{ group_docker_mservices.get('config', {}).get('cpuLimit', '3') }}"
+      memory: "{{ group_docker_mservices.get('config', {}).get('memoryLimit', '512mb') }}"
+      pids: 100000
     reservations:
-      cpus: '0.25'
-      memory: 128mb
+      cpus: "{{ group_docker_mservices.get('config', {}).get('cpuReserved', '0.25') }}"
+      memory: "{{ group_docker_mservices.get('config', {}).get('memoryReserved', '128mb') }}"
   registry:
     limits:
-      cpus: '3'
-      memory: 512mb
+      cpus: "{{ group_docker_mservices.get('registry', {}).get('cpuLimit', '3') }}"
+      memory: "{{ group_docker_mservices.get('registry', {}).get('memoryLimit', '512mb') }}"
+      pids: 100000
     reservations:
-      cpus: '0.25'
-      memory: 128mb
+      cpus: "{{ group_docker_mservices.get('registry', {}).get('cpuReserved', '0.25') }}"
+      memory: "{{ group_docker_mservices.get('registry', {}).get('memoryReserved', '128mb') }}"
   gateway:
     limits:
-      cpus: '3'
-      memory: 1024mb
+      cpus: "{{ group_docker_mservices.get('gateway', {}).get('cpuLimit', '3') }}"
+      memory: "{{ group_docker_mservices.get('gateway', {}).get('memoryLimit', '1024mb') }}"
+      pids: 100000
     reservations:
-      cpus: '0.25'
-      memory: 256mb
+      cpus: "{{ group_docker_mservices.get('gateway', {}).get('cpuReserved', '0.25') }}"
+      memory: "{{ group_docker_mservices.get('gateway', {}).get('memoryReserved', '256mb') }}"
   admin_instance:
     limits:
-      cpus: '3'
-      memory: 768mb
+      cpus: "{{ group_docker_mservices.get('admin_instance', {}).get('cpuLimit', '3') }}"
+      memory: "{{ group_docker_mservices.get('admin_instance', {}).get('memoryLimit', '768mb') }}"
+      pids: 100000
     reservations:
-      cpus: '0.50'
-      memory: 512mb
+      cpus: "{{ group_docker_mservices.get('admin_instance', {}).get('cpuReserved', '0.50') }}"
+      memory: "{{ group_docker_mservices.get('admin_instance', {}).get('memoryReserved', '512mb') }}"
   admin:
     limits:
-      cpus: '3'
-      memory: 1024mb
+      cpus: "{{ group_docker_mservices.get('admin', {}).get('cpuLimit', '3') }}"
+      memory: "{{ group_docker_mservices.get('admin', {}).get('memoryLimit', '1024mb') }}"
+      pids: 100000
     reservations:
-      cpus: '0.50'
-      memory: 512mb
+      cpus: "{{ group_docker_mservices.get('admin', {}).get('cpuReserved', '0.50') }}"
+      memory: "{{ group_docker_mservices.get('admin', {}).get('memoryReserved', '768mb') }}"
   authentication:
     limits:
-      cpus: '3'
-      memory: 768mb
+      cpus: "{{ group_docker_mservices.get('authentication', {}).get('cpuLimit', '3') }}"
+      memory: "{{ group_docker_mservices.get('authentication', {}).get('memoryLimit', '768mb') }}"
+      pids: 100000
     reservations:
-      cpus: '0.25'
-      memory: 256mb
+      cpus: "{{ group_docker_mservices.get('authentication', {}).get('cpuReserved', '0.25') }}"
+      memory: "{{ group_docker_mservices.get('authentication', {}).get('memoryReserved', '256mb') }}"
   dam:
     limits:
-      cpus: '4'
-      memory: 1920mb
+      cpus: "{{ group_docker_mservices.get('dam', {}).get('cpuLimit', '4') }}"
+      memory: "{{ group_docker_mservices.get('dam', {}).get('memoryLimit', '1280mb') }}"
+      pids: 100000
     reservations:
-      cpus: '1'
-      memory: 1536mb
+      cpus: "{{ group_docker_mservices.get('dam', {}).get('cpuReserved', '1') }}"
+      memory: "{{ group_docker_mservices.get('dam', {}).get('memoryReserved', '1024mb') }}"
   notifier:
     limits:
-      cpus: '4'
-      memory: 1920mb
+      cpus: "{{ group_docker_mservices.get('notifier', {}).get('cpuLimit', '4') }}"
+      memory: "{{ group_docker_mservices.get('notifier', {}).get('memoryLimit', '1280mb') }}"
+      pids: 100000
     reservations:
-      cpus: '1'
-      memory: 1536mb
+      cpus: "{{ group_docker_mservices.get('notifier', {}).get('cpuReserved', '1') }}"
+      memory: "{{ group_docker_mservices.get('notifier', {}).get('memoryReserved', '1024mb') }}"
   fem:
     limits:
-      cpus: '4'
-      memory: 1920mb
+      cpus: "{{ group_docker_mservices.get('fem', {}).get('cpuLimit', '4') }}"
+      memory: "{{ group_docker_mservices.get('fem', {}).get('memoryLimit', '1024mb') }}"
+      pids: 100000
     reservations:
-      cpus: '1'
-      memory: 1536mb
+      cpus: "{{ group_docker_mservices.get('fem', {}).get('cpuReserved', '1') }}"
+      memory: "{{ group_docker_mservices.get('fem', {}).get('memoryReserved', '1024mb') }}"
   catalog:
     limits:
-      cpus: '4'
-      memory: 1536mb
+      cpus: "{{ group_docker_mservices.get('catalog', {}).get('cpuLimit', '4') }}"
+      memory: "{{ group_docker_mservices.get('catalog', {}).get('memoryLimit', '1024mb') }}"
+      pids: 100000
     reservations:
-      cpus: '1'
-      memory: 1024mb
+      cpus: "{{ group_docker_mservices.get('catalog', {}).get('cpuReserved', '1') }}"
+      memory: "{{ group_docker_mservices.get('catalog', {}).get('memoryReserved', '1024mb') }}"
   access_instance:
     limits:
-      cpus: '3'
-      memory: 768mb
+      cpus: "{{ group_docker_mservices.get('access_instance', {}).get('cpuLimit', '3') }}"
+      memory: "{{ group_docker_mservices.get('access_instance', {}).get('memoryLimit', '768mb') }}"
+      pids: 100000
     reservations:
-      cpus: '0.25'
-      memory: 512mb
+      cpus: "{{ group_docker_mservices.get('access_instance', {}).get('cpuReserved', '0.25') }}"
+      memory: "{{ group_docker_mservices.get('access_instance', {}).get('memoryReserved', '512mb') }}"
   access_project:
     limits:
-      cpus: '3'
-      memory: 768mb
+      cpus: "{{ group_docker_mservices.get('access_project', {}).get('cpuLimit', '3') }}"
+      memory: "{{ group_docker_mservices.get('access_project', {}).get('memoryLimit', '768mb') }}"
+      pids: 100000
     reservations:
-      cpus: '0.25'
-      memory: 512mb
+      cpus: "{{ group_docker_mservices.get('access_project', {}).get('cpuReserved', '0.25') }}"
+      memory: "{{ group_docker_mservices.get('access_project', {}).get('memoryReserved', '512mb') }}"
   front:
     limits:
-      cpus: '4'
-      memory: 1024mb
+      cpus: "{{ group_docker_mservices.get('front', {}).get('cpuLimit', '1') }}"
+      memory: "{{ group_docker_mservices.get('front', {}).get('memoryLimit', '256mb') }}"
+      pids: 100000
     reservations:
-      cpus: '0.25'
-      memory: 128mb
+      cpus: "{{ group_docker_mservices.get('front', {}).get('cpuReserved', '0.1') }}"
+      memory: "{{ group_docker_mservices.get('front', {}).get('memoryReserved', '64mb') }}"
   storage:
     limits:
-      cpus: '4'
-      memory: 2560mb
+      cpus: "{{ group_docker_mservices.get('storage', {}).get('cpuLimit', '4') }}"
+      memory: "{{ group_docker_mservices.get('storage', {}).get('memoryLimit', '1024mb') }}"
+      pids: 100000
     reservations:
-      cpus: '1'
-      memory: 2048mb
+      cpus: "{{ group_docker_mservices.get('storage', {}).get('cpuReserved', '1') }}"
+      memory: "{{ group_docker_mservices.get('storage', {}).get('memoryReserved', '1024mb') }}"
   order:
     limits:
-      cpus: '4'
-      memory: 1536mb
+      cpus: "{{ group_docker_mservices.get('order', {}).get('cpuLimit', '4') }}"
+      memory: "{{ group_docker_mservices.get('order', {}).get('memoryLimit', '1280mb') }}"
+      pids: 100000
     reservations:
-      cpus: '1'
-      memory: 1024mb
+      cpus: "{{ group_docker_mservices.get('order', {}).get('cpuReserved', '1') }}"
+      memory: "{{ group_docker_mservices.get('order', {}).get('memoryReserved', '1024mb') }}"
   processing:
     limits:
-      cpus: '4'
-      memory: 1536mb
+      cpus: "{{ group_docker_mservices.get('processing', {}).get('cpuLimit', '4') }}"
+      memory: "{{ group_docker_mservices.get('processing', {}).get('memoryLimit', '1024mb') }}"
+      pids: 100000
     reservations:
-      cpus: '0.5'
-      memory: 1024mb
+      cpus: "{{ group_docker_mservices.get('processing', {}).get('cpuReserved', '0.5') }}"
+      memory: "{{ group_docker_mservices.get('processing', {}).get('memoryReserved', '1024mb') }}"
   ingest:
     limits:
-      cpus: '4'
-      memory: 3840mb
+      cpus: "{{ group_docker_mservices.get('ingest', {}).get('cpuLimit', '4') }}"
+      memory: "{{ group_docker_mservices.get('ingest', {}).get('memoryLimit', '1536mb') }}"
+      pids: 100000
     reservations:
-      cpus: '1'
-      memory: 1024mb
+      cpus: "{{ group_docker_mservices.get('ingest', {}).get('cpuReserved', '1') }}"
+      memory: "{{ group_docker_mservices.get('ingest', {}).get('memoryReserved', '1024mb') }}"
   dataprovider:
     limits:
-      cpus: '4'
-      memory: 1536mb
+      cpus: "{{ group_docker_mservices.get('dataprovider', {}).get('cpuLimit', '4') }}"
+      memory: "{{ group_docker_mservices.get('dataprovider', {}).get('memoryLimit', '1024mb') }}"
+      pids: 100000
     reservations:
-      cpus: '0.5'
-      memory: 1024mb
+      cpus: "{{ group_docker_mservices.get('dataprovider', {}).get('cpuReserved', '0.5') }}"
+      memory: "{{ group_docker_mservices.get('dataprovider', {}).get('memoryReserved', '1024mb') }}"
   worker_manager:
     limits:
-      cpus: '4'
-      memory: 2560mb
+      cpus: "{{ group_docker_mservices.get('worker_manager', {}).get('cpuLimit', '4') }}"
+      memory: "{{ group_docker_mservices.get('worker_manager', {}).get('memoryLimit', '1024mb') }}"
+      pids: 100000
     reservations:
-      cpus: '1'
-      memory: 2048mb
+      cpus: "{{ group_docker_mservices.get('worker_manager', {}).get('cpuReserved', '1') }}"
+      memory: "{{ group_docker_mservices.get('worker_manager', {}).get('memoryReserved', '1024mb') }}"
   lta_manager:
     limits:
-      cpus: '3'
-      memory: 1024mb
+      cpus: "{{ group_docker_mservices.get('lta_manager', {}).get('cpuLimit', '3') }}"
+      memory: "{{ group_docker_mservices.get('lta_manager', {}).get('memoryLimit', '768mb') }}"
+      pids: 100000
     reservations:
-      cpus: '0.5'
-      memory: 512mb
+      cpus: "{{ group_docker_mservices.get('lta_manager', {}).get('cpuReserved', '0.5') }}"
+      memory: "{{ group_docker_mservices.get('lta_manager', {}).get('memoryReserved', '512mb') }}"
   delivery:
     limits:
-      cpus: '3'
-      memory: 1024mb
+      cpus: "{{ group_docker_mservices.get('delivery', {}).get('cpuLimit', '3') }}"
+      memory: "{{ group_docker_mservices.get('delivery', {}).get('memoryLimit', '1024mb') }}"
+      pids: 100000
     reservations:
-      cpus: '0.5'
-      memory: 512mb
+      cpus: "{{ group_docker_mservices.get('delivery', {}).get('cpuReserved', '0.5') }}"
+      memory: "{{ group_docker_mservices.get('delivery', {}).get('memoryReserved', '512mb') }}"
+  file_catalog:
+    limits:
+      cpus: "{{ group_docker_mservices.get('file_catalog', {}).get('cpuLimit', '3') }}"
+      memory: "{{ group_docker_mservices.get('file_catalog', {}).get('memoryLimit', '768mb') }}"
+      pids: 100000
+    reservations:
+      cpus: "{{ group_docker_mservices.get('file_catalog', {}).get('cpuReserved', '0.5') }}"
+      memory: "{{ group_docker_mservices.get('file_catalog', {}).get('memoryReserved', '512mb') }}"
+  file_access:
+    limits:
+      cpus: "{{ group_docker_mservices.get('file_access', {}).get('cpuLimit', '3') }}"
+      memory: "{{ group_docker_mservices.get('file_access', {}).get('memoryLimit', '768mb') }}"
+      pids: 100000
+    reservations:
+      cpus: "{{ group_docker_mservices.get('file_access', {}).get('cpuReserved', '0.5') }}"
+      memory: "{{ group_docker_mservices.get('file_access', {}).get('memoryReserved', '512mb') }}"
+  file_packager:
+    limits:
+      cpus: "{{ group_docker_mservices.get('file_packager', {}).get('cpuLimit', '3') }}"
+      memory: "{{ group_docker_mservices.get('file_packager', {}).get('memoryLimit', '768mb') }}"
+      pids: 100000
+    reservations:
+      cpus: "{{ group_docker_mservices.get('file_packager', {}).get('cpuReserved', '0.5') }}"
+      memory: "{{ group_docker_mservices.get('file_packager', {}).get('memoryReserved', '512mb') }}"
 
 role_regards_stack_front_securised: "{{ (group_docker_mservices.front | default({})).get('securised', false) | bool }}"
+role_regards_stack_front_healthcheck_url: "{{ group_docker_mservices.front.host }}:{{ group_docker_mservices.front.public_port | default(group_docker_mservices.front.port) }}"
+role_regards_stack_front_has_rabbitmq_admin: "{{ (group_docker_mservices.front | default({})).rabbitmq_admin is defined }}"
+
+role_regards_stack_restart_policy:
+  delay: "{{ (group_docker_restart_policy | default({})).get('delay', '10s') }}"
+  # Do not use large max_attemps as it can destroy a cluster
+  # @see https://github.com/moby/moby/issues/35637
+  max_attempts: "{{ (group_docker_restart_policy | default({})).get('max_attempts', '0') }}"
+  window: "{{ (group_docker_restart_policy | default({})).get('window', '0s') }}"

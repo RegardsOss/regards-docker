@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.9'
 
 # Config name must contains less than 32 [a-zA-Z0-9-_.] caracters
 {% if role_regards_stack_elasticsearch_active|bool %}
@@ -78,12 +78,14 @@ services:
 {% endif %}
 {% if role_regards_stack_elasticsearch_cots_elasticsearch.node_label_placement_constraint is defined or role_regards_stack_elasticsearch_cots_elasticsearch.global_service is defined or role_regards_stack_elasticsearch_enable_cots_resource_limits is defined %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_elasticsearch_cots_kibana_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_elasticsearch_cots_kibana_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_elasticsearch_cots_kibana_restart_policy.window }}
 {% if role_regards_stack_elasticsearch_enable_cots_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_elasticsearch_resource_limits.elasticsearch.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_elasticsearch_resource_limits.elasticsearch.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_elasticsearch_resource_limits.elasticsearch | to_nice_yaml | indent(8) }}
 {% endif %}
 {% if role_regards_stack_elasticsearch_cots_elasticsearch.global_service is defined %}
       mode: global
@@ -191,12 +193,14 @@ services:
 {% endif %}
 {% if role_regards_stack_elasticsearch_cots_kibana.node_label_placement_constraint is defined or role_regards_stack_elasticsearch_enable_cots_resource_limits is defined %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_elasticsearch_cots_kibana_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_elasticsearch_cots_kibana_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_elasticsearch_cots_kibana_restart_policy.window }}
 {% if role_regards_stack_elasticsearch_enable_cots_resource_limits is defined %}
       resources:
-        limits:
-          {{ role_regards_stack_elasticsearch_resource_limits.kibana.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_elasticsearch_resource_limits.kibana.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_elasticsearch_resource_limits.kibana | to_nice_yaml | indent(8) }}
 {% endif %}
 {% if role_regards_stack_elasticsearch_cots_kibana.node_label_placement_constraint is defined %}
       placement:

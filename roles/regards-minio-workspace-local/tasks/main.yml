@@ -1,0 +1,11 @@
+---
+- name: Create minio data folder
+  ansible.builtin.file:
+    path: "{{ role_regards_minio_workspace_local_directory }}"
+    state: directory
+    mode: '2770'
+    owner: "{{ role_regards_minio_workspace_local_container_run_user }}"
+    group: "{{ role_regards_minio_workspace_local_container_run_group }}"
+    setype: "{{ role_regards_minio_workspace_local_setype }}"
+    seuser: "{{ role_regards_minio_workspace_local_seuser }}"
+  

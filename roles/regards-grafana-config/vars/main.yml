@@ -1,0 +1,80 @@
+---
+role_regards_grafana_config_is_defined: "{{ group_docker_cots.grafana is defined }}"
+
+role_regards_grafana_config_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/grafana/"
+
+role_regards_grafana_config_container_root_user: "{{ group_container_root_user }}"
+role_regards_grafana_config_container_root_group: "{{ group_container_root_group }}"
+role_regards_grafana_config_setype: "{{ group_setype }}"
+role_regards_grafana_config_seuser: "{{ group_seuser }}"
+
+role_regards_grafana_config_configuration: "{{ group_docker_cots.get('grafana', {}).get('configuration', {}) }}"
+
+role_regards_grafana_config_use_generic_dashboards: "{{ role_regards_grafana_config_configuration.get('use_generic_dashboards', True) }}"
+
+default_admin: 
+  user: regards
+  password: regardspwd
+
+role_regards_grafana_config_configuration_admin: 
+  user: "{{ role_regards_grafana_config_configuration.get('admin', {}).get('username', default_admin.user) }}"
+  password: "{{ role_regards_grafana_config_configuration.get('admin', {}).get('password', default_admin.password) }}"
+
+
+#
+# Datasource conf
+#
+# Info: if you want integrated Postgres datasource schema research, use this :
+# ALTER ROLE <username> SET search_path = "accessproject", "admin", "authentication", "catalog", "dam", "dataprovider", "fem", "ingest", "notifier", "order_", "processing", "public", "storage", "workermanager";
+role_regards_grafana_config_datasources: "{{ group_docker_cots.get('grafana', {}).get('datasources', {}) }}"
+role_regards_grafana_config_configuration_custom_datasources: "{{ role_regards_grafana_config_datasources.get('custom', {}) }}"
+
+role_regards_grafana_config_configuration_postgres:
+  active: "{{ group_docker_cots.postgres is defined }}"
+  url: rs-postgres:5432
+  user: azertyuiop123456789
+  password: azertyuiop123456789
+  databases: "{{ role_regards_grafana_config_datasources.get('regards_cots', {}).get('postgres_databases', [group_stack_name]) }}"
+
+role_regards_grafana_config_configuration_custom_datasources_postgres: "{{ role_regards_grafana_config_configuration_custom_datasources.get('postgres', []) }}"
+
+
+role_regards_grafana_config_configuration_elasticsearch:
+  active: "{{ group_docker_cots.elasticsearch is defined }}"
+  url: rs-elasticsearch:9200
+  user: 
+  indexes: "{{ role_regards_grafana_config_datasources.get('regards_cots', {}).get('elasticsearch_indexes', [group_stack_name]) }}"
+
+role_regards_grafana_config_configuration_custom_datasources_elasticsearch: "{{ role_regards_grafana_config_configuration_custom_datasources.get('elasticsearch', []) }}"
+
+role_regards_grafana_config_ssl_is_active: "{{ group_docker_cots.get('grafana', {}).ssl is defined }}"
+role_regards_grafana_config_ssl_files: "{{ group_docker_cots.get('grafana', {}).get('ssl', {}) }}"
+
+# SSL src and dest infos
+role_regards_grafana_config_ssl_destination: "{{ role_regards_grafana_config_conf_local }}ssl"
+role_regards_grafana_config_ssl_location_inside_playbook: "{{ inventory_dir }}/group_vars/regards_nodes/files/ssl"
+
+role_regards_grafana_config_host: "{{ group_docker_cots.get('grafana', {}).get('host') }}"
+
+role_regards_grafana_config_prometheus_active: "{{ group_docker_cots.prometheus is defined }}"
+role_regards_grafana_config_loki_active: "{{ group_docker_cots.loki is defined }}"
+role_regards_grafana_config_kafka_active: "{{ group_docker_cots.kafka is defined }}"
+role_regards_grafana_config_fluentbit_active: "{{ group_docker_cots.fluentbit is defined }}"
+role_regards_grafana_config_fluentd_active: "{{ group_docker_cots.fluentd is defined }}"
+role_regards_grafana_config_elasticsearch_exporter_active: "{{ group_docker_cots.elasticsearch_exporter is defined }}"
+role_regards_grafana_config_node_exporter_active: "{{ group_docker_cots.node_exporter is defined }}"
+role_regards_grafana_config_telegraf_active: "{{ group_docker_cots.telegraf is defined }}"
+role_regards_grafana_config_phppgadmin_active: "{{ group_docker_cots.phppgadmin is defined }}"
+role_regards_grafana_config_kibana_active: "{{ group_docker_cots.kibana is defined }}"
+
+# Display Minio dashboard when MinIO deployed OR Prometheus has a special conf to scan external MinIO 
+role_regards_grafana_config_minio_active: "{{ group_docker_cots.minio is defined or group_docker_cots.get('prometheus', {}).minio is defined }}"
+# Retrieve the public hostname / port of MinIO
+role_regards_grafana_config_minio_hostname: "{{ group_docker_cots.get('prometheus', {}).get('minio', {}).get('host', 'rs-minio') }}"
+role_regards_grafana_config_minio_port: "{{ group_docker_cots.get('prometheus', {}).get('minio', {}).get('port', '9000') }}"
+
+role_regards_grafana_config_elasticsearch_active: "{{ group_docker_cots.elasticsearch is defined }}"
+
+role_regards_grafana_config_rabbitmq_active: "{{ group_docker_cots.rabbitmq is defined }}"
+# When grafana is deployed globaly, should have 3 running instances, otherwise 1
+role_regards_grafana_config_rabbitmq_nb_instances: "{{ group_docker_cots.get('rabbitmq', {}).global_service is defined  | ternary('3', '1') }}"

@@ -1,0 +1,12 @@
+---
+- name: Generate prometheus exporter stack file
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ role_regards_stack_logs_stack }}"
+    mode: '0740'
+    owner: "{{ role_regards_stack_logs_container_root_user }}"
+    group: "{{ role_regards_stack_logs_container_root_group }}"
+  with_items:
+    - prometheus-exporters.yml
+    - logs-stack.yml
+  when: role_regards_stack_logs_is_defined|bool

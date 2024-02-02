@@ -1,14 +1,14 @@
-version: '3.7'
+version: '3.9'
 
 services:
 {% for worker in role_regards_stack_workers %}
   {{ worker.name }}:
     image: {{ worker.docker_registry | default(role_regards_stack_registry) }}/{{ worker.image | default(worker.name) }}:{{ worker.tag }}
-{%if (worker.configuration | default({})).labels is defined %}
+{% if (worker.configuration | default({})).labels is defined %}
     labels:
-{% for key, value in worker.configuration.labels.items() %}
+{%   for key, value in worker.configuration.labels.items() %}
       {{ key }}: "{{value}}"
-{% endfor %}
+{%   endfor %}
 {% endif %}
 {% if worker.command is defined %}
     command: {{ worker.command }}
@@ -16,17 +16,19 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: {{ worker.name }}
     read_only: true
+{% if role_regards_stack_enable_cots_healthcheck and worker.healthcheck is defined %}
+    healthcheck:
+      {{ worker.healthcheck | to_nice_yaml | indent(6) }}
+{% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if worker.resources is defined %}
       resources:
-{% if worker.resources.limits is defined %}
-        limits:
-          {{ worker.resources.limits | to_nice_yaml | indent(10) }}
-{% endif %}
-{% if worker.resources.reservations is defined %}
-        reservations:
-          {{ worker.resources.reservations | to_nice_yaml | indent(10) }}
-{% endif %}
+        {{ worker.resources | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ worker.replicas | default(1) }}
 {% if worker.node_label_placement_constraint is defined %}
@@ -36,23 +38,24 @@ services:
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
-{%if (worker.configuration | default({})).environment is defined or worker.jdwp is defined %}
+{% if ((worker.configuration | default({})).environment is defined) or (worker.jdwp is defined) or (worker.get('venv_replication', True) == False) %}
     environment:
-{% if worker.jdwp is defined %}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+{%   if worker.jdwp is defined %}
       - BPL_DEBUG_ENABLED=true
-{% endif %}
-{%if (worker.configuration | default({})).environment is defined %}
-{% for key, value in worker.configuration.environment.items() %}
+{%   endif %}
+{%   if (worker.configuration | default({})).environment is defined %}
+{%     for key, value in worker.configuration.environment.items() %}
       {{ key }}: "{{value}}"
-{% endfor %}
-{% endif %}
+{%     endfor %}
+{%   endif %}
 {% endif %}
     volumes:
       - {{ role_regards_stack_workspace_local }}regards/workers/{{ worker.name }}/logs:/logs
 {% if worker.volumes is defined %}
-{% for volume in worker.volumes %}
+{%   for volume in worker.volumes %}
       - {{ volume.source }}:{{ volume.destination }}
-{% endfor %}
+{%   endfor %}
 {% endif %}
       - type: tmpfs
         target: /tmp
@@ -64,17 +67,17 @@ services:
         target: /tmp/{{ worker.name }}.yml
 {% endif %}
 {% if worker.configs is defined %}
-{% for config in worker.configs %}
+{%   for config in worker.configs %}
       - source: conf_{{ config.source }}
         target: {{ config.destination }}
-{% endfor %}
+{%   endfor %}
 {% endif %}
 {% if worker.secrets is defined %}
     secrets:
-{% for secret in worker.secrets %}
+{%   for secret in worker.secrets %}
       - source: secret_{{ secret.source }}
         target: {{ secret.destination }}
-{% endfor %}
+{%   endfor %}
 {% endif %}
 {% if worker.jdwp is defined %}
     ports:
@@ -82,12 +85,12 @@ services:
 {% endif %}
 {% if role_regards_stack_initialize_default_logging|bool or worker.logging is defined %}
     logging:
-{% if worker.logging is defined %}
+{%   if worker.logging is defined %}
       {{ worker.logging | to_nice_yaml | indent(6) }}
-{% else %}
+{%   else %}
       options:
         max-size: "10m"
         max-file: "10"
-{% endif %}
+{%   endif %}
 {% endif %}
 {% endfor %}

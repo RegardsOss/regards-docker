@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.9'
 
 # Config name must contains less than 32 [a-zA-Z0-9-_.] caracters
 configs:

@@ -1,2 +1,5 @@
 ---
 python_version: 3
+# Used on dev servers where we use the root user
+# add autocomplete on CLI scripts
+group_enable_cli_autocomplete: False

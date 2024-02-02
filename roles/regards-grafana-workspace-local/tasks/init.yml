@@ -1,0 +1,10 @@
+---
+- name: Create grafana folder
+  ansible.builtin.file:
+    path: "{{ role_regards_grafana_workspace_local_workspace_local }}grafana"
+    state: directory
+    mode: '2750'
+    owner: "{{ role_regards_grafana_workspace_local_container_run_user }}"
+    group: "{{ role_regards_grafana_workspace_local_container_run_group }}"
+    setype: "{{ role_regards_grafana_workspace_local_setype }}"
+    seuser: "{{ role_regards_grafana_workspace_local_seuser }}"

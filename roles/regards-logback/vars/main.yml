@@ -7,3 +7,6 @@ role_regards_logback_container_root_user: "{{ group_container_root_user }}"
 role_regards_logback_container_root_group: "{{ group_container_root_group }}"
 role_regards_logback_setype: "{{ group_setype }}"
 role_regards_logback_seuser: "{{ group_seuser }}"
+
+# Define the log format
+role_regards_logback_use_log_json_format: "{{ group_docker_cots.fluentd is defined and group_config_mservices.get('use_log_json_format', True) }}"

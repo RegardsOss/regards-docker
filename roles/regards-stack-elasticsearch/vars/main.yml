@@ -56,13 +56,20 @@ role_regards_stack_elasticsearch_resource_limits:
     limits:
       cpus: '4'
       memory: "{{ role_regards_stack_elasticsearch_cots_elasticsearch.get('containerLimit', '4000m') }}"
+      pids: 100000
     reservations:
-      cpus: '1'
+      cpus: '0.5'
       memory: "{{ role_regards_stack_elasticsearch_cots_elasticsearch.get('memoryLimit', '2000m') }}"
   kibana:
     limits:
       cpus: '4'
       memory: "{{ role_regards_stack_elasticsearch_cots_kibana.get('containerLimit', '1000m') }}"
+      pids: 100000
     reservations:
-      cpus: '1'
+      cpus: '0.5'
       memory: "{{ role_regards_stack_elasticsearch_cots_kibana.get('memoryLimit', '800m') }}"
+
+role_regards_stack_elasticsearch_cots_kibana_restart_policy:
+  delay: "{{ (group_docker_restart_policy | default({})).get('delay', '10s') }}"
+  max_attempts: "{{ (group_docker_restart_policy | default({})).get('max_attempts', '0') }}"
+  window: "{{ (group_docker_restart_policy | default({})).get('window', '0s') }}"

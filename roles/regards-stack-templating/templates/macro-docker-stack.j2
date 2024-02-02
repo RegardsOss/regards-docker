@@ -1,0 +1,367 @@
+###########################################################
+# Jinja 2 Macros to generate a docker compose spec
+# using a list of services conf and the
+# global configuration of the deployment
+#
+# @author Léo Mieulet
+###########################################################
+
+
+#########################################
+# Get a hash of 3 chars from the provided text param
+#########################################
+{% macro getShortHash(text) -%}
+{{ (text | hash('sha1'))[:3] }}
+{%- endmacro %}
+
+#########################################
+# Service > volumes section
+#########################################
+{% macro initVolumesSection(common, service) %}
+    volumes:
+{%   if service.volumes is defined %}
+{%     for volume in service.volumes %}
+{%         if volume.get('active', True)|bool %}
+      - source: {{ volume.swarm_volume_name_prefix }}-datavolume
+        target: {{ volume.destination }}
+        type: volume
+{%         if volume.get('ro', False)|bool %}
+        read_only: true
+{%         endif %}
+{%        endif %}
+{%     endfor %}
+{%   endif %}
+{%   if service.tmpfs_volumes is defined %}
+{%     for tmpfs_volume in service.tmpfs_volumes %}
+      - type: tmpfs
+        target: {{ tmpfs_volume }}
+{%     endfor %}
+{%   endif %}
+{%   if service.direct_mounts is defined %}
+{%     for direct_volume in service.direct_mounts %}
+      - {{ direct_volume }}
+{%     endfor %}
+{%   endif %}
+
+{% endmacro %}
+
+#########################################
+# Service > configs or secrets > an entry
+#########################################
+{% macro initConfigOrSecretEntry(common, hostname, entry) %}
+{%   if entry.get('active', True) %}
+      - source: {{ hostname }}_{{ getShortHash(entry.src_directory_location) }}_{{ entry.src_filename }}
+        target: {{ entry.destination }}
+{%   endif %}
+{% endmacro %}
+
+#########################################
+# Service > configs section
+#########################################
+{% macro initConfigsSection(common, service) %}
+    configs:
+{%   for config in service.configs %}
+{{     initConfigOrSecretEntry(common, service.get('service', service.hostname), config) }}
+{%   endfor %}
+{% endmacro %}
+
+#########################################
+# Service > secrets section
+#########################################
+{% macro initSecretsSection(common, service) %}
+    secrets:
+{%   for secret in service.secrets %}
+{{     initConfigOrSecretEntry(common, service.get('service', service.hostname), secret) }}
+{%   endfor %}
+{% endmacro %}
+
+#########################################
+# Service > ports section
+#########################################
+{% macro initPortsSection(common, service) %}
+    ports:
+{%   for port in service.ports %}
+{%     if port.active %}
+      - "{{ port.host }}:{{ port.container }}"
+{%     endif %}
+{%   endfor %}
+{% endmacro %}
+
+#########################################
+# Service > deploy section
+#########################################
+{% macro initDeploySection(common, service) %}
+    deploy:
+      restart_policy:
+        condition: any
+        delay: {{ common.resource_limits.delay }}
+        max_attempts: {{ common.resource_limits.max_attempts }}
+        window: {{ common.resource_limits.window }}
+{% if service.get('deployGlobal', False)|bool %}
+      mode: global
+{% else %}
+      replicas: {{ service.replicas | default(1) }}
+{% endif %}
+{% if common.enable_resource_limits is defined and service.resources is defined %}
+      resources:
+        {{ service.resources | to_nice_yaml | indent(8) }}
+{% endif %}
+{% if service.node_label_placement_constraint is defined and service.node_label_placement_constraint | length > 0 %}
+      placement:
+        constraints:
+          - node.labels.{{ service.node_label_placement_constraint.key }} == {{ service.node_label_placement_constraint.value }}
+{% endif %}
+{% endmacro %}
+
+
+#########################################
+# Service > healthcheck section
+#########################################
+{% macro initHealthcheckSection(common, service) %}
+    healthcheck:
+      test: {{ service.healthcheck.test|to_json }}
+      interval: {{ service.healthcheck.interval }}
+      timeout: {{ service.healthcheck.timeout }}
+      retries: {{ service.healthcheck.retries }}
+      start_period: {{ service.healthcheck.start_period }}
+{% endmacro %}
+
+
+#########################################
+# Service > labels section
+#########################################
+{% macro initLabelSection(common, service) %}
+    labels:
+{%    for key, value in service.labels.items() %}
+      {{ key }}: "{{value}}"
+{%    endfor %}
+{% endmacro %}
+
+
+#########################################
+# Service > logging section
+#########################################
+{% macro initLoggingSection(common, service) %}
+{% if service.logging is defined and service.logging | length > 0 %}
+    logging:
+      {{ service.logging | to_nice_yaml | indent(6) }}
+{% endif %}
+{% endmacro %}
+
+
+#########################################
+# Service > environment section
+#########################################
+{% macro initEnvSection(common, service) %}
+    environment:
+{%    for key, value in service.envs.items() %}
+      - "{{ key }}={{value}}"
+{%     endfor %}
+{% endmacro %}
+
+
+#########################################
+# Service > cap_add section
+#########################################
+{% macro initCapAddNetAdminSection(common, service) %}
+    cap_add:
+      - NET_ADMIN
+{% endmacro %}
+
+
+
+
+
+#########################################
+# Get an active service declaration
+#########################################
+{% macro initActiveService(common, service) %}
+
+{%  if service.service is defined %}
+  {{ service.service }}:
+{%  else %}
+  {{ service.hostname }}:
+{%  endif %}
+    image: {{ common.registry }}/{{ service.imageName }}:{{ service.imageTag }}
+{%  if service.get('userNamespace', True)|bool %}
+{%    if service.user is defined %}
+    user: "{{ service.user }}"
+{%    else %}
+    user: "{{ common.user.id }}:{{ common.user.gid }}"
+{%    endif %}
+{%  endif %}
+{%  if service.hostnameWithNodeHostname is defined %}
+    hostname: '{{ service.hostnameWithNodeHostname }}.{{ '{{' }} if ge (.Node.Hostname|len) {{ 62 - service.hostnameWithNodeHostname|length }} {{ '}}' }}{{ '{{' }} slice (printf "%v" .Node.Hostname) 0 {{ 62 - service.hostnameWithNodeHostname|length }} {{ '}}' }}{{ '{{' }}else{{ '}}' }}{{ '{{' }} .Node.Hostname {{ '}}' }}{{ '{{' }}end{{ '}}' }}'
+{%  else %}
+    hostname: {{ service.hostname }}
+{%  endif %}
+{%  if service.get('read_only', True)|bool %}
+    read_only: true
+{%  endif %}
+{%  if service.stop_grace_period is defined %}
+    stop_grace_period: {{ service.stop_grace_period }}
+{%   endif %}
+    networks:
+      - {{ common.network }}
+{%   if service.healthcheck is defined and common.heathcheck_active|bool %}
+{{     initHealthcheckSection(common, service) }}
+{%   endif %}
+{%   if service.volumes is defined or service.tmpfs_volumes is defined or service.direct_mounts is defined %}
+{{     initVolumesSection(common, service) }}
+{%   endif %}
+{%   if service.configs is defined and (
+            (service.configs | selectattr('active', 'defined') | selectattr('active', 'equalto', True) | list) +
+            (service.configs | rejectattr('active', 'defined') | list)
+          )|length > 0 %}
+{{       initConfigsSection(common, service) }}
+{%   endif %}
+{%   if service.secrets is defined and (
+            (service.secrets | selectattr('active', 'defined') | selectattr('active', 'equalto', True) | list) +
+            (service.secrets | rejectattr('active', 'defined') | list)
+          )|length > 0 %}
+{{     initSecretsSection(common, service) }}
+{%   endif %}
+{%  if service.envs is defined %}
+{{     initEnvSection(common, service) }}
+{%  endif %}
+{%  if service.ports is defined and service.ports|selectattr('active', 'equalto', True)|list|length > 0 %}
+{{     initPortsSection(common, service) }}
+{%  endif %}
+{%  if service.labels is defined %}
+{{     initLabelSection(common, service) }}
+{%  endif %}
+{%  if service.capAddNetAdmin is defined %}
+{{    initCapAddNetAdminSection(common, service) }}
+{%  endif %}
+{{  initLoggingSection(common, service) }}
+{{  initDeploySection(common, service) }}
+{% endmacro %}
+
+
+
+#########################################
+# Top-Service declaration
+#########################################
+{%- macro initService(common, service) -%}
+{%    if service.active|bool %}
+{{      initActiveService(common,service) }}
+{%    endif %}
+{%- endmacro -%}
+
+
+#########################################
+# Top-Secret or Top-Config declaration > entry
+#########################################
+{%- macro initTopConfigOrSecretEntry(common, hostname, file_path_dir, filename, swarm_prefix, env_name) %}
+  {{ hostname }}_{{ getShortHash(file_path_dir) }}_{{ filename }}:
+    name: {{ swarm_prefix }}_{{ '${' }}{{ env_name }}{{ '}' }}
+    file: {{ file_path_dir }}{{ filename }}
+{%- endmacro -%}
+
+#########################################
+# Top-Config declaration
+#########################################
+{%- macro initConfig(common, service) -%}
+{%    if service.active|bool and service.configs is defined %}
+{%      for config in service.configs %}
+{%        if config.get('active', True)|bool %}
+{{          initTopConfigOrSecretEntry(common, service.get('service', service.hostname), config.src_directory_location, config.src_filename, config.swarm_config_name_prefix, config.env_containing_checksum) }}
+{%        endif %}
+{%      endfor %}
+{%    endif %}
+{%- endmacro -%}
+
+
+
+#########################################
+# Top-Secret declaration (hahahahaha)
+#########################################
+{%- macro initSecret(common, service) -%}
+{%    if service.active|bool and service.secrets is defined %}
+{%      for secret in service.secrets %}
+{%        if secret.get('active', True)|bool %}
+{{          initTopConfigOrSecretEntry(common, service.get('service', service.hostname), secret.src_directory_location, secret.src_filename, secret.swarm_secret_name_prefix, secret.env_containing_checksum) }}
+{%        endif %}
+{%      endfor %}
+{%    endif %}
+{%- endmacro -%}
+
+#########################################
+# Top-Volume declaration
+#########################################
+{%- macro initVolume(common, service) -%}
+{%    if service.active|bool and service.volumes is defined %}
+{%      for volume in service.volumes %}
+{%         if volume.get('active', True)|bool %}
+  {{ volume.swarm_volume_name_prefix }}-datavolume:
+    driver: local
+    driver_opts:
+{%          if volume.config.nfs is defined %}
+{%            for nfs_server in common.top_level_nfs_servers %}
+{%              if nfs_server.name == volume.config.nfs %}
+      type: {{ nfs_server.config.get('type', 'nfs') }}
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ volume.config.get('device_postfix', volume.src_default_directory_location) }}"
+{%              endif %}
+{%            endfor %}
+{%         else %}
+      type: none
+      o: bind
+{%            if volume.config.source is defined %}
+      device: {{ volume.config.source }}
+{%            elif volume.source is defined %}
+      device: {{ volume.source }}
+{%            else %}
+      device: {{ common.workspace_local }}{{ volume.src_default_directory_location }}
+{%            endif %}
+{%          endif %}
+{%        endif %}
+{%      endfor %}
+{%    endif %}
+{%- endmacro -%}
+
+
+
+#########################################
+# Docker compose stack file declaration
+#########################################
+{%- macro initStackFile(common, services) -%}
+version: '3.9'
+
+{%  if services | dict2items | selectattr('value') | map(attribute='value') | selectattr('active', 'equalto', True) | selectattr('volumes', 'defined') | list|length > 0 %}
+volumes:
+{%    for key, value in services.items() %}
+{{      initVolume(common, value) }}
+{%    endfor %}
+{%  endif %}
+
+{%  if (
+        (services | dict2items | selectattr('value') | map(attribute='value') | selectattr('active', 'equalto', True) | selectattr('configs', 'defined') | sum(attribute='configs', start=[]) | selectattr('active', 'defined') | selectattr('active', 'equalto', True) | list ) +
+        (services | dict2items | selectattr('value') | map(attribute='value') | selectattr('active', 'equalto', True) | selectattr('configs', 'defined') | sum(attribute='configs', start=[]) | rejectattr('active', 'defined') | list )
+        )|length > 0 %}
+configs:
+{%    for key, value in services.items() %}
+{{      initConfig(common, value) }}
+{%    endfor %}
+{%  endif %}
+
+
+{%  if (
+        (services | dict2items | selectattr('value') | map(attribute='value') | selectattr('active', 'equalto', True) | selectattr('secrets', 'defined') | sum(attribute='secrets', start=[]) | selectattr('active', 'defined') | selectattr('active', 'equalto', True) | list) +
+        (services | dict2items | selectattr('value') | map(attribute='value') | selectattr('active', 'equalto', True) | selectattr('secrets', 'defined') | sum(attribute='secrets', start=[]) | rejectattr('active', 'defined') | list)
+       )|length > 0 %}
+secrets:
+{%    for key, value in services.items() %}
+{{      initSecret(common, value) }}
+{%    endfor %}
+{%  endif %}
+
+{%  if services | dict2items | selectattr('value') | map(attribute='value') | selectattr('active', 'equalto', True) | list|length > 0 %}
+services:
+{%    for key, value in services.items() %}
+{{      initService(common, value) }}
+{%    endfor %}
+{%  endif %}
+
+
+{%- endmacro -%}

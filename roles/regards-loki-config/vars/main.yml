@@ -1,0 +1,12 @@
+---
+role_regards_loki_config_is_defined: "{{ group_docker_cots.loki is defined }}"
+
+role_regards_loki_config_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/loki/"
+
+role_regards_loki_config_container_root_user: "{{ group_container_root_user }}"
+role_regards_loki_config_container_root_group: "{{ group_container_root_group }}"
+role_regards_loki_config_setype: "{{ group_setype }}"
+role_regards_loki_config_seuser: "{{ group_seuser }}"
+
+default_retention_period: 90d
+role_regards_loki_config_retention_day: "{{ group_docker_cots.get('loki', {}).get('retention_period', default_retention_period) }}"

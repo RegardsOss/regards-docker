@@ -19,9 +19,13 @@
   ansible.builtin.include_role:
     name: regards-stack-haproxy
 
-- name: Generate haproxy stack file using external role
+- name: Generate network stack file using external role
   ansible.builtin.include_role:
     name: regards-stack-network
+
+- name: Generate logs stack file using external role
+  ansible.builtin.include_role:
+    name: regards-stack-logs
 
 - name: Generate logs.yml
   ansible.builtin.template:
@@ -41,14 +45,9 @@
     group: "{{ role_regards_stack_container_root_group }}"
   when: role_regards_stack_cots.doc is defined
 
-- name: Generate s3-minio.yml
-  ansible.builtin.template:
-    src: s3-minio.yml
-    dest: "{{ role_regards_stack_stack }}"
-    mode: '0740'
-    owner: "{{ role_regards_stack_container_root_user }}"
-    group: "{{ role_regards_stack_container_root_group }}"
-  when: role_regards_stack_cots.s3_minio is defined
+- name: Generate Minio stack file using external role
+  ansible.builtin.include_role:
+    name: regards-stack-minio
 
 - name: Generate mail.yml
   ansible.builtin.template:

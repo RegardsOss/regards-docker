@@ -1,0 +1,1600 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 18,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 38,
+      "title": "REGARDS MICROSERVICES",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "1"
+      },
+      "description": "Check at least 1 container exists and is ready",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Open dashboard",
+              "url": "/dashboards"
+            }
+          ],
+          "mappings": [
+            {
+              "options": {
+                "2": {
+                  "color": "dark-green",
+                  "index": 0,
+                  "text": "OK"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 0,
+                "result": {
+                  "color": "dark-red",
+                  "index": 1,
+                  "text": "KO"
+                },
+                "to": 999
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "dark-red",
+                  "index": 2,
+                  "text": "KO"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "StartedMsAgo"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": []
+              },
+              {
+                "id": "unit",
+                "value": "dtdurationms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ServiceReadyS"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": []
+              },
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "NbContainer"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "dark-red",
+                        "index": 0
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "from": 1,
+                      "result": {
+                        "color": "dark-green",
+                        "index": 1
+                      },
+                      "to": 9999
+                    },
+                    "type": "range"
+                  }
+                ]
+              },
+              {
+                "id": "unit",
+                "value": "instance(s)"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 3,
+        "x": 0,
+        "y": 1
+      },
+      "id": 36,
+      "links": [],
+      "maxPerRow": 8,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": true
+        },
+        "text": {
+          "valueSize": 45
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "10.0.9",
+      "repeat": "regards_services",
+      "repeatDirection": "h",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "1"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "min without (container_image, container_name, container_id, container_status, container_version, engine_host, host, instance, server_version) ((time() * 1000) - (last_over_time(docker_container_status_started_at{container_status=\"running\", container_name=~\".+_${regards_services}\\\\..+\"}[1m]) / 1000000) > 60000)",
+          "format": "time_series",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "StartedMsAgo"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "1"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "min without (instance,job, main_application_class, replication_instance) (label_replace(last_over_time(application_ready_time_seconds{job=\"${regards_services}-scrape\"}[1m]), \"some\", \"common-label\", \"\", \"\"))",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "ServiceReadyS"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "1"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "count without (instance,job, main_application_class, replication_instance) (label_replace(last_over_time(application_ready_time_seconds{job=\"${regards_services}-scrape\"}[1m]), \"nb\", \"container\", \"\", \"\"))",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "NbContainer"
+        }
+      ],
+      "title": "$regards_services",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "Time",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "{main_application_class=\"fr.cnes.regards.microservices.access.Application\"}": false,
+              "{nb=\"container\"}": false
+            },
+            "indexByName": {},
+            "renameByName": {
+              "Time": "",
+              "telegraf": "StartedMsAgo",
+              "{job=\"rabbitmq\"}": "Consumer",
+              "{job=\"telegraf\"}": "StartedMsAgo",
+              "{main_application_class=\"fr.cnes.regards.microservices.access.Application\"}": "ServiceReadyS",
+              "{nb=\"container\"}": "NbContainer",
+              "{some=\"common-label\"}": "ServiceReadyS"
+            }
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "MetricsOK",
+            "mode": "reduceRow",
+            "reduce": {
+              "include": [
+                "StartedMsAgo",
+                "ServiceReadyS"
+              ],
+              "reducer": "count"
+            },
+            "replaceFields": false
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "ServiceReadyS": true,
+              "StartedMsAgo": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "NbContainer": ""
+            }
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 17,
+      "panels": [],
+      "title": "REGARDS COTS",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "2"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-purple",
+            "mode": "fixed"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Open logs dashboard",
+              "url": "/d/fRIvzUZMz/logs"
+            }
+          ],
+          "mappings": []
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ERROR"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "INFO"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "UNKNOWN"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "WARN"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 0,
+        "y": 10
+      },
+      "id": 61,
+      "options": {
+        "displayLabels": [
+          "name"
+        ],
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "2"
+          },
+          "editorMode": "code",
+          "expr": "sum by (level) (count_over_time({swarm_service=~\".+\"}[$__range]) )",
+          "legendFormat": "{{ '{{' }}level{{ '}}' }}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Logs level repartition",
+      "type": "piechart"
+    },
+{%  if role_regards_grafana_config_elasticsearch_active %}
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "1"
+      },
+      "description": "Check ElasticSearch has booted more than 1 min ago and cluster is healthy (green)",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Open ES dashboard",
+              "url": "/d/n_nxrE_mk/cots-elasticsearch"
+            }
+          ],
+          "mappings": [
+            {
+              "options": {
+                "2": {
+                  "color": "dark-orange",
+                  "index": 1,
+                  "text": "Yellow"
+                },
+                "3": {
+                  "color": "dark-green",
+                  "index": 0,
+                  "text": "OK"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 0,
+                "result": {
+                  "color": "dark-red",
+                  "index": 2,
+                  "text": "KO"
+                },
+                "to": 999
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "dark-red",
+                  "index": 3,
+                  "text": "KO"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Health"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "1": {
+                        "color": "dark-orange",
+                        "index": 0,
+                        "text": "yellow"
+                      },
+                      "2": {
+                        "color": "dark-green",
+                        "index": 1,
+                        "text": "ok"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "StartedMsAgo"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dtdurationms"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 3,
+        "y": 10
+      },
+      "id": 3,
+      "links": [],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": true
+        },
+        "text": {
+          "valueSize": 45
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.9",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "1"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "last_over_time(elasticsearch_cluster_health_status{color=\"green\"}[1m]) == 1",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "Elasticsearch health"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "1"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "min without (container_image, container_name, container_id, container_status, container_version, engine_host, host, instance, server_version) ((time() * 1000) - (last_over_time(docker_container_status_started_at{container_status=\"running\", container_name=~\".+_rs-elasticsearch\\\\..+\"}[1m]) / 1000000) > 60000)",
+          "format": "time_series",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "container status"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "1"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "last_over_time(elasticsearch_cluster_health_status{color=\"yellow\"}[1m]) + ON(job) last_over_time(elasticsearch_cluster_health_status{color=\"green\"}[1m])",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "Elasticsearch health yellow"
+        }
+      ],
+      "title": "ElasticSearch",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "Time",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "Time": "",
+              "elasticsearch-exporter": "",
+              "scalar(elasticsearch_cluster_health_status{color=\"green\"})": "Health",
+              "scalar(elasticsearch_cluster_health_status{color=\"green\"}) + scalar(elasticsearch_cluster_health_status{color=\"yellow\"}) * 2 + scalar(elasticsearch_cluster_health_status{color=\"red\"}) * 3": "Health",
+              "scalar(elasticsearch_cluster_health_status{color=\"yellow\"})": "Health",
+              "telegraf": "",
+              "{__name__=\"elasticsearch_cluster_health_status\", cluster=\"regards\", color=\"green\", instance=\"rs-elasticsearch-exporter:9114\", job=\"elasticsearch-exporter\"}": "Health",
+              "{__name__=\"minio_cluster_health_status\", instance=\"{{ role_regards_grafana_config_minio_hostname }}:{{ role_regards_grafana_config_minio_port }}\", job=\"minio\", server=\"127.0.0.1:9000\"}": "Health",
+              "{instance=\"{{ role_regards_grafana_config_minio_hostname }}:{{ role_regards_grafana_config_minio_port }}\"}": "Health",
+              "{job=\"telegraf\"}": "StartedMsAgo"
+            }
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "MetricsOK",
+            "mode": "reduceRow",
+            "reduce": {
+              "include": [
+                "Health",
+                "StartedMsAgo",
+                "telegraf",
+                "elasticsearch-exporter"
+              ],
+              "reducer": "count"
+            },
+            "replaceFields": true
+          }
+        }
+      ],
+      "type": "stat"
+    },
+{%  endif %}
+{%  if role_regards_grafana_config_minio_active %}
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "1"
+      },
+      "description": "Check MinIO has booted more than 1 min ago and cluster is healthy",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Open MinIO dashboard",
+              "url": "/d/TgmJnqnnk/cots-minio"
+            }
+          ],
+          "mappings": [
+            {
+              "options": {
+                "2": {
+                  "color": "dark-green",
+                  "index": 0,
+                  "text": "OK"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 0,
+                "result": {
+                  "color": "dark-red",
+                  "index": 1,
+                  "text": "KO"
+                },
+                "to": 999
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "dark-red",
+                  "index": 2,
+                  "text": "KO"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Health"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "1": {
+                        "color": "dark-green",
+                        "index": 0,
+                        "text": "ok"
+                      }
+                    },
+                    "type": "value"
+                  },
+                  {
+                    "options": {
+                      "from": 0,
+                      "result": {
+                        "color": "dark-red",
+                        "index": 1,
+                        "text": "nok"
+                      },
+                      "to": 999
+                    },
+                    "type": "range"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "StartedMsAgo"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 6,
+        "y": 10
+      },
+      "id": 6,
+      "links": [],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": true
+        },
+        "text": {
+          "valueSize": 45
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.9",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "1"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum without (job, server) (last_over_time(minio_cluster_health_status[1m]) == 1)",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "MinIO health"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "1"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum without (container_image, container_name, container_id, container_status, container_version, engine_host, host, instance, server_version) ((time() * 1000) - (last_over_time(docker_container_status_started_at{container_status=\"running\", container_name=~\".+_rs-minio.+\"}[1m]) / 1000000) > 60000)",
+          "format": "time_series",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "container status"
+        }
+      ],
+      "title": "MinIO",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "Time",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "Time": "",
+              "{__name__=\"minio_cluster_health_status\", instance=\"{{ role_regards_grafana_config_minio_hostname }}:{{ role_regards_grafana_config_minio_port }}\", job=\"minio\", server=\"127.0.0.1:9000\"}": "Health",
+              "{instance=\"{{ role_regards_grafana_config_minio_hostname }}:{{ role_regards_grafana_config_minio_port }}\"}": "Health",
+              "{job=\"telegraf\"}": "StartedMsAgo"
+            }
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "MetricsOK",
+            "mode": "reduceRow",
+            "reduce": {
+              "include": [
+                "Health",
+                "StartedMsAgo"
+              ],
+              "reducer": "count"
+            },
+            "replaceFields": true
+          }
+        }
+      ],
+      "type": "stat"
+    },
+{%  endif %}
+{%  if role_regards_grafana_config_rabbitmq_active %}
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "1"
+      },
+      "description": "Check RabbitMQ has booted more than 1 min ago, there is {{ role_regards_grafana_config_rabbitmq_nb_instances }} nodes running and every node has consumers",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Open RabbitMQ dashboard",
+              "url": "/d/Kn5xm-gZk/cots-rabbitmq"
+            }
+          ],
+          "mappings": [
+            {
+              "options": {
+                "3": {
+                  "color": "dark-green",
+                  "index": 0,
+                  "text": "OK"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 0,
+                "result": {
+                  "color": "dark-red",
+                  "index": 1,
+                  "text": "KO"
+                },
+                "to": 999
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "dark-red",
+                  "index": 2,
+                  "text": "KO"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Consumer"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": []
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "StartedMsAgo"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "NbNode"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": []
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 3,
+        "y": 13
+      },
+      "id": 5,
+      "links": [],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": true
+        },
+        "text": {
+          "valueSize": 45
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.9",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "1"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "min without (instance) (last_over_time(rabbitmq_consumers[1m]) > 1)",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "Nb consummer"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "1"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "min without (container_image, container_name, container_id, container_status, container_version, engine_host, host, instance, server_version) ((time() * 1000) - (last_over_time(docker_container_status_started_at{container_status=\"running\", container_name=~\".+_rs-rabbitmq.+\"}[1m]) / 1000000) > 60000)",
+          "format": "time_series",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "StartedMsAgo"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "1"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "count(last_over_time(rabbitmq_consumers[1m])) == {{ role_regards_grafana_config_rabbitmq_nb_instances }}",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "Nb instance"
+        }
+      ],
+      "title": "RabbitMQ",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "Time",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "Time": "",
+              "count(last_over_time(rabbitmq_consumers[1m]))": "NbNode",
+              "count(last_over_time(rabbitmq_consumers[1m])) == {{ role_regards_grafana_config_rabbitmq_nb_instances }}": "NbNode",
+              "rabbitmq": "Consumer",
+              "telegraf": "StartedMsAgo",
+              "{job=\"rabbitmq\"}": "Consumer",
+              "{job=\"telegraf\"}": "StartedMsAgo"
+            }
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "MetricsOK",
+            "mode": "reduceRow",
+            "reduce": {
+              "include": [
+                "Consumer",
+                "StartedMsAgo",
+                "NbNode"
+              ],
+              "reducer": "count"
+            },
+            "replaceFields": true
+          }
+        }
+      ],
+      "type": "stat"
+    },
+{%  endif %}
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 27,
+      "panels": [],
+      "title": "Low level component",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "1"
+      },
+      "description": "Check a container exists",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Open dashboard",
+              "url": "/dashboards"
+            }
+          ],
+          "mappings": [
+            {
+              "options": {
+                "1": {
+                  "color": "dark-green",
+                  "index": 0,
+                  "text": "OK"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 0,
+                "result": {
+                  "color": "dark-red",
+                  "index": 1,
+                  "text": "KO"
+                },
+                "to": 999
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "dark-red",
+                  "index": 2,
+                  "text": "KO"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "StartedMsAgo"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": []
+              },
+              {
+                "id": "unit",
+                "value": "dtdurationms"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 0,
+        "y": 17
+      },
+      "id": 7,
+      "links": [],
+      "maxPerRow": 12,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": true
+        },
+        "text": {
+          "valueSize": 45
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.9",
+      "repeat": "monitored_services",
+      "repeatDirection": "h",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "1"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "min without (container_image, container_name, container_id, container_status, container_version, engine_host, host, instance, server_version) ((time() * 1000) - (last_over_time(docker_container_status_started_at{container_status=\"running\", container_name=~\".+_$monitored_services\\\\..+\"}[1m]) / 1000000) > 60000)",
+          "format": "time_series",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "StartedMsAgo"
+        }
+      ],
+      "title": "$monitored_services",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "Time",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "Time": "",
+              "count(last_over_time(rabbitmq_consumers[1m]))": "NbNode",
+              "count(last_over_time(rabbitmq_consumers[1m])) == 3": "NbNode",
+              "rabbitmq": "Consumer",
+              "telegraf": "StartedMsAgo",
+              "{job=\"rabbitmq\"}": "Consumer",
+              "{job=\"telegraf\"}": "StartedMsAgo"
+            }
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "MetricsOK",
+            "mode": "reduceRow",
+            "reduce": {
+              "include": [
+                "Consumer",
+                "StartedMsAgo",
+                "NbNode"
+              ],
+              "reducer": "count"
+            },
+            "replaceFields": true
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 85,
+      "panels": [],
+      "title": "Virtual Machines",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "1"
+      },
+      "description": "Busy state of all CPU cores together (5 min average),\nAvailable RAM memory and\nLocal disk usage",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Dashboard",
+              "url": "/d/rYdddlPWk/monitoring-swarm-nodes"
+            }
+          ],
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "rgba(50, 172, 45, 0.97)",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 70
+              },
+              {
+                "color": "rgba(245, 54, 54, 0.9)",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 25
+      },
+      "id": 110,
+      "links": [],
+      "maxPerRow": 3,
+      "options": {
+        "orientation": "vertical",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false,
+        "text": {
+          "titleSize": 16,
+          "valueSize": 26
+        }
+      },
+      "pluginVersion": "10.0.9",
+      "repeat": "swarm_nodes",
+      "repeatDirection": "h",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": 1
+          },
+          "editorMode": "code",
+          "expr": "avg(node_load5{instance=~\"$swarm_nodes\"}) /  count(count(node_cpu_seconds_total{instance=~\"$swarm_nodes\"}) by (cpu)) * 100",
+          "format": "time_series",
+          "hide": false,
+          "intervalFactor": 1,
+          "legendFormat": "CPU (5m average)",
+          "range": true,
+          "refId": "A",
+          "step": 240
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "1"
+          },
+          "editorMode": "code",
+          "expr": "100 - ((node_memory_MemAvailable_bytes{instance=~\"$swarm_nodes\"} * 100) / node_memory_MemTotal_bytes{instance=~\"$swarm_nodes\"})",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "RAM used",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "1"
+          },
+          "editorMode": "code",
+          "expr": "100 - ((node_filesystem_avail_bytes{instance=~\"$swarm_nodes\",device!~'rootfs'} * 100) / node_filesystem_size_bytes{instance=~\"$swarm_nodes\",device!~'rootfs'})",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Node disk used",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "$swarm_nodes",
+      "type": "gauge"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 2,
+        "includeAll": true,
+        "multi": false,
+        "name": "monitored_services",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          },
+{%  if role_regards_grafana_config_loki_active %}
+          {
+            "selected": false,
+            "text": "rs-loki",
+            "value": "rs-loki"
+          },
+{%  endif %}
+{%  if role_regards_grafana_config_prometheus_active %}
+          {
+            "selected": false,
+            "text": "rs-prometheus",
+            "value": "rs-prometheus"
+          },
+{%  endif %}
+{%  if role_regards_grafana_config_node_exporter_active %}
+          {
+            "selected": false,
+            "text": "rs-node-exporter",
+            "value": "rs-node-exporter"
+          },
+{%  endif %}
+{%  if role_regards_grafana_config_telegraf_active %}
+          {
+            "selected": false,
+            "text": "rs-telegraf",
+            "value": "rs-telegraf"
+          },
+{%  endif %}
+{%  if role_regards_grafana_config_phppgadmin_active %}
+          {
+            "selected": false,
+            "text": "rs-phppgadmin",
+            "value": "rs-phppgadmin"
+          },
+{%  endif %}
+{%  if role_regards_grafana_config_kibana_active %}
+          {
+            "selected": false,
+            "text": "rs-kibana",
+            "value": "rs-kibana"
+          },
+{%  endif %}
+{%  if role_regards_grafana_config_kafka_active %}
+          {
+            "selected": false,
+            "text": "rs-kafka",
+            "value": "rs-kafka"
+          },
+{%  endif %}
+{%  if role_regards_grafana_config_fluentbit_active %}
+          {
+            "selected": false,
+            "text": "rs-fluentbit",
+            "value": "rs-fluentbit"
+          }
+{%  endif %}
+        ],
+        "query": "{%  if role_regards_grafana_config_loki_active %}rs-loki,{%  endif %}{%  if role_regards_grafana_config_prometheus_active %}rs-prometheus,{%  endif %}{%  if role_regards_grafana_config_node_exporter_active %} rs-node-exporter,{%  endif %}{%  if role_regards_grafana_config_telegraf_active %}rs-telegraf,{%  endif %}{%  if role_regards_grafana_config_phppgadmin_active %} rs-phppgadmin,{%  endif %}{%  if role_regards_grafana_config_kibana_active %}rs-kibana,{%  endif %}{%  if role_regards_grafana_config_kafka_active %}rs-kafka,{%  endif %}{%  if role_regards_grafana_config_fluentbit_active %}rs-fluentbit{%  endif %}",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "allValue": ".+",
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "1"
+        },
+        "definition": "query_result(count by (job)(count_over_time(process_uptime_seconds[1w])))",
+        "hide": 2,
+        "includeAll": true,
+        "multi": false,
+        "name": "regards_services",
+        "options": [],
+        "query": {
+          "query": "query_result(count by (job)(count_over_time(process_uptime_seconds[1w])))",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "/job=\"(.*)-scrape/",
+        "skipUrlSync": false,
+        "sort": 2,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "1"
+        },
+        "definition": "query_result(count by (instance, nodename)(count_over_time(node_uname_info[1m])))",
+        "hide": 2,
+        "includeAll": true,
+        "multi": false,
+        "name": "swarm_nodes",
+        "options": [],
+        "query": {
+          "query": "query_result(count by (instance, nodename)(count_over_time(node_uname_info[1m])))",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": ".*instance=\"(?<value>[^\"]+)\".*\"rs-node-exporter.(?<text>[^\"]*).*",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Home",
+  "uid": "MA_YerzIk",
+  "version": 4,
+  "weekStart": ""
+}

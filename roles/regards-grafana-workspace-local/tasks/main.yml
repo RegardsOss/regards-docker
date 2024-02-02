@@ -1,0 +1,3 @@
+---
+- ansible.builtin.include_tasks: init.yml
+  when: role_regards_grafana_workspace_local_is_defined|bool

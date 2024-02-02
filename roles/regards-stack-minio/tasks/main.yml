@@ -1,0 +1,9 @@
+---
+- name: Generate minio stack file
+  ansible.builtin.template:
+    src: minio.yml
+    dest: "{{ role_regards_stack_minio_stack }}"
+    mode: '0740'
+    owner: "{{ role_regards_stack_minio_container_root_user }}"
+    group: "{{ role_regards_stack_minio_container_root_group }}"
+  when: role_regards_stack_minio_active|bool

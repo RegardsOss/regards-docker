@@ -20,5 +20,5 @@
     seuser: "{{ role_regards_rabbitmq_config_seuser }}"
   with_items: 
     - "{{ role_regards_rabbitmq_config_ssl_certificates_conf.ca }}"
-    - "{{ role_regards_rabbitmq_config_ssl_certificates_conf.cert }}"
+    - "{{ role_regards_rabbitmq_config_ssl_certificates_conf.crt }}"
     - "{{ role_regards_rabbitmq_config_ssl_certificates_conf.key }}"

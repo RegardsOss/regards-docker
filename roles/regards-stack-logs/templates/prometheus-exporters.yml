@@ -1,0 +1,5 @@
+{% import 'roles/regards-stack-templating/templates/macro-docker-stack.j2' as dockerStackLibrary %}
+{{ dockerStackLibrary.initStackFile(
+  role_regards_stack_logs_services_common,
+  role_regards_stack_logs_services_exporters
+) }}

@@ -29,8 +29,11 @@ role_regards_init_nfs_workspaces_volume_elasticsearch_logs_data: "{{  role_regar
 role_regards_init_nfs_workspaces_volume_elasticsearch_logs_backup: "{{  role_regards_init_nfs_workspaces_volume_elasticsearch_logs.get('backup', {}) }}"
 
 role_regards_init_nfs_workspaces_volume_rabbitmq_data: "{{ (group_docker_mounts | default({})).get('rabbitmq', {}) }}"
-role_regards_init_nfs_workspaces_volume_s3_minio_data: "{{ (group_docker_mounts | default({})).get('s3_minio', {}) }}"
+role_regards_init_nfs_workspaces_volume_minio_data: "{{ (group_docker_mounts | default({})).get('minio', [])[0] | default({}) }}"
 role_regards_init_nfs_workspaces_volume_postgres_data: "{{ (group_docker_mounts | default({})).get('postgresql', {}) }}"
+role_regards_init_nfs_workspaces_volume_loki_data: "{{ (group_docker_mounts | default({})).get('loki', {}) }}"
+role_regards_init_nfs_workspaces_volume_prometheus_data: "{{ (group_docker_mounts | default({})).get('prometheus', {}) }}"
+role_regards_init_nfs_workspaces_volume_grafana_data: "{{ (group_docker_mounts | default({})).get('grafana', {}) }}"
 
 role_regards_init_nfs_workspaces_top_level_volumes: "{{ (group_docker_mounts | default({})).get('volumes', []) }}"
 role_regards_init_nfs_workspaces_top_level_regards: "{{  (group_docker_mounts | default({})).get('regards', {}) }}"
@@ -69,6 +72,9 @@ role_regards_init_nfs_workspaces_volume_mservices_logs:
   - worker-manager
   - lta-manager
   - delivery
+  - file-catalog
+  - file-access
+  - file-packager
   - front
 
 role_regards_init_nfs_workspaces_microservice_having_plugin:

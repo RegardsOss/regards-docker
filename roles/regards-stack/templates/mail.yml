@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.9'
 services:
 
 {% if role_regards_stack_cots.maildev is defined %}
@@ -17,8 +17,21 @@ services:
     ports:
       - "{{ role_regards_stack_cots.maildev.http }}:1080"
 {% endif %}
-{% if role_regards_stack_cots.maildev.node_label_placement_constraint is defined %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 128M
+          pids: 100000
+        reservations:
+          cpus: '0.1'
+          memory: 32M
+{% if role_regards_stack_cots.maildev.node_label_placement_constraint is defined %}
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_cots.maildev.node_label_placement_constraint.key }} == {{ role_regards_stack_cots.maildev.node_label_placement_constraint.value }}

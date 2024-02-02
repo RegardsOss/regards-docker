@@ -81,3 +81,9 @@
   loop: "{{ role_regards_microservices_workspace_local_volume_data_inputs }}"
   loop_control:
     loop_var: data_input
+
+- name: Iterate over (generic) Volumes
+  ansible.builtin.include_tasks: createInputsFolders.yml
+  loop: "{{ role_regards_microservices_workspace_local_volume_generic_volumes }}"
+  loop_control:
+    loop_var: data_input

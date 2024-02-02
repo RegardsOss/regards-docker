@@ -1,0 +1,6 @@
+---
+- ansible.builtin.include_tasks: config.yml
+  when: role_regards_phppgadmin_config_is_defined|bool
+
+- ansible.builtin.include_tasks: ssl.yml
+  when: role_regards_phppgadmin_is_ssl_defined|bool

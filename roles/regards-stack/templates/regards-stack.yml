@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.9'
 
 {% if (role_regards_stack_mservices.front is defined and role_regards_stack_mservices.front.ssl is defined) %}
 secrets:
@@ -435,6 +435,21 @@ configs:
     name: delivery_logback_xml_${CHECKSUM_RS_DELIVERY_LOGBACK_XML}
     file: {{ role_regards_stack_logback }}delivery/logback.xml
 {% endif %}
+{% if role_regards_stack_mservices.file_catalog is defined %}
+  rs-file-catalog_logback.xml:
+    name: file_catalog_logback_xml_${CHECKSUM_RS_FILE_CATALOG_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}file-catalog/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.file_access is defined %}
+  rs-file-access_logback.xml:
+    name: file_access_logback_xml_${CHECKSUM_RS_FILE_ACCESS_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}file-access/logback.xml
+{% endif %}
+{% if role_regards_stack_mservices.file_packager is defined %}
+  rs-file-packager_logback.xml:
+    name: file_packager_logback_xml_${CHECKSUM_RS_FILE_PACKAGER_LOGBACK_XML}
+    file: {{ role_regards_stack_logback }}file-packager/logback.xml
+{% endif %}
 
 ############################################################
 ################## Microservices configs ###################
@@ -538,6 +553,21 @@ configs:
     name: rs_ms_worker_manager_properties_${CHECKSUM_RS_MS_WORKER_MANAGER_PROPERTIES}
     file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-worker-manager.properties
 {% endif %}
+{% if role_regards_stack_mservices.file_catalog is defined %}
+  rs_ms_file-catalog.properties:
+    name: rs_ms_file_catalog_properties_${CHECKSUM_RS_MS_FILE_CATALOG_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-file-catalog.properties
+{% endif %}
+{% if role_regards_stack_mservices.file_access is defined %}
+  rs_ms_file-access.properties:
+    name: rs_ms_file_access_properties_${CHECKSUM_RS_MS_FILE_ACCESS_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-file-access.properties
+{% endif %}
+{% if role_regards_stack_mservices.file_packager is defined %}
+  rs_ms_file-packager.properties:
+    name: rs_ms_file_packager_properties_${CHECKSUM_RS_MS_FILE_PACKAGER_PROPERTIES}
+    file: {{ role_regards_stack_config }}regards/config/regards-oss-backend/rs-file-packager.properties
+{% endif %}
 
 #############################################
 ################ WORKER #####################
@@ -578,6 +608,11 @@ configs:
   rs-front_regards.conf:
     name: front_regards.conf_${CHECKSUM_RS_FRONT_REGARDS_CONF}
     file: {{ role_regards_stack_config }}regards/nginx/regards.conf
+{% if role_regards_stack_front_has_rabbitmq_admin|bool %}
+  rs-front_rabbitmq.conf:
+    name: front_regards.conf_${CHECKSUM_RS_FRONT_RABBITMQ_CONF}
+    file: {{ role_regards_stack_config }}/regards/nginx/rabbitmq.conf
+{% endif %}
 {% if role_regards_stack_mservices.front.ssl is defined %}
   rs-front_badhost.conf:
     name: front_regards.conf_${CHECKSUM_RS_FRONT_BADHOST_CONF}
@@ -621,16 +656,18 @@ services:
       interval: 5s
       timeout: 10s
       retries: 10
-      start_period: 5m
+      start_period: 1m
 {% endif %}
 {% if role_regards_stack_mservices.config.node_label_placement_constraint is defined or role_regards_stack_enable_mservices_resource_limits %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.config.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.config.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.config | to_nice_yaml | indent(8) }}
 {% endif %}
 {% if role_regards_stack_mservices.config.node_label_placement_constraint is defined %}
       placement:
@@ -731,6 +768,18 @@ services:
       - source: rs_ms_worker-manager.properties
         target: /config/regards/regards-oss-backend/rs-worker-manager.properties
 {% endif %}
+{% if role_regards_stack_mservices.file_catalog is defined %}
+      - source: rs_ms_file-catalog.properties
+        target: /config/regards/regards-oss-backend/rs-file-catalog.properties
+{% endif %}
+{% if role_regards_stack_mservices.file_access is defined %}
+      - source: rs_ms_file-access.properties
+        target: /config/regards/regards-oss-backend/rs-file-access.properties
+{% endif %}
+{% if role_regards_stack_mservices.file_packager is defined %}
+      - source: rs_ms_file-packager.properties
+        target: /config/regards/regards-oss-backend/rs-file-packager.properties
+{% endif %}
 {% if role_regards_stack_workers|length %}
       - source: rs_workers_application.yml
         target: /config/regards/regards-workers/application.yml
@@ -778,16 +827,18 @@ services:
       interval: 5s
       timeout: 10s
       retries: 10
-      start_period: 5m
+      start_period: 2m
 {% endif %}
 {% if role_regards_stack_mservices.registry.node_label_placement_constraint is defined or role_regards_stack_enable_mservices_resource_limits %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.registry.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.registry.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.registry | to_nice_yaml | indent(8) }}
 {% endif %}
 {% if role_regards_stack_mservices.registry.node_label_placement_constraint is defined %}
       placement:
@@ -865,12 +916,14 @@ services:
       start_period: 15m
 {% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.gateway.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.gateway.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.gateway | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.gateway.replicas | default(1) }}
 {% if role_regards_stack_mservices.gateway.node_label_placement_constraint is defined %}
@@ -878,8 +931,9 @@ services:
         constraints:
           - node.labels.{{ role_regards_stack_mservices.gateway.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.gateway.node_label_placement_constraint.value }}
 {% endif %}
-{% if role_regards_stack_mservices.gateway.jdwp is defined %}
     environment:
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+{% if role_regards_stack_mservices.gateway.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
 {% if role_regards_stack_mservices.gateway.yourkit is defined %}
@@ -972,12 +1026,14 @@ services:
 {% endif %}
 {% if role_regards_stack_mservices.admin_instance.node_label_placement_constraint is defined or role_regards_stack_enable_mservices_resource_limits %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.admin_instance.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.admin_instance.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.admin_instance | to_nice_yaml | indent(8) }}
 {% endif %}
 {% if role_regards_stack_mservices.admin_instance.node_label_placement_constraint is defined %}
       placement:
@@ -988,7 +1044,7 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}      
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}  
 {% if role_regards_stack_mservices.admin_instance.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1062,12 +1118,14 @@ services:
       start_period: 5m
 {% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.admin.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.admin.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.admin | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.admin.replicas | default(1) }}
 {% if role_regards_stack_mservices.admin.node_label_placement_constraint is defined %}
@@ -1076,7 +1134,7 @@ services:
           - node.labels.{{ role_regards_stack_mservices.admin.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.admin.node_label_placement_constraint.value }}
 {% endif %}
     environment:
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.admin.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1152,12 +1210,14 @@ services:
       start_period: 15m
 {% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.authentication.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.authentication.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.authentication | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.authentication.replicas | default(1) }}
 {% if role_regards_stack_mservices.authentication.node_label_placement_constraint is defined %}
@@ -1166,7 +1226,7 @@ services:
           - node.labels.{{ role_regards_stack_mservices.authentication.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.authentication.node_label_placement_constraint.value }}
 {% endif %}
     environment:
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.authentication.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1259,15 +1319,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 5m
+      start_period: 8m
 {% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.dam.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.dam.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.dam | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.dam.replicas | default(1) }}
 {% if role_regards_stack_mservices.dam.node_label_placement_constraint is defined %}
@@ -1278,7 +1340,7 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment: 
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.dam.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1372,15 +1434,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 5m
+      start_period: 9m
 {% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.notifier.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.notifier.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.notifier | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.notifier.replicas | default(1) }}
 {% if role_regards_stack_mservices.notifier.node_label_placement_constraint is defined %}
@@ -1391,7 +1455,7 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.notifier.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1474,12 +1538,14 @@ services:
       start_period: 15m
 {% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.fem.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.fem.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.fem | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.fem.replicas | default(1) }}
 {% if role_regards_stack_mservices.fem.node_label_placement_constraint is defined %}
@@ -1490,7 +1556,7 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.fem.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1580,12 +1646,14 @@ services:
       start_period: 15m
 {% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.catalog.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.catalog.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.catalog | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.catalog.replicas | default(1) }}
 {% if role_regards_stack_mservices.catalog.node_label_placement_constraint is defined %}
@@ -1607,7 +1675,7 @@ services:
 {% endfor %}
 {% endif %}
     environment:
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.catalog.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1684,16 +1752,18 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 5m
+      start_period: 6m
 {% endif %}
 {% if role_regards_stack_mservices.access_instance.node_label_placement_constraint is defined or role_regards_stack_enable_mservices_resource_limits %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.access_instance.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.access_instance.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.access_instance | to_nice_yaml | indent(8) }}
 {% endif %}
 {% if role_regards_stack_mservices.access_instance.node_label_placement_constraint is defined %}
       placement:
@@ -1704,7 +1774,7 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.access_instance.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1775,15 +1845,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 5m
+      start_period: 6m
 {% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.access_project.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.access_project.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.access_project | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.access_project.replicas | default(1) }}
 {% if role_regards_stack_mservices.access_project.node_label_placement_constraint is defined %}
@@ -1792,7 +1864,7 @@ services:
           - node.labels.{{ role_regards_stack_mservices.access_project.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.access_project.node_label_placement_constraint.value }}
 {% endif %}
     environment:
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.access_project.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1861,19 +1933,21 @@ services:
     read_only: true
 {% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
-      test: ["CMD-SHELL", "curl -I localhost:8080"]
+      test: ["CMD-SHELL", "curl -I {{ group_docker_mservices.front.protocol }}://localhost:8080 {{ role_regards_stack_mservices.front.ssl is defined | ternary('-k', '') }} -H 'Host: {{ role_regards_stack_front_healthcheck_url }}'"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15m
 {% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.front.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.front.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.front | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.front.replicas | default(1) }}
 {% if role_regards_stack_mservices.front.node_label_placement_constraint is defined %}
@@ -1899,6 +1973,9 @@ services:
 {% if role_regards_stack_mservices.front.port is defined %}
     ports:
       - "{{ role_regards_stack_mservices.front.port }}:8080"
+{%   if role_regards_stack_front_has_rabbitmq_admin|bool %}
+      - "{{ role_regards_stack_mservices.front.rabbitmq_admin }}:15672"
+{%   endif %}
 {% endif %}
     volumes:
       - type: volume
@@ -1923,6 +2000,10 @@ services:
 {% if role_regards_stack_front_securised|bool %}
       - source: rs-front_regards.conf
         target: /etc/nginx/conf.d/regards.conf
+{% if role_regards_stack_front_has_rabbitmq_admin|bool %}
+      - source: rs-front_rabbitmq.conf
+        target: /etc/nginx/conf.d/rabbitmq.conf
+{% endif %}
 {% if role_regards_stack_mservices.front.ssl is defined %}
       - source: rs-front_badhost.conf
         target: /etc/nginx/conf.d/badhost.conf
@@ -1981,15 +2062,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 5m
+      start_period: 9m
 {% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.storage.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.storage.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.storage | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.storage.replicas | default(1) }}
 {% if role_regards_stack_mservices.storage.node_label_placement_constraint is defined %}
@@ -2000,7 +2083,7 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.storage.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -2102,15 +2185,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 5m
+      start_period: 9m
 {% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.order.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.order.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.order | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.order.replicas | default(1) }}
 {% if role_regards_stack_mservices.order.node_label_placement_constraint is defined %}
@@ -2121,7 +2206,7 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.order.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -2208,15 +2293,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 15m
+      start_period: 10m
 {% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.processing.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.processing.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.processing | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.processing.replicas | default(1) }}
 {% if role_regards_stack_mservices.processing.node_label_placement_constraint is defined %}
@@ -2227,7 +2314,7 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.processing.jdwp is defined %}
       - ACTIVE_DEBUG=true
       # as /tmp is mounted as noexec into docker containers we configure specific tmp directory for jna lib
@@ -2239,7 +2326,7 @@ services:
 {% if role_regards_stack_mservices.processing.http is defined or role_regards_stack_mservices.processing.jdwp is defined or role_regards_stack_mservices.processing.jmx is defined or role_regards_stack_mservices.processing.yourkit is defined %}
     ports:
 {% if role_regards_stack_mservices.processing.http is defined %}
-      - "{{ role_regards_stack_mservices.processing.http }}:9046"
+      - "{{ role_regards_stack_mservices.processing.http }}:9043"
 {% endif %}
 {% if role_regards_stack_mservices.processing.jdwp is defined %}
       - "{{ role_regards_stack_mservices.processing.jdwp }}:10500"
@@ -2319,12 +2406,14 @@ services:
       start_period: 15m
 {% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.ingest.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.ingest.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.ingest | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.ingest.replicas | default(1) }}
 {% if role_regards_stack_mservices.ingest.node_label_placement_constraint is defined %}
@@ -2335,7 +2424,7 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.ingest.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -2422,15 +2511,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 5m
+      start_period: 9m
 {% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.dataprovider.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.dataprovider.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.dataprovider | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.dataprovider.replicas | default(1) }}
 {% if role_regards_stack_mservices.dataprovider.node_label_placement_constraint is defined %}
@@ -2441,7 +2532,7 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.dataprovider.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -2528,15 +2619,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 5m
+      start_period: 7m
 {% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.worker_manager.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.worker_manager.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.worker_manager | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.worker_manager.replicas | default(1) }}
 {% if role_regards_stack_mservices.worker_manager.node_label_placement_constraint is defined %}
@@ -2547,7 +2640,7 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.worker_manager.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -2617,13 +2710,23 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-lta-manager
     read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9048/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 9m
+{% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.lta_manager.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.lta_manager.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.lta_manager | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.lta_manager.replicas | default(1) }}
 {% if role_regards_stack_mservices.lta_manager.node_label_placement_constraint is defined %}
@@ -2634,7 +2737,7 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.lta_manager.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -2699,13 +2802,23 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-delivery
     read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9049/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 9m
+{% endif %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.delivery.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.delivery.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.delivery | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ role_regards_stack_mservices.delivery.replicas | default(1) }}
 {% if role_regards_stack_mservices.delivery.node_label_placement_constraint is defined %}
@@ -2716,7 +2829,7 @@ services:
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
-      - AMQP_INSTANCE_ID=instance_{{ '{{.Task.Slot}}' }}
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
 {% if role_regards_stack_mservices.delivery.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -2726,13 +2839,13 @@ services:
 {% if role_regards_stack_mservices.delivery.http is defined or role_regards_stack_mservices.delivery.jdwp is defined or role_regards_stack_mservices.delivery.jmx is defined or role_regards_stack_mservices.delivery.yourkit is defined %}
     ports:
 {% if role_regards_stack_mservices.delivery.http is defined %}
-      - "{{ role_regards_stack_mservices.delivery.http }}:9048"
+      - "{{ role_regards_stack_mservices.delivery.http }}:9049"
 {% endif %}
 {% if role_regards_stack_mservices.delivery.jdwp is defined %}
       - "{{ role_regards_stack_mservices.delivery.jdwp }}:10500"
 {% endif %}
 {% if role_regards_stack_mservices.delivery.jmx is defined %}
-      - "{{ role_regards_stack_mservices.delivery.jmx }}:18048"
+      - "{{ role_regards_stack_mservices.delivery.jmx }}:18049"
 {% endif %}
 {% if role_regards_stack_mservices.delivery.yourkit is defined %}
       - "{{ role_regards_stack_mservices.delivery.yourkit }}:10001"
@@ -2744,6 +2857,9 @@ services:
         target: /logs
       - type: tmpfs
         target: /tmp
+      - type: volume
+        source: workspace-datavolume
+        target: /tmp/workspace
     configs:
       - source: rs-delivery_logback.xml
         target: /config/logback.xml
@@ -2757,10 +2873,292 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
+{% if role_regards_stack_ca_certificates|length > 0 %}
+{% for file in role_regards_stack_ca_certificates %}
+      - source: ca_cert_{{ file.split('.') | first }}
+        target: "/etc/ca-certificates/{{ file }}"
+{% endfor %}
+{% endif %}
 {% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.delivery.logging is defined %}
     logging:
 {% if role_regards_stack_mservices.delivery.logging is defined %}
       {{ role_regards_stack_mservices.delivery.logging | to_nice_yaml | indent(6) }}
+{% else %}
+      options:
+        max-size: "10m"
+        max-file: "10"
+{% endif %}
+{% endif %}
+{% endif %}
+
+{% if role_regards_stack_mservices.file_catalog is defined %}
+  rs-file-catalog:
+    image: {{ role_regards_stack_registry }}/rs-file-catalog:{{ role_regards_stack_mservices.file_catalog.tag }}
+{% if (role_regards_stack_mservices.file_catalog.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.file_catalog.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
+    user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
+    hostname: rs-file-catalog
+    read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9050/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 9m
+{% endif %}
+    deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        {{ role_regards_stack_resource_limits.file_catalog | to_nice_yaml | indent(8) }}
+{% endif %}
+      replicas: {{ role_regards_stack_mservices.file_catalog.replicas | default(1) }}
+{% if role_regards_stack_mservices.file_catalog.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.file_catalog.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.file_catalog.node_label_placement_constraint.value }}
+{% endif %}
+    networks:
+      - {{ role_regards_stack_docker_network_name }}
+    environment:
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+{% if role_regards_stack_mservices.file_catalog.jdwp is defined %}
+      - ACTIVE_DEBUG=true
+{% endif %}
+{% if role_regards_stack_mservices.file_catalog.yourkit is defined %}
+      - ACTIVE_YOURKIT=true
+{% endif %}
+{% if role_regards_stack_mservices.file_catalog.http is defined or role_regards_stack_mservices.file_catalog.jdwp is defined or role_regards_stack_mservices.file_catalog.jmx is defined or role_regards_stack_mservices.file_catalog.yourkit is defined %}
+    ports:
+{% if role_regards_stack_mservices.file_catalog.http is defined %}
+      - "{{ role_regards_stack_mservices.file_catalog.http }}:9050"
+{% endif %}
+{% if role_regards_stack_mservices.file_catalog.jdwp is defined %}
+      - "{{ role_regards_stack_mservices.file_catalog.jdwp }}:10500"
+{% endif %}
+{% if role_regards_stack_mservices.file_catalog.jmx is defined %}
+      - "{{ role_regards_stack_mservices.file_catalog.jmx }}:18050"
+{% endif %}
+{% if role_regards_stack_mservices.file_catalog.yourkit is defined %}
+      - "{{ role_regards_stack_mservices.file_catalog.yourkit }}:10001"
+{% endif %}
+{% endif %}
+    volumes:
+      - type: volume
+        source: logs-file-catalog-datavolume
+        target: /logs
+      - type: tmpfs
+        target: /tmp
+    configs:
+      - source: rs-file-catalog_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_file-catalog.properties
+        target: /tmp/rs-file-catalog.properties
+{% if role_regards_stack_mservices.file_catalog.configs is defined %}
+{% for config in role_regards_stack_mservices.file_catalog.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.file_catalog.logging is defined %}
+    logging:
+{% if role_regards_stack_mservices.file_catalog.logging is defined %}
+      {{ role_regards_stack_mservices.file_catalog.logging | to_nice_yaml | indent(6) }}
+{% else %}
+      options:
+        max-size: "10m"
+        max-file: "10"
+{% endif %}
+{% endif %}
+{% endif %}
+
+{% if role_regards_stack_mservices.file_access is defined %}
+  rs-file-access:
+    image: {{ role_regards_stack_registry }}/rs-file-access:{{ role_regards_stack_mservices.file_access.tag }}
+{% if (role_regards_stack_mservices.file_access.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.file_access.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
+    user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
+    hostname: rs-file-access
+    read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9051/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 9m
+{% endif %}
+    deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        {{ role_regards_stack_resource_limits.file_access | to_nice_yaml | indent(8) }}
+{% endif %}
+      replicas: {{ role_regards_stack_mservices.file_access.replicas | default(1) }}
+{% if role_regards_stack_mservices.file_access.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.file_access.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.file_access.node_label_placement_constraint.value }}
+{% endif %}
+    networks:
+      - {{ role_regards_stack_docker_network_name }}
+    environment:
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+{% if role_regards_stack_mservices.file_access.jdwp is defined %}
+      - ACTIVE_DEBUG=true
+{% endif %}
+{% if role_regards_stack_mservices.file_access.yourkit is defined %}
+      - ACTIVE_YOURKIT=true
+{% endif %}
+{% if role_regards_stack_mservices.file_access.http is defined or role_regards_stack_mservices.file_access.jdwp is defined or role_regards_stack_mservices.file_access.jmx is defined or role_regards_stack_mservices.file_access.yourkit is defined %}
+    ports:
+{% if role_regards_stack_mservices.file_access.http is defined %}
+      - "{{ role_regards_stack_mservices.file_access.http }}:9051"
+{% endif %}
+{% if role_regards_stack_mservices.file_access.jdwp is defined %}
+      - "{{ role_regards_stack_mservices.file_access.jdwp }}:10510"
+{% endif %}
+{% if role_regards_stack_mservices.file_access.jmx is defined %}
+      - "{{ role_regards_stack_mservices.file_access.jmx }}:18051"
+{% endif %}
+{% if role_regards_stack_mservices.file_access.yourkit is defined %}
+      - "{{ role_regards_stack_mservices.file_access.yourkit }}:10001"
+{% endif %}
+{% endif %}
+    volumes:
+      - type: volume
+        source: logs-file-access-datavolume
+        target: /logs
+      - type: tmpfs
+        target: /tmp
+    configs:
+      - source: rs-file-access_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_file-access.properties
+        target: /tmp/rs-file-access.properties
+{% if role_regards_stack_mservices.file_access.configs is defined %}
+{% for config in role_regards_stack_mservices.file_access.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.file_access.logging is defined %}
+    logging:
+{% if role_regards_stack_mservices.file_access.logging is defined %}
+      {{ role_regards_stack_mservices.file_access.logging | to_nice_yaml | indent(6) }}
+{% else %}
+      options:
+        max-size: "10m"
+        max-file: "10"
+{% endif %}
+{% endif %}
+{% endif %}
+
+{% if role_regards_stack_mservices.file_packager is defined %}
+  rs-file-packager:
+    image: {{ role_regards_stack_registry }}/rs-file-packager:{{ role_regards_stack_mservices.file_packager.tag }}
+{% if (role_regards_stack_mservices.file_packager.configuration | default({})).labels is defined %}
+    labels:
+{% for key, value in role_regards_stack_mservices.file_packager.configuration.labels.items() %}
+      {{ key }}: "{{value}}"
+{% endfor %}
+{% endif %}
+    user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
+    hostname: rs-file-packager
+    read_only: true
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9052/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 9m
+{% endif %}
+    deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
+{% if role_regards_stack_enable_mservices_resource_limits %}
+      resources:
+        {{ role_regards_stack_resource_limits.file_packager | to_nice_yaml | indent(8) }}
+{% endif %}
+      replicas: {{ role_regards_stack_mservices.file_packager.replicas | default(1) }}
+{% if role_regards_stack_mservices.file_packager.node_label_placement_constraint is defined %}
+      placement:
+        constraints:
+          - node.labels.{{ role_regards_stack_mservices.file_packager.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.file_packager.node_label_placement_constraint.value }}
+{% endif %}
+    networks:
+      - {{ role_regards_stack_docker_network_name }}
+    environment:
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+{% if role_regards_stack_mservices.file_packager.jdwp is defined %}
+      - ACTIVE_DEBUG=true
+{% endif %}
+{% if role_regards_stack_mservices.file_packager.yourkit is defined %}
+      - ACTIVE_YOURKIT=true
+{% endif %}
+{% if role_regards_stack_mservices.file_packager.http is defined or role_regards_stack_mservices.file_packager.jdwp is defined or role_regards_stack_mservices.file_packager.jmx is defined or role_regards_stack_mservices.file_packager.yourkit is defined %}
+    ports:
+{% if role_regards_stack_mservices.file_packager.http is defined %}
+      - "{{ role_regards_stack_mservices.file_packager.http }}:9052"
+{% endif %}
+{% if role_regards_stack_mservices.file_packager.jdwp is defined %}
+      - "{{ role_regards_stack_mservices.file_packager.jdwp }}:10510"
+{% endif %}
+{% if role_regards_stack_mservices.file_packager.jmx is defined %}
+      - "{{ role_regards_stack_mservices.file_packager.jmx }}:18052"
+{% endif %}
+{% if role_regards_stack_mservices.file_packager.yourkit is defined %}
+      - "{{ role_regards_stack_mservices.file_packager.yourkit }}:10001"
+{% endif %}
+{% endif %}
+    volumes:
+      - type: volume
+        source: logs-file-packager-datavolume
+        target: /logs
+      - type: tmpfs
+        target: /tmp
+    configs:
+      - source: rs-file-packager_logback.xml
+        target: /config/logback.xml
+      - source: rs_ms_application.properties
+        target: /tmp/application.properties
+      - source: rs_ms_file-packager.properties
+        target: /tmp/rs-file-packager.properties
+{% if role_regards_stack_mservices.file_packager.configs is defined %}
+{% for config in role_regards_stack_mservices.file_packager.configs %}
+      - source: conf_{{ config.source }}
+        target: {{ config.destination }}
+{% endfor %}
+{% endif %}
+{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.file_packager.logging is defined %}
+    logging:
+{% if role_regards_stack_mservices.file_packager.logging is defined %}
+      {{ role_regards_stack_mservices.file_packager.logging | to_nice_yaml | indent(6) }}
 {% else %}
       options:
         max-size: "10m"

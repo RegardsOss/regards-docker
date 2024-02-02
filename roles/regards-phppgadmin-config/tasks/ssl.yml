@@ -1,0 +1,23 @@
+---
+- name: Create SSL folder
+  ansible.builtin.file:
+    path: "{{ role_regards_phppgadmin_config_ssl_destination }}"
+    state: directory
+    mode: '2770'
+    owner: "{{ role_regards_phppgadmin_config_container_root_user }}"
+    group: "{{ role_regards_phppgadmin_config_container_root_group }}"
+    setype: "{{ role_regards_phppgadmin_config_setype }}"
+    seuser: "{{ role_regards_phppgadmin_config_seuser }}"
+
+- name: Copy certificates
+  ansible.builtin.copy:
+    src: "{{ role_regards_phppgadmin_config_ssl_location_inside_playbook }}/{{ item }}"
+    dest: "{{ role_regards_phppgadmin_config_ssl_destination }}/{{ item }}"
+    mode: '0440'
+    owner: "{{ role_regards_phppgadmin_config_container_root_user }}"
+    group: "{{ role_regards_phppgadmin_config_container_root_group }}"
+    setype: "{{ role_regards_phppgadmin_config_setype }}"
+    seuser: "{{ role_regards_phppgadmin_config_seuser }}"
+  loop:
+    - "{{ role_regards_phppgadmin_config_ssl_files.crt }}"
+    - "{{ role_regards_phppgadmin_config_ssl_files.key }}"

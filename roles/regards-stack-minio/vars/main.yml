@@ -1,0 +1,221 @@
+# Stack infos
+role_regards_stack_minio_stack_name: "{{ group_stack_name }}"
+role_regards_stack_cots: "{{ group_docker_cots }}"
+role_regards_stack_registry: "{{ group_docker_registry }}"
+role_regards_stack_minio_docker_network_name: "{{ group_docker_network_name }}"
+role_regards_stack_minio_stack: "{{ group_workdir_local }}{{ group_stack_name }}/stack/"
+role_regards_stack_minio_conf: "{{ group_docker_cots.get('minio', {}) }}"
+
+# Files owners
+role_regards_stack_minio_container_root_user: "{{ group_container_root_user }}"
+role_regards_stack_minio_container_root_group: "{{ group_container_root_group }}"
+
+# Top level volumes / configs / secrets and REGARDS related volumes
+role_regards_stack_minio_top_level_nfs_servers: "{{ (group_docker_mounts | default({})).get('nfs', []) }}"
+
+# Healthcheck
+role_regards_stack_minio_enable_cots_healthcheck: "{{ (group_docker_cots_configuration | default({})).get('enable_healthcheck', false) | bool }}"
+
+# Folder structure
+role_regards_stack_minio_config_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/minio/"
+role_regards_stack_minio_workspace_local: "{{ group_workdir_local }}{{ group_stack_name }}/workspace/"
+
+# Docker users
+role_regards_stack_minio_container_run_uid: "{{ group_container_run_uid }}"
+role_regards_stack_minio_container_run_gid: "{{ group_container_run_gid }}"
+
+
+# Volumes
+role_regards_stack_volume_minio_data_list: "{{ (group_docker_mounts | default({})).get('minio', []) }}"
+role_regards_stack_volume_minio_first_data: "{{ role_regards_stack_volume_minio_data_list[0] | default({}) }}"
+role_regards_stack_volume_minio_second_data: "{{ role_regards_stack_volume_minio_data_list[1] | default({}) }}"
+role_regards_minio_config_drives_second_active: "{{ (role_regards_stack_volume_minio_data_list|length > 1) }}"
+
+# SSL configuration
+role_regards_minio_config_ssl_active: "{{ role_regards_stack_minio_conf.ssl is defined }}"
+role_regards_minio_config_internal_ssl_active: "{{ role_regards_stack_minio_conf.ssl_internal is defined }}"
+role_regards_minio_config_ssl_internal_certificates_conf: "{{ role_regards_stack_minio_conf.get('ssl_internal', {}) }}"
+role_regards_minio_config_ssl_certificates_conf: "{{role_regards_stack_minio_conf.get('ssl', {}) }}"
+role_regards_minio_ssl_internal_infos:
+  crt: "{{ role_regards_minio_config_ssl_internal_certificates_conf.get('crt', '') }}"
+  private_key: "{{ role_regards_minio_config_ssl_internal_certificates_conf.get('key', '') }}"
+  ca_trust: "{{ role_regards_minio_config_ssl_internal_certificates_conf.get('ca', '') }}"
+
+role_regards_minio_ssl_infos:
+  domain: "{{ role_regards_minio_config_ssl_certificates_conf.get('domain', '') }}"
+  crt: "{{ role_regards_minio_config_ssl_certificates_conf.get('crt', '') }}"
+  private_key: "{{ role_regards_minio_config_ssl_certificates_conf.get('key', '') }}"
+  ca_trust: "{{ role_regards_minio_config_ssl_certificates_conf.get('ca', '') }}"
+
+# Minio
+minio_default:
+  region: fr-regards-1
+  root_user: regards
+  root_password: regardspwd
+
+role_regards_stack_minio_active: "{{ group_docker_cots.minio is defined }}"
+role_regards_stack_minio_region: "{{ role_regards_stack_minio_conf.get('region', minio_default.region) }}"
+role_regards_stack_minio_root_user: "{{ role_regards_stack_minio_conf.get('root_user', minio_default.root_user) }}"
+role_regards_stack_minio_root_password: "{{ role_regards_stack_minio_conf.get('root_password', minio_default.root_password) }}"
+role_regards_stack_minio_server_protocol: "http{{ 's' if role_regards_minio_config_ssl_active else '' }}"
+role_regards_stack_minio_cluster:
+  active: "{{ role_regards_stack_minio_conf.global_service is defined }}"
+  url: "{{ role_regards_stack_minio_server_protocol }}://rs-minio-{{ role_regards_stack_minio_conf.get('cluster_url') }}"
+role_regards_stack_minio_cluster_env: "{{ role_regards_stack_minio_cluster.active|bool | ternary(role_regards_stack_minio_cluster.url, '') }}"
+role_regards_stack_minio_server_url_env: "{{ role_regards_stack_minio_conf.get('host', 'http://rs-minio:9000') }}"
+# If the host attribute contains :443, replaces it by :9000. It should be done by any public port as we need
+# here the port inside the container (9000) and not the exposed port
+role_regards_stack_minio_server_url_healthcheck: "{{ role_regards_stack_minio_conf.get('host', role_regards_stack_minio_server_protocol + '://localhost:9000') | replace(':443',':9000') }}"
+# curl resolve option when healthcheck requires to use public domain of the MinIO server
+role_regards_stack_minio_server_url_healthcheck_resolve: "--resolve {{ role_regards_stack_minio_conf.get('host', '') | replace('https://','') | replace('http://','') | replace(':443',':9000') }}:127.0.0.1"
+
+# MinIO log
+role_regards_stack_minio_mc_log_conf: "{{ group_docker_cots.get('minio_mc_log', {}) }}"
+role_regards_stack_minio_mc_log_ca_active: "{{ role_regards_stack_minio_mc_log_conf.ca is defined }}"
+role_regards_stack_minio_mc_log_ca: "{{ role_regards_stack_minio_mc_log_conf.get('ca') }}"
+
+# Service common template
+role_regards_stack_minio_services_common:
+  registry: "{{ role_regards_stack_registry }}"
+  network: "{{ role_regards_stack_minio_docker_network_name }}"
+  user:
+    id: "{{ role_regards_stack_minio_container_run_uid }}"
+    gid: "{{ role_regards_stack_minio_container_run_gid }}"
+  heathcheck_active: "{{ role_regards_stack_minio_enable_cots_healthcheck }}"
+  top_level_nfs_servers: "{{ role_regards_stack_minio_top_level_nfs_servers }}"
+  workspace_local: "{{ role_regards_stack_minio_workspace_local }}"
+  enable_resource_limits: "{{ (group_docker_cots_configuration | default({})).get('enable_resource_limits', false) | bool }}"
+  resource_limits:
+    delay: "{{ (group_docker_restart_policy | default({})).get('delay', '10s') }}"
+    max_attempts: "{{ (group_docker_restart_policy | default({})).get('max_attempts', '0') }}"
+    window: "{{ (group_docker_restart_policy | default({})).get('window', '0s') }}"
+
+# Service minio template
+role_regards_stack_minio_services:
+  minio:
+    active: "{{ group_docker_cots.minio is defined }}"
+    imageName: regards-minio
+    imageTag: "{{ role_regards_stack_minio_conf.tag | default('latest') }}"
+    hostname: "rs-minio-{{ '{{.Node.Hostname}}' }}"
+    service: rs-minio
+    deployGlobal: "{{ role_regards_stack_minio_cluster.active }}"
+    node_label_placement_constraint: "{{ role_regards_stack_minio_conf.get('node_label_placement_constraint', {}) }}"
+    ports:
+      - active: "{{ role_regards_stack_minio_conf.client is defined }}"
+        host: "{{ role_regards_stack_minio_conf.get('client') }}"
+        container: 9000
+      - active: "{{ role_regards_stack_minio_conf.admin is defined }}"
+        host: "{{ role_regards_stack_minio_conf.get('admin') }}"
+        container: 9001
+    envs:
+      MINIO_PROMETHEUS_AUTH_TYPE: public
+      MINIO_REGION: "{{ role_regards_stack_minio_region }}"
+      MINIO_ROOT_USER: "{{ role_regards_stack_minio_root_user }}"
+      MINIO_ROOT_PASSWORD: "{{ role_regards_stack_minio_root_password }}"
+      MINIO_CLUSTER_URL: "{{ role_regards_stack_minio_cluster_env }}"
+      MINIO_SERVER_URL: "{{ role_regards_stack_minio_server_url_env }}"
+    configs:
+      - src_directory_location: "{{ role_regards_stack_minio_config_local }}certs/"
+        src_filename: "{{ role_regards_minio_ssl_internal_infos.crt }}"
+        destination: /certs/public.crt
+        env_containing_checksum: CHECKSUM_RS_MINIO_SSL_INT_PUBLIC_CERT
+        swarm_config_name_prefix: minio_nodes_public_cert
+        active: "{{ role_regards_minio_config_internal_ssl_active|bool }}"
+        # trust certificate for all minio nodes. Allows each node to communicate with others via TLS.
+      - src_directory_location: "{{ role_regards_stack_minio_config_local }}certs/CAs/"
+        src_filename: "{{ role_regards_minio_ssl_internal_infos.ca_trust }}"
+        destination: /certs/CAs/public.crt
+        env_containing_checksum: CHECKSUM_RS_MINIO_SSL_INT_CA_TRUST
+        swarm_config_name_prefix: minio_nodes_ca
+        active: "{{ role_regards_minio_ssl_internal_infos.ca_trust | length > 0 }}"
+      - src_directory_location: "{{ role_regards_stack_minio_config_local }}certs/{{ role_regards_minio_ssl_infos.domain }}/"
+        src_filename: "{{ role_regards_minio_ssl_infos.crt }}"
+        destination: "/certs/{{ role_regards_minio_ssl_infos.domain }}/public.crt"
+        env_containing_checksum: CHECKSUM_RS_MINIO_SSL_PUBLIC_CERT
+        swarm_config_name_prefix: minio_public_cert
+        active: "{{ role_regards_minio_config_ssl_active|bool }}"
+        # this trust certificate allows Console to communicate with S3-API
+      - src_directory_location: "{{ role_regards_stack_minio_config_local }}certs/CAs/"
+        src_filename: "{{ role_regards_minio_ssl_infos.ca_trust }}"
+        destination: "/certs/CAs/{{ role_regards_minio_ssl_infos.ca_trust }}"
+        env_containing_checksum: CHECKSUM_RS_MINIO_SSL_EXT_CA_TRUST
+        swarm_config_name_prefix: minio_nodes_ext_ca
+        active: "{{ role_regards_minio_ssl_infos.ca_trust | length > 0 }}"
+    secrets:
+      - src_directory_location: "{{ role_regards_stack_minio_config_local }}certs/"
+        src_filename: "{{ role_regards_minio_ssl_internal_infos.private_key }}"
+        destination: /certs/private.key
+        env_containing_checksum: CHECKSUM_RS_MINIO_SSL_INT_PRIVATE_KEY
+        swarm_secret_name_prefix: minio_nodes_private_key
+        active: "{{ role_regards_minio_config_internal_ssl_active|bool }}"
+      - src_directory_location: "{{ role_regards_stack_minio_config_local }}certs/{{ role_regards_minio_ssl_infos.domain }}/"
+        src_filename: "{{ role_regards_minio_ssl_infos.private_key }}"
+        destination: "/certs/{{ role_regards_minio_ssl_infos.domain }}/private.key"
+        env_containing_checksum: CHECKSUM_RS_MINIO_SSL_PRIVATE_KEY
+        swarm_secret_name_prefix: minio_private_key
+        active: "{{ role_regards_minio_config_ssl_active|bool }}"
+    volumes:
+      - swarm_volume_name_prefix: minio-datavolume-01
+        src_default_directory_location: minio
+        config: "{{ role_regards_stack_volume_minio_first_data }}"
+        destination: /data-01/
+      - swarm_volume_name_prefix: minio-datavolume-02
+        config: "{{ role_regards_stack_volume_minio_second_data }}"
+        destination: /data-02/
+        active: "{{ role_regards_minio_config_drives_second_active|bool }}"
+    healthcheck:
+      test: ['CMD-SHELL', "curl -I {{ role_regards_minio_config_ssl_active|bool | ternary('-k', '') }} {{ role_regards_stack_minio_server_url_healthcheck }}/minio/health/live {{ role_regards_minio_config_ssl_active|bool | ternary(role_regards_stack_minio_server_url_healthcheck_resolve, '') }}"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      start_period: 1m
+    resources:
+      limits:
+        cpus: "{{ role_regards_stack_minio_conf.get('cpuLimit', '4') }}"
+        memory: "{{ role_regards_stack_minio_conf.get('memoryLimit', '4000m') }}"
+        pids: 100000
+      reservations:
+        cpus: "{{ role_regards_stack_minio_conf.get('cpuReserved', '0.5') }}"
+        memory: "{{ role_regards_stack_minio_conf.get('memoryReserved', '512mb') }}"
+    logging: "{{ role_regards_stack_minio_conf.get('logging') }}"
+  minio-mc-log:
+    active: "{{ group_docker_cots.minio_mc_log is defined }}"
+    imageName: regards-minio-mc-log
+    hostname: rs-minio-mc-log
+    imageTag: "{{ role_regards_stack_minio_mc_log_conf.tag | default('latest') }}"
+    node_label_placement_constraint: "{{ role_regards_stack_minio_mc_log_conf.get('node_label_placement_constraint', {}) }}"
+    envs:
+      # Allowed values: s3, all, batch-keyrotation, batch-replication, 
+      #                 bootstrap, decommission, ftp, healing, ilm, internal,
+      #                 os, rebalance, replication-resync, scanner
+      #                 default to s3
+      #                 Example: s3,os to display S3 HTTP calls and OS trace
+      MC_LOGGING_TYPE: "{{ role_regards_stack_minio_mc_log_conf.types | default('s3') }}"
+      MINIO_ROOT_USER: "{{ role_regards_stack_minio_root_user }}"
+      MINIO_ROOT_PASSWORD: "{{ role_regards_stack_minio_root_password }}"
+      MINIO_SERVER_URL: "{{ role_regards_stack_minio_server_url_env }}"
+    tmpfs_volumes:
+      - /.mc
+    configs:
+      - src_directory_location: "{{ role_regards_stack_minio_config_local }}/mc/CAs/"
+        src_filename: "{{ role_regards_stack_minio_mc_log_ca }}"
+        destination: /.mc/certs/CAs/public.crt
+        env_containing_checksum: CHECKSUM_RS_MINIO_MC_LOG_CA
+        swarm_config_name_prefix: minio_mc_log_ca
+        active: "{{ role_regards_stack_minio_mc_log_ca_active|bool }}"
+    resources:
+      limits:
+        cpus: "{{ role_regards_stack_minio_mc_log_conf.get('cpuLimit', '0.1') }}"
+        memory: "{{ role_regards_stack_minio_mc_log_conf.get('memoryLimit', '32m') }}"
+        pids: 100000
+      reservations:
+        cpus: "{{ role_regards_stack_minio_mc_log_conf.get('cpuLimit', '0.01') }}"
+        memory: "{{ role_regards_stack_minio_mc_log_conf.get('memoryLimit', '6m') }}"
+    logging: "{{ role_regards_stack_minio_mc_log_conf.get('logging') }}"
+    healthcheck:
+      # connection to minio creates the following file
+      test: ['CMD-SHELL', "ls /.mc/config.json.old"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 1m

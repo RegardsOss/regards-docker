@@ -2,14 +2,10 @@
 {% if docker_bip is defined %}
     "bip": "{{ docker_bip }}",
 {% endif %}
-{% if docker_dns is defined %}
     "dns": [
-{%   for host in docker_dns %}
-      "{{ host }}"{% if not loop.last %},{% endif %}
-
-{%   endfor %}
+      "{{ docker_dns }}"
     ],
-{% endif %}
+    "dns-search": ["."],
 {% if docker_active_selinux|bool %}
     "selinux-enabled": true,
 {% endif %}

@@ -15,6 +15,7 @@ role_regards_microservices_workspace_local_image_version: "{{ (group_docker_cots
 role_regards_microservices_workspace_local_run_uid: "{{ group_container_run_uid }}"
 role_regards_microservices_workspace_local_run_gid: "{{ group_container_run_gid }}"
 
+role_regards_microservices_workspace_local_volume_generic_volumes: "{{  (group_docker_mounts | default({})).get('volumes', []) }}"
 role_regards_microservices_workspace_local_top_level_regards: "{{  (group_docker_mounts | default({})).get('regards', {}) }}"
 
 role_regards_microservices_workspace_local_volume_data_inputs: "{{  role_regards_microservices_workspace_local_top_level_regards.get('data_inputs', []) }}"

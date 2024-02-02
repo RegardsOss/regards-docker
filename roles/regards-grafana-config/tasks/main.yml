@@ -1,0 +1,6 @@
+---
+- ansible.builtin.include_tasks: config.yml
+  when: role_regards_grafana_config_is_defined|bool
+
+- ansible.builtin.include_tasks: ssl.yml
+  when: role_regards_grafana_config_ssl_is_active|bool

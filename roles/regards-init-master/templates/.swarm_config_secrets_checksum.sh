@@ -34,6 +34,9 @@ create_env CHECKSUM_RS_FRONT_SSL_CRT {{ role_regards_init_master_config }}regard
 create_env CHECKSUM_RS_FRONT_SSL_KEY {{ role_regards_init_master_config }}regards/nginx/ssl/{{ role_regards_init_master_mservices.front.ssl.crt }}
 {% if role_regards_init_master_mservices.front.securised is defined %}
 create_env CHECKSUM_RS_FRONT_BADHOST_CONF {{ role_regards_init_master_config }}regards/nginx/badhost.conf
+{%   if role_regards_init_master_mservices.front.rabbitmq_admin is defined %}
+create_env CHECKSUM_RS_FRONT_RABBITMQ_CONF {{ role_regards_init_master_config }}regards/nginx/rabbitmq.conf
+{%   endif %}
 {% endif %}
 {% endif %}
 {% endif %}
@@ -144,6 +147,21 @@ create_env CHECKSUM_RS_WORKER_MANAGER_LOGBACK_XML {{ role_regards_init_master_co
 create_env CHECKSUM_RS_MS_WORKER_MANAGER_PROPERTIES {{ role_regards_init_master_config }}regards/config/regards-oss-backend/rs-worker-manager.properties
 {% endif %}
 
+{% if role_regards_init_master_mservices.file_catalog is defined %}
+create_env CHECKSUM_RS_FILE_CATALOG_LOGBACK_XML {{ role_regards_init_master_config }}regards/logback/file-catalog/logback.xml
+create_env CHECKSUM_RS_MS_FILE_CATALOG_PROPERTIES {{ role_regards_init_master_config }}regards/config/regards-oss-backend/rs-file-catalog.properties
+{% endif %}
+
+{% if role_regards_init_master_mservices.file_access is defined %}
+create_env CHECKSUM_RS_FILE_ACCESS_LOGBACK_XML {{ role_regards_init_master_config }}regards/logback/file-access/logback.xml
+create_env CHECKSUM_RS_MS_FILE_ACCESS_PROPERTIES {{ role_regards_init_master_config }}regards/config/regards-oss-backend/rs-file-access.properties
+{% endif %}
+
+{% if role_regards_init_master_mservices.file_packager is defined %}
+create_env CHECKSUM_RS_FILE_PACKAGER_LOGBACK_XML {{ role_regards_init_master_config }}regards/logback/file-packager/logback.xml
+create_env CHECKSUM_RS_MS_FILE_PACKAGER_PROPERTIES {{ role_regards_init_master_config }}regards/config/regards-oss-backend/rs-file-packager.properties
+{% endif %}
+
 # End FRONTEND & MICROSERVICES
 {% endif %}
 
@@ -177,6 +195,19 @@ create_env CHECKSUM_RS_POSTGRES_INIT_SQL {{ role_regards_init_master_config }}po
 create_env CHECKSUM_RS_POSTGRES_POSTGRESQL_CONF {{ role_regards_init_master_config }}postgres/postgresql.conf
 {% endif %}
 
+################# PhpPGAdmin ####################
+{% if role_regards_init_master_cots.phppgadmin is defined %}
+{%   if role_regards_init_master_cots.phppgadmin.ssl is defined %}
+create_env CHECKSUM_RS_PHPPGADMIN_SSL_KEY {{ role_regards_init_master_config }}phppgadmin/ssl/{{ role_regards_init_master_cots.phppgadmin.ssl.key }}
+create_env CHECKSUM_RS_PHPPGADMIN_SSL_CRT {{ role_regards_init_master_config }}phppgadmin/ssl/{{ role_regards_init_master_cots.phppgadmin.ssl.crt }}
+{%   endif %}
+create_env CHECKSUM_RS_PHPPGADMIN_DEFAULT_CONF {{ role_regards_init_master_config }}phppgadmin/default.conf
+{%   if role_regards_init_master_cots.phppgadmin.host is defined %}
+create_env CHECKSUM_RS_PHPPGADMIN_BADHOST_CONF {{ role_regards_init_master_config }}phppgadmin/badhost.conf
+{%   endif %}
+{% endif %}
+
+
 ################# RabbitMQ ####################
 {% if role_regards_init_master_cots.rabbitmq is defined %}
 create_env CHECKSUM_RS_RABBITMQ_RABBITMQ_CONF {{ role_regards_init_master_config }}rabbitmq/rabbitmq.conf
@@ -190,7 +221,7 @@ create_env CHECKSUM_RS_RABBITMQ_ERLANG_COOKIE {{ role_regards_init_master_config
 {% if role_regards_init_master_rabbitmq_ssl_active|bool %}
 # RabbitMQ SSL
 create_env CHECKSUM_RS_RABBITMQ_SSL_CA {{ role_regards_init_master_rabbitmq_folder_certificates }}{{ role_regards_init_master_rabbitmq_ssl_certificates_conf.ca }}
-create_env CHECKSUM_RS_RABBITMQ_SSL_CERT {{ role_regards_init_master_rabbitmq_folder_certificates }}{{ role_regards_init_master_rabbitmq_ssl_certificates_conf.cert }}
+create_env CHECKSUM_RS_RABBITMQ_SSL_CRT {{ role_regards_init_master_rabbitmq_folder_certificates }}{{ role_regards_init_master_rabbitmq_ssl_certificates_conf.crt }}
 create_env CHECKSUM_RS_RABBITMQ_SSL_KEY {{ role_regards_init_master_rabbitmq_folder_certificates }}{{ role_regards_init_master_rabbitmq_ssl_certificates_conf.key }}
 {% endif %}
 
@@ -198,6 +229,24 @@ create_env CHECKSUM_RS_RABBITMQ_SSL_KEY {{ role_regards_init_master_rabbitmq_fol
 {% if role_regards_init_master_cots.elasticsearch is defined %}
 create_env CHECKSUM_RS_ELASTICSEARCH_ELASTICSEARCH_YML {{ role_regards_init_master_config }}elasticsearch/elasticsearch.yml
 {% endif %}
+
+################# MinIO ####################
+{% if role_regards_init_master_minio_internal_ssl_active|bool %}
+create_env CHECKSUM_RS_MINIO_SSL_INT_PUBLIC_CERT {{ role_regards_init_master_config }}minio/certs/{{ role_regards_init_master_minio_ssl_internal_certificates_conf.crt }}
+create_env CHECKSUM_RS_MINIO_SSL_INT_PRIVATE_KEY {{ role_regards_init_master_config }}minio/certs/{{ role_regards_init_master_minio_ssl_internal_certificates_conf.key }}
+create_env CHECKSUM_RS_MINIO_SSL_INT_CA_TRUST {{ role_regards_init_master_config }}minio/certs/CAs/{{ role_regards_init_master_minio_ssl_internal_certificates_conf.ca }}
+{% endif %}
+{% if role_regards_init_master_minio_ssl_active|bool %}
+create_env CHECKSUM_RS_MINIO_SSL_PUBLIC_CERT {{ role_regards_init_master_config }}minio/certs/{{ role_regards_init_master_minio_ssl_certificates_conf.domain }}/{{ role_regards_init_master_minio_ssl_certificates_conf.crt }}
+create_env CHECKSUM_RS_MINIO_SSL_PRIVATE_KEY {{ role_regards_init_master_config }}minio/certs/{{ role_regards_init_master_minio_ssl_certificates_conf.domain }}/{{ role_regards_init_master_minio_ssl_certificates_conf.key }}
+{%   if role_regards_init_master_minio_ssl_ca_active|bool %}
+create_env CHECKSUM_RS_MINIO_SSL_EXT_CA_TRUST {{ role_regards_init_master_config }}minio/certs/CAs/{{ role_regards_init_master_minio_ssl_certificates_conf.ca }}
+{%   endif %}
+{% endif %}
+{% if role_regards_init_master_minio_mc_log_ca_active|bool %}
+create_env CHECKSUM_RS_MINIO_MC_LOG_CA {{ role_regards_init_master_config }}minio/mc/CAs/{{ role_regards_init_master_minio_mc_log_ca }}
+{% endif %}
+
 
 ################# HAProxy ####################
 {% if role_regards_init_master_cots.haproxy is defined %}
@@ -208,8 +257,52 @@ create_env CHECKSUM_RS_HAPROXY_CONFIG_YML {{ role_regards_init_master_config }}h
 create_env CHECKSUM_RS_ELASTICSEARCH_LOGS_ELASTICSEARCH_LOGS_YML {{ role_regards_init_master_config }}elasticsearch/elasticsearch-logs.yml
 {% endif %}
 
+################# FluentD ####################
+
 {% if role_regards_init_master_cots.fluent is defined %}
 create_env CHECKSUM_RS_FLUENT_FLUENT_CONF {{ role_regards_init_master_config }}fluentd/fluent.conf
+{% endif %}
+
+{% if role_regards_init_master_cots.fluentd is defined %}
+create_env CHECKSUM_RS_FLUENTD_FLUENT_CONF {{ role_regards_init_master_config }}fluentd/fluent.conf
+{% endif %}
+
+################# Grafana ####################
+{% if role_regards_init_master_cots.grafana is defined %}
+create_env CHECKSUM_RS_GRAFANA_DATASOURCES_YML {{ role_regards_init_master_config }}grafana/datasources.yml
+create_env CHECKSUM_RS_GRAFANA_DASHBOARDS_YML {{ role_regards_init_master_config }}grafana/dashboards.yml
+create_env CHECKSUM_RS_GRAFANA_GRAFANA_INI {{ role_regards_init_master_config }}grafana/grafana.ini
+
+{%   if role_regards_init_master_cots.grafana.ssl is defined %}
+create_env CHECKSUM_RS_GRAFANA_SSL_CRT {{ role_regards_init_master_config }}grafana/ssl/{{ role_regards_init_master_cots.grafana.ssl.key }}
+create_env CHECKSUM_RS_GRAFANA_SSL_KEY {{ role_regards_init_master_config }}grafana/ssl/{{ role_regards_init_master_cots.grafana.ssl.crt }}
+{%   endif %}
+
+{%   if role_regards_init_master_grafana_active_default_dashboard|bool %}
+create_env CHECKSUM_RS_GRAFANA_HOME_JSON {{ role_regards_init_master_config }}grafana/dashboards/home.json
+create_env CHECKSUM_RS_GRAFANA_DEMO_JSON {{ role_regards_init_master_config }}grafana/dashboards/demo.json
+create_env CHECKSUM_RS_GRAFANA_ELASTICSEARCH_JSON {{ role_regards_init_master_config }}grafana/dashboards/elasticsearch.json
+create_env CHECKSUM_RS_GRAFANA_LOKI_LOGS_JSON {{ role_regards_init_master_config }}grafana/dashboards/loki-logs.json
+create_env CHECKSUM_RS_GRAFANA_LOKI_MONITORING_JSON {{ role_regards_init_master_config }}grafana/dashboards/loki-monitoring.json
+create_env CHECKSUM_RS_GRAFANA_FLUENTD_JSON {{ role_regards_init_master_config }}grafana/dashboards/fluentd.json
+create_env CHECKSUM_RS_GRAFANA_MINIO_JSON {{ role_regards_init_master_config }}grafana/dashboards/minio.json
+create_env CHECKSUM_RS_GRAFANA_NGINX_JSON {{ role_regards_init_master_config }}grafana/dashboards/nginx.json
+create_env CHECKSUM_RS_GRAFANA_NODE_EXPORTER_JSON {{ role_regards_init_master_config }}grafana/dashboards/node-exporter.json
+create_env CHECKSUM_RS_GRAFANA_PROMETHEUS_JSON {{ role_regards_init_master_config }}grafana/dashboards/prometheus.json
+create_env CHECKSUM_RS_GRAFANA_RABBITMQ_JSON {{ role_regards_init_master_config }}grafana/dashboards/rabbitmq.json
+create_env CHECKSUM_RS_GRAFANA_REGARDS_MS_JSON {{ role_regards_init_master_config }}grafana/dashboards/regards_ms.json
+create_env CHECKSUM_RS_GRAFANA_CONTAINER_JSON {{ role_regards_init_master_config }}grafana/dashboards/container.json
+{%   endif %}
+{% endif %}
+
+################# Prometheus ####################
+{% if role_regards_init_master_cots.prometheus is defined %}
+create_env CHECKSUM_RS_PROMETHEUS_PROMETHEUS_YML {{ role_regards_init_master_config }}prometheus/prometheus.yml
+{% endif %}
+
+################# Loki ####################
+{% if role_regards_init_master_cots.loki is defined %}
+create_env CHECKSUM_RS_LOKI_LOKI_YML {{ role_regards_init_master_config }}loki/loki.yaml
 {% endif %}
 
 #######################################################

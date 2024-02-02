@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.9'
 
 # Config name must contains less than 32 [a-zA-Z0-9-_.] caracters
 configs:
@@ -18,11 +18,11 @@ configs:
 
 {% if role_regards_stack_rabbitmq_ssl_active|bool %}
   rs-rabbitmq_ssl.ca:
-    name: rabbitmq_ssl_key_${CHECKSUM_RS_RABBITMQ_SSL_CA}
+    name: rabbitmq_ssl_ca_${CHECKSUM_RS_RABBITMQ_SSL_CA}
     file: {{ role_regards_stack_rabbitmq_folder_certificates }}{{ role_regards_stack_rabbitmq_ssl_certificates_conf.ca }}
-  rs-rabbitmq_ssl.cert:
-    name: rabbitmq_ssl_key_${CHECKSUM_RS_RABBITMQ_SSL_CERT}
-    file: {{ role_regards_stack_rabbitmq_folder_certificates }}{{ role_regards_stack_rabbitmq_ssl_certificates_conf.cert }}
+  rs-rabbitmq_ssl.crt:
+    name: rabbitmq_ssl_crt_${CHECKSUM_RS_RABBITMQ_SSL_CRT}
+    file: {{ role_regards_stack_rabbitmq_folder_certificates }}{{ role_regards_stack_rabbitmq_ssl_certificates_conf.crt }}
 
 secrets:
   rs-rabbitmq_ssl.key:
@@ -68,7 +68,7 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "rabbitmq-diagnostics --formatter=json is_booting | jq -r '.result' | grep true  || rabbitmq-diagnostics -q check_running"]
       interval: 5s
-      timeout: 30s
+      timeout: 2m
       retries: 3
       start_period: 2h
 {% endif %}
@@ -97,15 +97,15 @@ services:
 {% if role_regards_stack_rabbitmq_ssl_active|bool %}
       - source: rs-rabbitmq_ssl.ca
         target: "/etc/ca-certificates/{{ role_regards_stack_rabbitmq_ssl_certificates_conf.ca }}"
-      - source: rs-rabbitmq_ssl.cert
-        target: "/etc/ca-certificates/{{ role_regards_stack_rabbitmq_ssl_certificates_conf.cert }}"    
+      - source: rs-rabbitmq_ssl.crt
+        target: "/etc/ca-certificates/{{ role_regards_stack_rabbitmq_ssl_certificates_conf.crt }}"
     secrets:
       - source: rs-rabbitmq_ssl.key
-        target: "/etc/ca-certificates/{{ role_regards_stack_rabbitmq_ssl_certificates_conf.key }}" 
+        target: "/etc/ca-certificates/{{ role_regards_stack_rabbitmq_ssl_certificates_conf.key }}"
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
-{% if role_regards_stack_cots.rabbitmq.http is defined or role_regards_stack_cots.rabbitmq.client is defined and role_regards_stack_cots.rabbitmq.global_service is defined == false %}
+{% if role_regards_stack_cots.rabbitmq.http is defined or role_regards_stack_cots.rabbitmq.client is defined or role_regards_stack_cots.rabbitmq.client_ssl is defined %}
     ports:
 {%   if role_regards_stack_cots.rabbitmq.client is defined %}
       - "{{ role_regards_stack_cots.rabbitmq.client }}:5672"
@@ -119,12 +119,14 @@ services:
 {% endif %}
 {% if role_regards_stack_cots.rabbitmq.node_label_placement_constraint is defined or role_regards_stack_cots.rabbitmq.global_service is defined or role_regards_stack_enable_cots_resource_limits %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
 {%   if role_regards_stack_enable_cots_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_resource_limits.rabbitmq.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_resource_limits.rabbitmq.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_resource_limits.rabbitmq | to_nice_yaml | indent(8) }}
 {%   endif %}
 {%   if role_regards_stack_cots.rabbitmq.global_service is defined %}
       mode: global

@@ -31,4 +31,7 @@ role_regards_logs_workspace_local_logs_directories:
   - worker-manager
   - lta-manager
   - delivery
- 
+  - file-catalog
+  - file-access
+  - file-packager
+

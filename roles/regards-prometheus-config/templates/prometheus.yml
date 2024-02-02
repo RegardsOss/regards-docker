@@ -1,0 +1,98 @@
+{% import './macro-prometheus-config.j2' as prometheusConfigLibrary %}
+# See https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+# my global config
+global:
+  scrape_interval:     15s # By default, scrape targets every 15 seconds.
+  evaluation_interval: 15s # By default, scrape targets every 15 seconds.
+  scrape_timeout: 15s      # scrape_timeout is set to the global default (10s).
+
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+      monitor: 'regards'
+
+scrape_configs:
+  - job_name: 'prometheus'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['localhost:9090']
+
+
+
+{%   for service in role_regards_prometheus_config_cots_replicated %}
+{%     if service.active %}
+
+  {{ prometheusConfigLibrary.initConf({ 
+    'jobName': service.name, 
+    'sourceInfo': {
+      'type': 'dns_sd',
+      'hostname': service.hostname,
+      'scheme': service.scheme,
+      'port': service.port,
+      'insecure': service.insecure
+    },
+    'metricRelabelConfigs': service.metric_relabel_configs
+  }) }}
+{%     endif %}
+{%   endfor %}
+
+
+
+{%   for service in role_regards_prometheus_config_cots %}
+{%     if service.active %}
+  {{ prometheusConfigLibrary.initConf({ 
+    'jobName': service.name, 
+    'sourceInfo': {
+      'type': 'static',
+      'hostname': service.hostname,
+      'scheme': service.scheme,
+      'port': service.port,
+      'metricsPath': service.metrics_path,
+      'insecure': service.insecure
+    },
+    'metricRelabelConfigs': service.metric_relabel_configs,
+    'honorLabels': service.get('honor_labels', False)
+  }) }}
+
+{%     endif %}
+{%   endfor %}
+
+
+
+{%   for service in role_regards_prometheus_config_mservices %}
+{%     if service.active %}
+  {{ prometheusConfigLibrary.initConf({ 
+    'jobName': service.name, 
+    'sourceInfo': {
+      'type': 'dns_sd',
+      'hostname': service.hostname,
+      'scheme': service.scheme,
+      'port': service.port,
+      'metricsPath': '/actuator/prometheus',
+      'endpointParams': {
+        'scope': ['all']
+      },
+      'insecure': service.insecure
+    }
+  }) }}
+
+{%     endif %}
+{%   endfor %}
+
+
+
+{%   for worker in role_regards_prometheus_config_workers %}
+{%     if worker.prometheus is defined %}
+  {{ prometheusConfigLibrary.initConf({ 
+    'jobName': worker.name + '-scrape', 
+    'sourceInfo': {
+      'type': 'dns_sd',
+      'hostname': worker.name,
+      'port': worker.prometheus.port,
+      'metricsPath': worker.prometheus.get('metrics_path', '/actuator/prometheus')
+    },
+    'honorLabels': worker.prometheus.get('honor_labels', False)
+  }) }}
+
+{%     endif %}
+{%   endfor %}

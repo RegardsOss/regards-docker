@@ -15,7 +15,7 @@ if [ "${askBeforeContinuing}" == 1 ] ; then
     read response
 fi
 
-if [ "${askBeforeContinuing}" == 0 ] || [ "$response" = "y" ] ; then
+if [[ "${askBeforeContinuing}" == 0 || "$response" = "y" ]] ; then
   echo "Shutdown in progress for stack {{ role_regards_init_master_stack_name }} ..."
   if docker stack rm {{ role_regards_init_master_stack_name }}; then
     # Encode the script before sending it threw SSH

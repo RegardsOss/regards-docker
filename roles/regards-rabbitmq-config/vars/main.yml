@@ -13,7 +13,7 @@ role_regards_rabbitmq_config_ssl_active: "{{ group_docker_cots_configuration.get
 role_regards_rabbitmq_config_folder_certificates: "{{ group_workdir_local }}{{ group_stack_name }}/config/rabbitmq/ca-certificates/"
 role_regards_rabbitmq_config_ssl_certificates_conf: "{{ group_docker_cots_configuration.get('rabbitmq', {}).get('ssl', {}) }}"
 role_regards_rabbitmq_config_ssl_location_inside_playbook: "{{ inventory_dir }}/group_vars/regards_nodes/files/ssl/"
-
+role_regards_rabbitmq_config_ssl_peer_cert_check_active: "{{ group_docker_cots_configuration.get('rabbitmq', {}).get('ssl', {}).get('active_peer_cert_check', False) }}"
 # Erlang cookie
 default_erlang_cookie: MY-SECRET-KEY-123
 role_regards_rabbitmq_config_erlang_cookie: "{{ (group_docker_cots | default({})).get('rabbitmq', {}).get('erlang_cookie', default_erlang_cookie) }}"

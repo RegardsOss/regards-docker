@@ -16,6 +16,5 @@
   docker_swarm:
     state: absent
     force: true
-  become: yes
   vars:
     ansible_python_interpreter: "env python{{ python_version }}"

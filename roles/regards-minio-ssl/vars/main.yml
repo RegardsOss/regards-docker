@@ -1,0 +1,37 @@
+---
+role_regards_minio_config_certs_dir: "{{ group_workdir_local }}{{group_stack_name}}/config/minio/certs"
+
+role_regards_minio_ssl_local_container_root_user: "{{ group_container_root_user }}"
+role_regards_minio_ssl_local_container_root_group: "{{ group_container_root_group }}"
+role_regards_minio_ssl_local_setype: "{{ group_setype }}"
+role_regards_minio_ssl_local_seuser: "{{ group_seuser }}"
+
+
+# SSL configuration
+role_regards_minio_ssl_location_inside_playbook: "{{ inventory_dir }}/group_vars/regards_nodes/files/ssl/"
+role_regards_minio_ssl_active: "{{ group_docker_cots.get('minio', {}).ssl is defined }}"
+role_regards_minio_internal_ssl_active: "{{ group_docker_cots.get('minio', {}).ssl_internal is defined }}"
+# Public SSL
+role_regards_minio_ssl_certificates_conf: "{{ group_docker_cots.get('minio', {}).get('ssl', {}) }}"
+
+role_regards_minio_ssl_infos:
+  domain: "{{ role_regards_minio_ssl_certificates_conf.get('domain') }}"
+  crt: "{{ role_regards_minio_ssl_certificates_conf.get('crt') }}"
+  private_key: "{{ role_regards_minio_ssl_certificates_conf.get('key') }}"
+  ca_trust: "{{ role_regards_minio_ssl_certificates_conf.get('ca', '') }}"
+
+# Inter-node SSL / CA trust store
+role_regards_minio_ssl_internal_certificates_conf: "{{ group_docker_cots.get('minio', {}).get('ssl_internal', {}) }}"
+
+role_regards_minio_ssl_internal_infos:
+  crt: "{{ role_regards_minio_ssl_internal_certificates_conf.get('crt') }}"
+  private_key: "{{ role_regards_minio_ssl_internal_certificates_conf.get('key') }}"
+  ca_trust: "{{ role_regards_minio_ssl_internal_certificates_conf.get('ca', '') }}"
+
+# Should create the MinIO > CAs folder ?
+role_regards_minio_ca_trust_store_active: "{{ (role_regards_minio_ssl_certificates_conf.ca is defined) or (role_regards_minio_ssl_internal_infos.ca is defined) }}"
+
+# mc
+role_regards_minio_mc_loc_ca_active: "{{ group_docker_cots.get('minio_mc_log', {}).ca is defined }}"
+role_regards_minio_mc_loc_ca: "{{ group_docker_cots.get('minio_mc_log', {}).get('ca') }}"
+role_regards_minio_mc_loc_ca_dir: "{{ group_workdir_local }}{{group_stack_name}}/config/minio/mc/CAs/"

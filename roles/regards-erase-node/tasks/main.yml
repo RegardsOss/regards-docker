@@ -1,8 +1,6 @@
 ---
   - name: Delete local node directory (retry when containers are stopping too slowly)
     ansible.builtin.command: "rm -rf {{ role_regards_erase_node_rootdir_local }}"
-    args:
-      warn: false # We use command instead of file to be able to retry
     retries: 3 
     delay: 5
     register: result

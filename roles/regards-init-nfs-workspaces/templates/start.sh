@@ -56,11 +56,25 @@ mkdir -p /shared/{{ role_regards_init_nfs_workspaces_volume_rabbitmq_data.get('d
 chmod 0770 /shared/{{ role_regards_init_nfs_workspaces_volume_rabbitmq_data.get('device_postfix', 'rabbitmq') }}
 {% endif %}
 
-{% if role_regards_init_nfs_workspaces_volume_s3_minio_data.nfs is defined and nfs_server.name == role_regards_init_nfs_workspaces_volume_s3_minio_data.nfs %}
-mkdir -p /shared/{{ role_regards_init_nfs_workspaces_volume_s3_minio_data.get('device_postfix', 's3-minio/') }}
-chmod 0770 /shared/{{ role_regards_init_nfs_workspaces_volume_s3_minio_data.get('device_postfix', 's3-minio/') }}
+{% if role_regards_init_nfs_workspaces_volume_minio_data.nfs is defined and nfs_server.name == role_regards_init_nfs_workspaces_volume_minio_data.nfs %}
+mkdir -p /shared/{{ role_regards_init_nfs_workspaces_volume_minio_data.get('device_postfix', 'minio') }}
+chmod 0770 /shared/{{ role_regards_init_nfs_workspaces_volume_minio_data.get('device_postfix', 'minio') }}
 {% endif %}
 
+{% if role_regards_init_nfs_workspaces_volume_loki_data.nfs is defined and nfs_server.name == role_regards_init_nfs_workspaces_volume_loki_data.nfs %}
+mkdir -p /shared/{{ role_regards_init_nfs_workspaces_volume_loki_data.get('device_postfix', 'loki/') }}
+chmod 0770 /shared/{{ role_regards_init_nfs_workspaces_volume_loki_data.get('device_postfix', 'loki/') }}
+{% endif %}
+
+{% if role_regards_init_nfs_workspaces_volume_prometheus_data.nfs is defined and nfs_server.name == role_regards_init_nfs_workspaces_volume_prometheus_data.nfs %}
+mkdir -p /shared/{{ role_regards_init_nfs_workspaces_volume_prometheus_data.get('device_postfix', 'prometheus/') }}
+chmod 0770 /shared/{{ role_regards_init_nfs_workspaces_volume_prometheus_data.get('device_postfix', 'prometheus/') }}
+{% endif %}
+
+{% if role_regards_init_nfs_workspaces_volume_grafana_data.nfs is defined and nfs_server.name == role_regards_init_nfs_workspaces_volume_grafana_data.nfs %}
+mkdir -p /shared/{{ role_regards_init_nfs_workspaces_volume_grafana_data.get('device_postfix', 'grafana/') }}
+chmod 0770 /shared/{{ role_regards_init_nfs_workspaces_volume_grafana_data.get('device_postfix', 'grafana/') }}
+{% endif %}
 
 ############# REGARDS FOLDER ##############
 {% if role_regards_init_nfs_workspaces_volume_processing.nfs is defined and nfs_server.name == role_regards_init_nfs_workspaces_volume_processing.nfs %}

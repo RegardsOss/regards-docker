@@ -1,14 +1,38 @@
-version: '3.7'
+version: '3.9'
 
 # Config name must contains less than 32 [a-zA-Z0-9-_.] caracters
-{% if role_regards_stack_cots.postgres is defined %}
+{% if role_regards_stack_cots.postgres is defined or role_regards_stack_cots.phppgadmin is defined %}
 configs:
+{%   if role_regards_stack_cots.postgres is defined %}
   rs-postgres_init.sql:
     name: postgres_init_sql_${CHECKSUM_RS_POSTGRES_INIT_SQL}
     file: {{ role_regards_stack_config }}postgres/init.sql
   rs-postgres_postgresql.conf:
     name: postgres_postgresql_conf_${CHECKSUM_RS_POSTGRES_POSTGRESQL_CONF}
     file: {{ role_regards_stack_config }}postgres/postgresql.conf
+{%   endif %}
+{%   if role_regards_stack_cots.phppgadmin is defined %}
+  rs-phppgadmin_default.conf:
+    name: phppgadmin_phppgadmin_conf_${CHECKSUM_RS_PHPPGADMIN_DEFAULT_CONF}
+    file: {{ role_regards_stack_config }}phppgadmin/default.conf
+{%     if role_regards_stack_cots.phppgadmin.ssl is defined %}
+{%       if role_regards_stack_cots.phppgadmin.host is defined %}
+  rs-phppgadmin_badhost.conf:
+    name: phppgadmin_badhost_conf_${CHECKSUM_RS_PHPPGADMIN_BADHOST_CONF}
+    file: {{ role_regards_stack_config }}phppgadmin/badhost.conf
+{%       endif %}
+  rs-phppgadmin_ssl_crt:
+    name: phppgadmin_ssl_crt_${CHECKSUM_RS_PHPPGADMIN_SSL_CRT}
+    file: "{{ role_regards_stack_config }}phppgadmin/ssl/{{ role_regards_stack_cots.phppgadmin.ssl.crt }}"
+{%     endif %}
+{%   endif %}
+{% endif %}
+
+{% if role_regards_stack_cots.phppgadmin is defined and role_regards_stack_cots.phppgadmin.ssl is defined %}
+secrets:
+  phppgadmin_ssl_key:
+    name: phppgadmin_ssl_key_${CHECKSUM_RS_PHPPGADMIN_SSL_KEY}
+    file: "{{ role_regards_stack_config }}phppgadmin/ssl/{{ role_regards_stack_cots.phppgadmin.ssl.key }}"
 {% endif %}
 
 volumes:
@@ -33,21 +57,30 @@ services:
 {% if role_regards_stack_cots.postgres is defined %}
   rs-postgres:
     image: {{ role_regards_stack_registry }}/regards-database:{{ role_regards_stack_cots.postgres.tag | default("latest") }}
-{%if (role_regards_stack_cots.postgres.configuration | default({})).labels is defined %}
+{%   if (role_regards_stack_cots.postgres.configuration | default({})).labels is defined %}
     labels:
-{% for key, value in role_regards_stack_cots.postgres.configuration.labels.items() %}
+{%     for key, value in role_regards_stack_cots.postgres.configuration.labels.items() %}
       {{ key }}: "{{value}}"
-{% endfor %}
-{% endif %}
+{%     endfor %}
+{%   endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-postgres
     read_only: true
-{% if role_regards_stack_cots.postgres.node_label_placement_constraint is defined %}
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_restart_policy.window }}
+{%   if role_regards_stack_enable_cots_resource_limits %}
+      resources:
+        {{ role_regards_stack_resource_limits.postgres | to_nice_yaml | indent(8) }}
+{%   endif %}
+{%   if role_regards_stack_cots.postgres.node_label_placement_constraint is defined %}
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_cots.postgres.node_label_placement_constraint.key }} == {{ role_regards_stack_cots.postgres.node_label_placement_constraint.value }}
-{% endif %}
+{%   endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
@@ -57,11 +90,11 @@ services:
     volumes:
       - type: volume
         source: data-postgres-datavolume
-{% if role_regards_stack_volume_postgres_data.nfs is defined %}
+{%   if role_regards_stack_volume_postgres_data.nfs is defined %}
         target: /var/lib/postgresql/data
-{% else %}
+{%   else %}
         target: /var/lib/postgresql/data/pgdata
-{% endif %}
+{%   endif %}
       - type: tmpfs
         target: /tmp
       - type: tmpfs
@@ -71,73 +104,87 @@ services:
         target: /docker-entrypoint-initdb.d/init.sql
       - source: rs-postgres_postgresql.conf
         target: /etc/postgresql.conf
-{% if role_regards_stack_cots.postgres.configs is defined %}
-{% for config in role_regards_stack_cots.postgres.configs %}
+{%   if role_regards_stack_cots.postgres.configs is defined %}
+{%     for config in role_regards_stack_cots.postgres.configs %}
       - source: conf_{{ config.source }}
         target: {{ config.destination }}
-{% endfor %}
-{% endif %}
-{% if role_regards_stack_cots.postgres.client is defined %}
+{%     endfor %}
+{%   endif %}
+{%   if role_regards_stack_cots.postgres.client is defined %}
     ports:
       - "{{ role_regards_stack_cots.postgres.client }}:5432"
-{% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_cots.postgres.logging is defined %}
+{%   endif %}
+{%   if role_regards_stack_initialize_default_logging|bool or role_regards_stack_cots.postgres.logging is defined %}
     logging:
-{% if role_regards_stack_cots.postgres.logging is defined %}
+{%     if role_regards_stack_cots.postgres.logging is defined %}
       {{ role_regards_stack_cots.postgres.logging | to_nice_yaml | indent(6) }}
-{% else %}
+{%     else %}
       options:
         max-size: "10m"
         max-file: "10"
-{% endif %}
-{% endif %}
+{%     endif %}
+{%   endif %}
 {% endif %}
 
 {% if role_regards_stack_cots.phppgadmin is defined %}
   rs-phppgadmin:
     image: {{ role_regards_stack_registry }}/regards-phppgadmin:{{ role_regards_stack_cots.phppgadmin.tag | default("latest") }}
-{%if (role_regards_stack_cots.phppgadmin.configuration | default({})).labels is defined %}
+{%   if (role_regards_stack_cots.phppgadmin.configuration | default({})).labels is defined %}
     labels:
-{% for key, value in role_regards_stack_cots.phppgadmin.configuration.labels.items() %}
+{%     for key, value in role_regards_stack_cots.phppgadmin.configuration.labels.items() %}
       {{ key }}: "{{value}}"
-{% endfor %}
-{% endif %}
+{%     endfor %}
+{%   endif %}
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-phppgadmin
     read_only: true
-{% if role_regards_stack_cots.phppgadmin.node_label_placement_constraint is defined %}
+{% if role_regards_stack_enable_mservices_healthcheck %}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -I {{ role_regards_stack_cots.phppgadmin.ssl is defined | ternary('https', 'http') }}://127.0.0.1:8080/fpm-ping {{ role_regards_stack_cots.phppgadmin.ssl is defined | ternary('-k', '') }}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 1m
+{% endif %}
+{%   if role_regards_stack_cots.phppgadmin.node_label_placement_constraint is defined or role_regards_stack_enable_cots_resource_limits %}
     deploy:
+{%     if role_regards_stack_enable_cots_resource_limits %}
+      resources:
+        {{ role_regards_stack_resource_limits.phppgadmin | to_nice_yaml | indent(8) }}
+{%     endif %}
+{%     if role_regards_stack_cots.phppgadmin.node_label_placement_constraint is defined %}
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_cots.phppgadmin.node_label_placement_constraint.key }} == {{ role_regards_stack_cots.phppgadmin.node_label_placement_constraint.value }}
-{% endif %}
+{%     endif %}
+{%   endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
-{% if role_regards_stack_cots.phppgadmin.db is defined or role_regards_stack_cots.phppgadmin.setting_owned_only is defined or role_regards_stack_cots.phppgadmin.setting_raw_rows is defined or role_regards_stack_cots.phppgadmin.setting_raw_chars is defined or role_regards_stack_cots.phppgadmin.setting_main_theme is defined or role_regards_stack_cots.phppgadmin.setting_sidebar_left_width is defined %}
+{%   if role_regards_stack_cots.phppgadmin.db is defined or role_regards_stack_cots.phppgadmin.setting_owned_only is defined or role_regards_stack_cots.phppgadmin.setting_raw_rows is defined or role_regards_stack_cots.phppgadmin.setting_raw_chars is defined or role_regards_stack_cots.phppgadmin.setting_main_theme is defined or role_regards_stack_cots.phppgadmin.setting_sidebar_left_width is defined %}
     environment:
-{% if role_regards_stack_cots.phppgadmin.db is defined %}
+{%     if role_regards_stack_cots.phppgadmin.db is defined %}
       - 'DB_CONFIG={{ role_regards_stack_cots.phppgadmin.db | to_json }}'
-{% endif %}
-{% if role_regards_stack_cots.phppgadmin.setting_owned_only is defined %}
+{%     endif %}
+{%     if role_regards_stack_cots.phppgadmin.setting_owned_only is defined %}
       - OWNED_ONLY={{ role_regards_stack_cots.phppgadmin.setting_owned_only }}
-{% endif %}
-{% if role_regards_stack_cots.phppgadmin.setting_raw_rows is defined %}
+{%     endif %}
+{%     if role_regards_stack_cots.phppgadmin.setting_raw_rows is defined %}
       - MAX_ROWS={{ role_regards_stack_cots.phppgadmin.setting_raw_rows }}
-{% endif %}
-{% if role_regards_stack_cots.phppgadmin.setting_raw_chars is defined %}
+{%     endif %}
+{%     if role_regards_stack_cots.phppgadmin.setting_raw_chars is defined %}
       - MAX_CHARS={{ role_regards_stack_cots.phppgadmin.setting_raw_chars }}
-{% endif %}
-{% if role_regards_stack_cots.phppgadmin.setting_main_theme is defined %}
+{%     endif %}
+{%     if role_regards_stack_cots.phppgadmin.setting_main_theme is defined %}
       - MAIN_THEME={{ role_regards_stack_cots.phppgadmin.setting_main_theme }}
-{% endif %}
-{% if role_regards_stack_cots.phppgadmin.setting_sidebar_left_width is defined %}
+{%     endif %}
+{%     if role_regards_stack_cots.phppgadmin.setting_sidebar_left_width is defined %}
       - SIDEBAR_LEFT_WIDTH={{ role_regards_stack_cots.phppgadmin.setting_sidebar_left_width }}
-{% endif %}
-{% endif %}
-{% if role_regards_stack_cots.phppgadmin.http is defined %}
+{%     endif %}
+{%   endif %}
+{%   if role_regards_stack_cots.phppgadmin.http is defined %}
     ports:
       - "{{ role_regards_stack_cots.phppgadmin.http }}:8080"
-{% endif %}
+{%   endif %}
     volumes:
       - type: tmpfs
         target: /tmp
@@ -145,14 +192,28 @@ services:
         target: /run
       - type: tmpfs
         target: /var/lib/nginx/logs/
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_cots.phppgadmin.logging is defined %}
+    configs:
+      - source: rs-phppgadmin_default.conf
+        target: /etc/nginx/conf.d/default.conf
+{%   if role_regards_stack_cots.phppgadmin.host is defined %}
+      - source: rs-phppgadmin_badhost.conf
+        target: /etc/nginx/conf.d/badhost.conf
+{%   endif %}
+{%   if role_regards_stack_cots.phppgadmin.ssl is defined %}
+      - source: rs-phppgadmin_ssl_crt
+        target: /etc/ssl/server.crt
+    secrets:
+      - source: phppgadmin_ssl_key
+        target: /etc/ssl/server.key
+{%   endif %}
+{%   if role_regards_stack_initialize_default_logging|bool or role_regards_stack_cots.phppgadmin.logging is defined %}
     logging:
-{% if role_regards_stack_cots.phppgadmin.logging is defined %}
+{%     if role_regards_stack_cots.phppgadmin.logging is defined %}
       {{ role_regards_stack_cots.phppgadmin.logging | to_nice_yaml | indent(6) }}
-{% else %}
+{%     else %}
       options:
         max-size: "10m"
         max-file: "10"
-{% endif %}
-{% endif %}
+{%     endif %}
+{%   endif %}
 {% endif %}

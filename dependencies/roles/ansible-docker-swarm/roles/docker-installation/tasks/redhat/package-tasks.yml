@@ -58,11 +58,3 @@
       - docker-ce
     state: latest
     update_cache: yes
-
-- name: "[REDHAT] Rollback containerd to 1.6.21"
-  yum:
-    name: 
-      # fix containerd.io version - https://github.com/containerd/containerd/issues/9100
-      - "containerd.io-1.6.21-3.1.el{{ ansible_facts['distribution_major_version'] }}.x86_64"
-    state: installed
-    allow_downgrade: yes

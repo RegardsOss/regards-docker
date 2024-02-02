@@ -1,5 +1,5 @@
 ---
-- name: Shutdown REGARDS and delete network disk
+- name: Shutdown REGARDS and delete swarm network
   hosts: master
   roles:
     - regards-erase
@@ -8,4 +8,3 @@
   hosts: regards_nodes
   roles:
     - regards-erase-node
-  

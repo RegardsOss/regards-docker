@@ -1,0 +1,133 @@
+# See https://grafana.com/docs/grafana/latest/administration/provisioning/
+# Permits to deploy a grafana instance with all theses datasources
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    # Access mode - proxy (server in the UI) or direct (browser in the UI).
+    access: proxy
+    url: http://rs-prometheus:9090/
+    uid: 1
+  - name: Loki
+    type: loki
+    # Access mode - proxy (server in the UI) or direct (browser in the UI).
+    access: proxy
+    url: http://rs-loki:3100
+    basicAuth: false
+    isDefault: true
+    version: 1
+    editable: false
+    uid: 2
+
+{% set ns = namespace(uid=100) %}
+
+{%  if role_regards_grafana_config_configuration_postgres.active %}
+# Internal rs-postgres datasources
+{%    for index in range(role_regards_grafana_config_configuration_postgres.databases | length) %}
+  - name: Postgres - {{ role_regards_grafana_config_configuration_postgres.databases[index] }}
+    type: postgres
+    uid: {{ ns.uid }}
+    url: {{ role_regards_grafana_config_configuration_postgres.url }}
+    user: {{ role_regards_grafana_config_configuration_postgres.user }}
+    database: '{{ role_regards_grafana_config_configuration_postgres.databases[index] }}'
+    typeLogoUrl: public/app/plugins/datasource/postgres/img/postgresql_logo.svg
+    secureJsonData:
+      password: '{{ role_regards_grafana_config_configuration_postgres.password }}'
+    jsonData:
+      sslmode: 'disable'
+      maxOpenConns: 100
+      maxIdleConns: 100
+      maxIdleConnsAuto: true
+      connMaxLifetime: 14400
+      postgresVersion: 1100
+      timescaledb: false
+
+{%      set ns.uid = ns.uid + 1 %}
+{%    endfor %}
+{%  endif %}
+
+{% set ns.uid = 200 %}
+
+# Custom Postgres datasources
+{%  for postgres in role_regards_grafana_config_configuration_custom_datasources_postgres %}
+{%    for index in range(postgres.databases | length) %}
+  - name: {{ postgres.name }} - {{ postgres.databases[index] }}
+    type: postgres
+    uid: {{ ns.uid }}
+    url: {{ postgres.url }}
+    user: {{ postgres.user }}
+    database: '{{ postgres.databases[index] }}'
+    typeLogoUrl: public/app/plugins/datasource/postgres/img/postgresql_logo.svg
+    secureJsonData:
+      password: '{{ postgres.password }}'
+    jsonData:
+      # SSL mode: disable/require/verify-ca/verify-full
+{%      if postgres.sslmode is defined %}
+      sslmode: '{{ postgres.sslmode }}'
+{%      else %}
+      sslmode: 'disable'
+{%      endif %}
+      maxOpenConns: 100
+      maxIdleConns: 100
+      maxIdleConnsAuto: true
+      connMaxLifetime: 14400
+      # Postgres version 903=9.3, 904=9.4, 905=9.5, 906=9.6, 1000=10...
+{%      if postgres.version is defined %}
+      postgresVersion: {{ postgres.version }}
+{%      else %}
+      postgresVersion: 1100
+{%      endif %}
+      timescaledb: false
+
+{%      set ns.uid = ns.uid + 1 %}
+{%    endfor %}
+
+{%  endfor %}
+
+
+{% set ns.uid = 300 %}
+
+{%  if role_regards_grafana_config_configuration_elasticsearch.active %}
+# Internal ElasticSearch datasources
+{%    for index in range(role_regards_grafana_config_configuration_elasticsearch.indexes | length) %}
+  - name: Elasticsearch - {{ role_regards_grafana_config_configuration_elasticsearch.indexes[index] }}
+    type: elasticsearch
+    uid: {{ ns.uid }}
+    url: {{ role_regards_grafana_config_configuration_elasticsearch.url }}
+    database: '{{ role_regards_grafana_config_configuration_elasticsearch.indexes[index] }}'
+    typeLogoUrl: public/app/plugins/datasource/elasticsearch/img/elasticsearch.svg
+    basicAuth: false
+    jsonData:
+      esVersion: 7.10.0
+      maxConcurrentShardRequests: 5
+      timeField: creationDate
+
+{%      set ns.uid = ns.uid + 1 %}
+{%    endfor %}
+{%  endif %}
+
+{% set ns.uid = 400 %}
+
+# Custom Elasticsearch datasources
+{%  for elasticsearch in role_regards_grafana_config_configuration_custom_datasources_elasticsearch %}
+{%    for index in range(elasticsearch.indexes | length) %}
+  - name: {{ elasticsearch.name }} - {{ elasticsearch.indexes[index] }}
+    type: elasticsearch
+    uid: {{ ns.uid }}
+    url: {{ elasticsearch.url }}
+{%      if elasticsearch.user is defined %}
+    user: {{ elasticsearch.user }}
+{%      endif %}
+    database: '{{ elasticsearch.indexes[index] }}'
+    typeLogoUrl: public/app/plugins/datasource/elasticsearch/img/elasticsearch.svg
+    basicAuth: false
+    jsonData:
+      esVersion: 7.10.0
+      maxConcurrentShardRequests: 5
+      timeField: creationDate
+
+{%      set ns.uid = ns.uid + 1 %}
+{%    endfor %}
+
+{%  endfor %}

@@ -9,7 +9,6 @@
     docker_network_info:
       name: "{{ role_regards_erase_docker_network_name }}"
     register: docker_network_name_info
-    become: true
     vars:
       ansible_python_interpreter: "env python{{ python_version }}"
 
@@ -21,7 +20,6 @@
     docker_network:
       name: "{{ role_regards_erase_docker_network_name  }}"
       state: absent
-    become: true
     when: delete_regards_network|bool
     run_once: true
     vars:

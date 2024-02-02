@@ -1,0 +1,18 @@
+---
+role_regards_phppgadmin_config_is_defined: "{{ group_docker_cots.phppgadmin is defined }}"
+
+role_regards_phppgadmin_config_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/phppgadmin/"
+
+role_regards_phppgadmin_config_container_root_user: "{{ group_container_root_user }}"
+role_regards_phppgadmin_config_container_root_group: "{{ group_container_root_group }}"
+role_regards_phppgadmin_config_setype: "{{ group_setype }}"
+role_regards_phppgadmin_config_seuser: "{{ group_seuser }}"
+
+role_regards_phppgadmin_is_ssl_defined: "{{ group_docker_cots.get('phppgadmin', {}).ssl is defined }}"
+role_regards_phppgadmin_is_host_defined: "{{ group_docker_cots.get('phppgadmin', {}).host is defined }}"
+role_regards_phppgadmin_host: "{{ group_docker_cots.get('phppgadmin', {}).get('host', '_') }}"
+role_regards_phppgadmin_config_ssl_files: "{{ group_docker_cots.get('phppgadmin', {}).get('ssl', {}) }}"
+# SSL src and dest infos
+role_regards_phppgadmin_config_ssl_destination: "{{ role_regards_phppgadmin_config_conf_local }}ssl"
+role_regards_phppgadmin_config_ssl_location_inside_playbook: "{{ inventory_dir }}/group_vars/regards_nodes/files/ssl"
+

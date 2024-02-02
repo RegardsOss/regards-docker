@@ -44,3 +44,12 @@
     owner: "{{ role_regards_front_container_root_user }}"
     group: "{{ role_regards_front_container_root_group }}"
   when: role_regards_front_securised|bool and role_regards_front_is_ssl_defined|bool
+
+- name: Generate REGARDS RabbitMQ reverse proxy config file
+  ansible.builtin.template:
+    src: rabbitmq.conf
+    dest: "{{ role_regards_front_conf_local }}rabbitmq.conf"
+    mode: '0770'
+    owner: "{{ role_regards_front_container_root_user }}"
+    group: "{{ role_regards_front_container_root_group }}"
+  when: role_regards_front_has_rabbitmq_admin|bool

@@ -1,0 +1,9 @@
+---
+
+# Restart SSH daemon
+- name: Restart service
+  systemd:
+    name: dnsmasq
+    state: restarted
+  become: yes
+

@@ -1,0 +1,10 @@
+---
+- name: Create MinIO CA trust folder
+  ansible.builtin.file:
+    dest: "{{ role_regards_minio_config_certs_dir }}/CAs"
+    state: directory
+    mode: '2770'
+    owner: "{{ role_regards_minio_ssl_local_container_root_user }}"
+    group: "{{ role_regards_minio_ssl_local_container_root_group }}"
+    setype: "{{ role_regards_minio_ssl_local_setype }}"
+    seuser: "{{ role_regards_minio_ssl_local_seuser }}"

@@ -16,9 +16,12 @@
     - regards-microservices-workspace-local
     - regards-logs-workspace-local
     - regards-postgres-workspace-local
-    - regards-s3-minio-workspace-local
+    - regards-minio-workspace-local
     - regards-elasticsearch-workspace-local
     - regards-rabbitmq-workspace-local
+    - regards-loki-workspace-local
+    - regards-grafana-workspace-local
+    - regards-prometheus-workspace-local
     - regards-workers
 
 - name: Initiate NFS workspaces 
@@ -35,10 +38,15 @@
     - regards-front-ssl
     - regards-front-footer
     - regards-fluentd-config
+    - regards-minio-ssl
     - regards-postgres-config
     - regards-elasticsearch-config
     - regards-haproxy-config
     - regards-rabbitmq-config
+    - regards-phppgadmin-config
+    - regards-loki-config
+    - regards-prometheus-config
+    - regards-grafana-config
     - regards-mconfig
     - regards-logback
     - regards-mounts-secrets-configs

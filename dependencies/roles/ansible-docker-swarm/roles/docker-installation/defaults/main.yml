@@ -79,3 +79,7 @@ docker_bip:
 
 # Docker options
 docker_storage_driver:
+
+# Daemon docker DNS server reference
+# Default value is the dnsmasq running on the same server
+docker_dns: '{{ ansible_facts.default_ipv4.address }}'

@@ -43,6 +43,9 @@ role_regards_mconfig_global_default:
   database_max_pool_size: "{{ global_ms_default.database_max_pool_size }}"
   jobs_pool_size: "{{ global_ms_default.large_jobs_pool_size }}"
 
+# Name used to define this instance to other softwares
+role_regards_instance_name: "{{ global_regards.application_name | default('REGARDS') }}"
+
 # ----------------------------------
 # Admin configuration
 # ----------------------------------
@@ -51,11 +54,21 @@ instance_admin_default:
   username: regards-admin@c-s.fr
   password: root_admin
   account_validity_in_days: 355
+  account_password_validity_in_days: 350
 
 role_regards_mconfig_instance_admin:
   username: "{{ (group_config_mservices.instance_admin | default({})).get('username', instance_admin_default.username) }}"
   password: "{{ (group_config_mservices.instance_admin | default({})).get('password', instance_admin_default.password) }}"
   account_validity_in_days: "{{ (role_regards_mconfig_config_mservices | default({})).get('account_validity_in_days', instance_admin_default.account_validity_in_days) }}"
+  account_password_validity_in_days: "{{ (role_regards_mconfig_config_mservices | default({})).get('account_password_validity_in_days', instance_admin_default.account_password_validity_in_days) }}"
+
+admin_password_config_default:
+  regex: ^(?=.*[0-9])(?=.*[a-zA-Z])(?!.* ).{8,16}$
+  info: Password must contain at least one letter, one digit and must be 8-16 characters
+
+role_regards_mconfig_instance_admin_password_config:
+  regex: "{{ (group_config_mservices.password_config | default({})).get('regex', admin_password_config_default.regex) }}"
+  info: "{{ (group_config_mservices.password_config | default({})).get('info', admin_password_config_default.info) }}"
 
 # ----------------------------------
 # Storage configuration
@@ -87,6 +100,7 @@ dam_default:
   crawler_batch_size: 10000
   crawler_init_time_ms: 60000
   check_polygon_orientation: false
+  http_read_timeout: 60000
 
 role_regards_mconfig_dam:
   ingester_rate_ms: "{{ (group_docker_mservices.dam | default({})).get('configuration', {}).get('crawler_rate_delay_ms', dam_default.ingester_rate_ms) }}"
@@ -96,6 +110,7 @@ role_regards_mconfig_dam:
   database_min_pool_size: "{{ (group_docker_mservices.dam | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
   database_max_pool_size: "{{ (group_docker_mservices.dam | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
   check_polygon_orientation: "{{ (group_docker_mservices.dam | default({})).get('configuration', {}).get('check_polygon_orientation', dam_default.check_polygon_orientation) }}"
+  http_read_timeout: "{{ (group_docker_mservices.dam | default({})).get('configuration', {}).get('http_read_timeout', dam_default.http_read_timeout) }}"
 
 # ----------------------------------
 # Dataprovider configuration
@@ -147,13 +162,16 @@ role_regards_mconfig_ingest:
 notifier_default:
   entities_per_job: 1000
   read_batch_size: 1000
+  # Notifier currently use a lot of NEW_TRANSACTION while processing 1 thing
+  # so we need for now to increase the number of transaction (2x transactions per job for example)
+  database_max_pool_size: 10
 
 role_regards_mconfig_notifier:
   entities_per_job: "{{ (group_docker_mservices.notifier | default({})).get('configuration', {}).get('entities_per_job', notifier_default.entities_per_job) }}"
   read_batch_size: "{{ (group_docker_mservices.notifier | default({})).get('configuration', {}).get('read_batch_size', notifier_default.read_batch_size) }}"
   jobs_pool_size: "{{ (group_docker_mservices.notifier | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.small_jobs_pool_size) }}"
   database_min_pool_size: "{{ (group_docker_mservices.notifier | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
-  database_max_pool_size: "{{ (group_docker_mservices.notifier | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
+  database_max_pool_size: "{{ (group_docker_mservices.notifier | default({})).get('configuration', {}).get('database_max_pool_size', notifier_default.database_max_pool_size) }}"
 
 # ----------------------------------
 # Order configuration
@@ -170,8 +188,8 @@ role_regards_mconfig_order:
   database_min_pool_size: "{{ (group_docker_mservices.order | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
   database_max_pool_size: "{{ (group_docker_mservices.order | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
 
-role_regards_mconfig_mservice_order_suborder_max_size_mb: "{{ (role_regards_mconfig_config_mservices.order | default({})).get('suborder_max_size_mb', order_default.suborder_max_size_mb) }}"
-role_regards_mconfig_mservice_order_max_suborders_per_user: "{{ (role_regards_mconfig_config_mservices.order | default({})).get('max_suborders_per_user', order_default.max_suborders_per_user) }}"
+role_regards_mconfig_mservice_order_suborder_max_size_mb: "{{ (group_docker_mservices.order | default({})).get('configuration', {}).get('suborder_max_size_mb', order_default.suborder_max_size_mb) }}"
+role_regards_mconfig_mservice_order_max_suborders_per_user: "{{ (group_docker_mservices.order | default({})).get('configuration', {}).get('max_suborders_per_user', order_default.max_suborders_per_user) }}"
 
 # ----------------------------------
 # Processing configuration
@@ -204,11 +222,50 @@ role_regards_mconfig_worker_manager:
 lta_manager_default:
   read_batch_size: 1000
 
-role_regards_mconfig_lta_manager_default:
+role_regards_mconfig_lta_manager:
   read_batch_size: "{{ (group_docker_mservices.lta_manager | default({})).get('configuration', {}).get('read_batch_size', lta_manager_default.read_batch_size) }}"
   jobs_pool_size: "{{ (group_docker_mservices.lta_manager | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.large_jobs_pool_size) }}"
   database_min_pool_size: "{{ (group_docker_mservices.lta_manager | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
   database_max_pool_size: "{{ (group_docker_mservices.lta_manager | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
+
+# ----------------------------------
+# File Catalog configuration
+# ----------------------------------
+
+file_catalog_default:
+  read_batch_size: 1000
+
+role_regards_mconfig_file_catalog:
+  read_batch_size: "{{ (group_docker_mservices.file_catalog | default({})).get('configuration', {}).get('read_batch_size', file_catalog_default.read_batch_size) }}"
+  jobs_pool_size: "{{ (group_docker_mservices.file_catalog | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.large_jobs_pool_size) }}"
+  database_min_pool_size: "{{ (group_docker_mservices.file_catalog | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
+  database_max_pool_size: "{{ (group_docker_mservices.file_catalog | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
+
+# ----------------------------------
+# File Access configuration
+# ----------------------------------
+
+file_access_default:
+  read_batch_size: 1000
+
+role_regards_mconfig_file_access:
+  read_batch_size: "{{ (group_docker_mservices.file_access | default({})).get('configuration', {}).get('read_batch_size', file_access_default.read_batch_size) }}"
+  jobs_pool_size: "{{ (group_docker_mservices.file_access | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.large_jobs_pool_size) }}"
+  database_min_pool_size: "{{ (group_docker_mservices.file_access | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
+  database_max_pool_size: "{{ (group_docker_mservices.file_access | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
+
+# ----------------------------------
+# File Packager configuration
+# ----------------------------------
+
+file_packager_default:
+  read_batch_size: 1000
+
+role_regards_mconfig_file_packager:
+  read_batch_size: "{{ (group_docker_mservices.file_packager | default({})).get('configuration', {}).get('read_batch_size', file_packager_default.read_batch_size) }}"
+  jobs_pool_size: "{{ (group_docker_mservices.file_packager | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.large_jobs_pool_size) }}"
+  database_min_pool_size: "{{ (group_docker_mservices.file_packager | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
+  database_max_pool_size: "{{ (group_docker_mservices.file_packager | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
 
 # ----------------------------------
 # Delivery configuration
@@ -217,7 +274,7 @@ role_regards_mconfig_lta_manager_default:
 delivery_default:
   read_batch_size: 1000
 
-role_regards_mconfig_delivery_default:
+role_regards_mconfig_delivery:
   read_batch_size: "{{ (group_docker_mservices.delivery | default({})).get('configuration', {}).get('read_batch_size', delivery_default.read_batch_size) }}"
   jobs_pool_size: "{{ (group_docker_mservices.delivery | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.large_jobs_pool_size) }}"
   database_min_pool_size: "{{ (group_docker_mservices.delivery | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
@@ -286,7 +343,7 @@ role_regards_mconfig_amqp:
   http: "{{ (group_config_mservices.amqp | default({})).get('http', amqp_default.http )}}"
   user: "{{ (group_config_mservices.amqp | default({})).get('user', amqp_default.user )}}"
   password: "{{ (group_config_mservices.amqp | default({})).get('password', amqp_default.password )}}"
-  ssl: "{{ (group_config_mservices.amqp | default({})).ssl is defined }}"
+  ssl: "{{ (group_config_mservices.amqp | default({})).ssl is defined | ternary('true', 'false') }}"
 
 role_regards_mconfig_amqp_copied_events_to_notifier: "{{ group_config_mservices.amqp.copied_events_to_notifier | default([]) }}"
 
@@ -406,6 +463,18 @@ role_regards_mconfig_swagger:
     name: Lta manager
     title: MICROSERVICE LTA MANAGER
     description: Lta Manager API
+  file_catalog:
+    name: File catalog
+    title: MICROSERVICE FILE CATALOG
+    description: File Catalog API
+  file_access:
+    name: File access
+    title: MICROSERVICE FILE ACCESS
+    description: File Access API
+  file_packager:
+    name: File packager
+    title: MICROSERVICE FILE PACKAGER
+    description: File Packager API
   delivery:
     name: Delivery
     title: MICROSERVICE DELIVERY

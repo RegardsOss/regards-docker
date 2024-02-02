@@ -1,0 +1,48 @@
+---
+- name: Create grafana config folder
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0770'
+    owner: "{{ role_regards_grafana_config_container_root_user }}"
+    group: "{{ role_regards_grafana_config_container_root_group }}"
+    setype: "{{ role_regards_grafana_config_setype }}"
+    seuser: "{{ role_regards_grafana_config_seuser }}"
+  with_items:
+    - "{{ role_regards_grafana_config_conf_local }}"
+    - "{{ role_regards_grafana_config_conf_local }}dashboards/"
+
+- name: Copy configurations
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ role_regards_grafana_config_conf_local }}"
+    mode: '0770'
+    owner: "{{ role_regards_grafana_config_container_root_user }}"
+    group: "{{ role_regards_grafana_config_container_root_group }}"
+  with_items:
+    - dashboards.yml
+    - datasources.yml
+    - grafana.ini
+
+- name: Copy default dashboards
+  ansible.builtin.template:
+    src: "dashboards/{{ item }}"
+    dest: "{{ role_regards_grafana_config_conf_local }}dashboards/"
+    mode: '0770'
+    owner: "{{ role_regards_grafana_config_container_root_user }}"
+    group: "{{ role_regards_grafana_config_container_root_group }}"
+  with_items:
+    - home.json
+    - demo.json
+    - elasticsearch.json
+    - loki-logs.json
+    - loki-monitoring.json
+    - minio.json
+    - nginx.json
+    - node-exporter.json
+    - prometheus.json
+    - rabbitmq.json
+    - regards_ms.json
+    - fluentd.json
+    - container.json
+  when: role_regards_grafana_config_use_generic_dashboards|bool

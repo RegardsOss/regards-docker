@@ -28,6 +28,8 @@ role_regards_init_master_cots: "{{ group_docker_cots }}"
 role_regards_init_front: "{{ role_regards_init_master_mservices.get('front', {}) }}"
 role_regards_init_public_url: "{{ role_regards_init_front.protocol | default('http') }}://{{ role_regards_init_front.host | default('localhost') }}:{{ role_regards_init_front.public_port | default(role_regards_init_front.get('port','8080')) }}"
 
+role_regards_init_master_add_autocomplete_on_root_user: "{{ group_enable_cli_autocomplete }}"
+
 # Workers
 role_regards_init_workers: "{{ group_docker_workers | default([]) }}"
 
@@ -60,9 +62,25 @@ role_regards_init_volume_mservices_logs:
   - worker-manager
   - lta-manager
   - delivery
+  - file-catalog
+  - file-access
+  - file-packager
   - front
 
 role_regards_init_master_rabbitmq_ssl_active: "{{ group_docker_cots_configuration.get('rabbitmq', {}).ssl is defined }}"
 role_regards_init_master_rabbitmq_global_active: "{{ role_regards_init_master_cots.get('rabbitmq', {}).global_service is defined }}"
 role_regards_init_master_rabbitmq_folder_certificates: "{{ group_workdir_local }}{{ group_stack_name }}/config/rabbitmq/ca-certificates/"
 role_regards_init_master_rabbitmq_ssl_certificates_conf: "{{ group_docker_cots_configuration.get('rabbitmq', {}).get('ssl', {}) }}"
+
+role_regards_init_master_grafana_active_default_dashboard: "{{ role_regards_init_master_cots.get('grafana', {}).get('configuration', {}).get('use_generic_dashboards', True) }}"
+
+# MinIO
+role_regards_init_master_minio_ssl_active: "{{ group_docker_cots.get('minio', {}).ssl is defined }}"
+role_regards_init_master_minio_ssl_ca_active: "{{ group_docker_cots.get('minio', {}).get('ssl', {}).ca is defined }}"
+role_regards_init_master_minio_internal_ssl_active: "{{ group_docker_cots.get('minio', {}).ssl_internal is defined }}"
+role_regards_init_master_minio_ssl_internal_certificates_conf: "{{ group_docker_cots.get('minio', {}).get('ssl_internal', {}) }}"
+role_regards_init_master_minio_ssl_certificates_conf: "{{ group_docker_cots.get('minio', {}).get('ssl', {}) }}"
+
+# MinIO mc
+role_regards_init_master_minio_mc_log_ca_active: "{{ group_docker_cots.get('minio_mc_log', {}).ca is defined }}"
+role_regards_init_master_minio_mc_log_ca: "{{ group_docker_cots.get('minio_mc_log', {}).get('ca') }}"

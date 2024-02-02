@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.9'
 
 # Config name must contains less than 32 [a-zA-Z0-9-_.] caracters
 configs:
@@ -12,12 +12,14 @@ services:
     user: "{{ role_regards_stack_haproxy_container_run_uid }}:{{ role_regards_stack_haproxy_container_run_gid }}"
     read_only: true
     deploy:
+      restart_policy:
+        condition: any
+        delay: {{ role_regards_stack_haproxy_resource_limits_restart_policy.delay }}
+        max_attempts: {{ role_regards_stack_haproxy_resource_limits_restart_policy.max_attempts }}
+        window: {{ role_regards_stack_haproxy_resource_limits_restart_policy.window }}
 {% if role_regards_stack_haproxy_enable_cots_resource_limits %}
       resources:
-        limits:
-          {{ role_regards_stack_haproxy_resource_limits.haproxy.limits | to_nice_yaml | indent(10) }}
-        reservations:
-          {{ role_regards_stack_haproxy_resource_limits.haproxy.reservations | to_nice_yaml | indent(10) }}
+        {{ role_regards_stack_haproxy_resource_limits.haproxy | to_nice_yaml | indent(8) }}
 {% endif %}
       mode: global
     networks:

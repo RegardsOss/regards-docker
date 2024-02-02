@@ -24,9 +24,11 @@
   iptables:
     action: insert
     chain: INPUT
+    in_interface: "{{ item.interface|default(omit) }}"
     protocol: "{{ item.protocol }}"
-    jump: ACCEPT
+    destination: "{{ item.dest|default(omit) }}"
     destination_port: "{{ item.port }}"
+    jump: ACCEPT
   with_items :
     # Inbound swarm manager traffic
     - { port: '2377', protocol: 'tcp' }
@@ -35,6 +37,10 @@
     - { port: '7946', protocol: 'udp' }
     # UDP for the container ingress network.
     - { port: '4789', protocol: 'udp' }
+    # DNS requests to host (udp/53)
+    - { interface: docker0, dest: '{{ansible_facts.default_ipv4.address}}', port: '53', protocol: udp }
+    - { interface: docker_gwbridge, dest: '{{ansible_facts.default_ipv4.address}}', port: '53', protocol: udp }
+  tags: iptables-edit
 
 - name: "[DEBIAN] Save iptables"
   vars:
@@ -42,3 +48,4 @@
   shell: >
         cp {{ iptablesFiles }} {{ iptablesFiles }}-$(date -u '+%FT%X.%N').sav;
         iptables-save -t filter > {{ iptablesFiles }}
+  tags: iptables-save

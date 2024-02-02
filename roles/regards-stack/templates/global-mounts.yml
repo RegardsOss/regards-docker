@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.9'
 
 {% if role_regards_stack_top_level_configs|length %}
 configs:

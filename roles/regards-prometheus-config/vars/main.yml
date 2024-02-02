@@ -1,0 +1,168 @@
+---
+role_regards_prometheus_config_is_defined: "{{ group_docker_cots.prometheus is defined }}"
+
+role_regards_prometheus_config_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/prometheus/"
+
+role_regards_prometheus_config_container_root_user: "{{ group_container_root_user }}"
+role_regards_prometheus_config_container_root_group: "{{ group_container_root_group }}"
+role_regards_prometheus_config_setype: "{{ group_setype }}"
+role_regards_prometheus_config_seuser: "{{ group_seuser }}"
+
+role_regards_prometheus_config_mservices:
+  - name: rs-admin-instance-scrape
+    hostname: rs-admin-instance
+    port: 9037
+    active: "{{ group_docker_mservices.admin_instance is defined }}"
+  - name: rs-admin-scrape
+    hostname: rs-admin
+    port: 9033
+    active: "{{ group_docker_mservices.admin is defined }}"
+  - name: rs-authentication-scrape
+    hostname: rs-authentication
+    port: 9034
+    active: "{{ group_docker_mservices.authentication is defined }}"
+  - name: rs-dam-scrape
+    hostname: rs-dam
+    port: 9035
+    active: "{{ group_docker_mservices.dam is defined }}"
+  - name: rs-notifier-scrape
+    hostname: rs-notifier
+    port: 9039
+    active: "{{ group_docker_mservices.notifier is defined }}"
+  - name: rs-fem-scrape
+    hostname: rs-fem
+    port: 9038
+    active: "{{ group_docker_mservices.fem is defined }}"
+  - name: rs-catalog-scrape
+    hostname: rs-catalog
+    port: 9036
+    active: "{{ group_docker_mservices.catalog is defined }}"
+  - name: rs-access-instance-scrape
+    hostname: rs-access-instance
+    port: 9040
+    active: "{{ group_docker_mservices.access_instance is defined }}"
+  - name: rs-access-project-scrape
+    hostname: rs-access-project
+    port: 9041
+    active: "{{ group_docker_mservices.access_project is defined }}"
+  - name: rs-storage-scrape
+    hostname: rs-storage
+    port: 9042
+    active: "{{ group_docker_mservices.storage is defined }}"
+  - name: rs-order-scrape
+    hostname: rs-order
+    port: 9043
+    active: "{{ group_docker_mservices.order is defined }}"
+  - name: rs-processing-scrape
+    hostname: rs-processing
+    port: 9043
+    active: "{{ group_docker_mservices.processing is defined }}"
+  - name: rs-ingest-scrape
+    hostname: rs-ingest
+    port: 9044
+    active: "{{ group_docker_mservices.ingest is defined }}"
+  - name: rs-dataprovider-scrape
+    hostname: rs-dataprovider
+    port: 9045
+    active: "{{ group_docker_mservices.dataprovider is defined }}"
+  - name: rs-worker-manager-scrape
+    hostname: rs-worker-manager
+    port: 9047
+    active: "{{ group_docker_mservices.worker_manager is defined }}"
+  - name: rs-lta-manager-scrape
+    hostname: rs-lta-manager
+    port: 9048
+    active: "{{ group_docker_mservices.lta_manager is defined }}"
+  - name: rs-file-catalog-scrape
+    hostname: rs-file-catalog
+    port: 9050
+    active: "{{ group_docker_mservices.file_catalog is defined }}"
+  - name: rs-file-access-scrape
+    hostname: rs-file-access
+    port: 9051
+    active: "{{ group_docker_mservices.file_access is defined }}"
+  - name: rs-file-packager-scrape
+    hostname: rs-file-packager
+    port: 9052
+    active: "{{ group_docker_mservices.file_packager is defined }}"
+
+role_regards_prometheus_config_cots:
+  - name: loki
+    hostname: rs-loki
+    port: 3100
+    active: "{{ group_docker_cots.loki is defined }}"
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: loki_build_info|loki_distributor_bytes_received_total|loki_distributor_ingester_append_failures_total|loki_distributor_ingester_appends_total|loki_distributor_lines_received_total|loki_ingester_blocks_per_chunk_bucket|loki_ingester_chunk_age_seconds_bucket|loki_ingester_chunk_compression_ratio_bucket|loki_ingester_chunk_encode_time_seconds_bucket|loki_ingester_chunk_entries_bucket|loki_ingester_chunk_size_bytes_bucket|loki_ingester_chunk_stored_bytes_total|loki_ingester_chunks_created_total|loki_ingester_chunks_flushed_total|loki_ingester_chunks_stored_total|loki_ingester_memory_chunks|loki_ingester_memory_streams|loki_ingester_streams_created_total|loki_ingester_streams_removed_total|loki_internal_log_messages_total|loki_logql_querystats_bytes_processed_per_seconds_bucket|loki_logql_querystats_latency_seconds_bucket|loki_panic_total|loki_request_duration_seconds_bucket|loki_store_series_total
+        action: keep
+
+  - name: elasticsearch-exporter
+    hostname: rs-elasticsearch-exporter
+    port: 9114
+    honor_labels: True
+    active: "{{ group_docker_cots.elasticsearch_exporter is defined }}"
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: elasticsearch_breakers_tripped|elasticsearch_cluster_health_active_primary_shards|elasticsearch_cluster_health_active_shards|elasticsearch_cluster_health_delayed_unassigned_shards|elasticsearch_cluster_health_initializing_shards|elasticsearch_cluster_health_number_of_data_nodes|elasticsearch_cluster_health_number_of_nodes|elasticsearch_cluster_health_number_of_pending_tasks|elasticsearch_cluster_health_relocating_shards|elasticsearch_cluster_health_status|elasticsearch_cluster_health_unassigned_shards|elasticsearch_indices_docs|elasticsearch_indices_indexing_index_total|elasticsearch_indices_search_fetch_total|elasticsearch_indices_store_size_bytes|elasticsearch_jvm_gc_collection_seconds_sum|elasticsearch_jvm_memory_max_bytes|elasticsearch_jvm_memory_used_bytes|elasticsearch_thread_pool_active_count|elasticsearch_thread_pool_queue_count|elasticsearch_thread_pool_rejected_count|elasticsearch_transport_rx_packets_total|elasticsearch_transport_tx_packets_total
+        action: keep
+  - name: postgres-exporter
+    hostname: rs-postgres-exporter
+    port: 9187
+    active: "{{ group_docker_cots.postgres_exporter is defined }}"
+  - name: fluentd
+    hostname: rs-fluentd
+    port: 24231
+    active: "{{ group_docker_cots.fluentd is defined }}"
+  - name: minio
+    # allow specific minio configuration used by Prometheus
+    hostname: "{{ group_docker_cots.get('prometheus', {}).get('minio', {}).get('host', 'rs-minio') }}"
+    port: "{{ group_docker_cots.get('prometheus', {}).get('minio', {}).get('port', '9000') }}"
+    scheme: "{{ group_docker_cots.get('prometheus', {}).get('minio', {}).get('protocol', 'http') }}"
+    insecure: "{{ group_docker_cots.get('prometheus', {}).get('minio', {}).get('insecure') }}"
+    metrics_path: /minio/v2/metrics/cluster
+    active: "{{ group_docker_cots.minio is defined or group_docker_cots.get('prometheus', {}).minio is defined }}"
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: minio_s3_traffic_.+|minio_s3_requests_.+|minio_node_drive_used_bytes|minio_node_file_descriptor_open_total|minio_node_go_routine_total|minio_node_io_rchar_bytes|minio_node_io_wchar_bytes|minio_node_process_cpu_total_seconds|minio_node_process_resident_memory_bytes|minio_node_process_starttime_seconds|minio_node_syscall_read_total|minio_node_syscall_write_total|minio_cluster_capacity_usable_free_bytes|minio_cluster_capacity_usable_total_bytes|minio_node_drive_free_inodes|minio_cluster_drive_offline_total|minio_cluster_drive_online_total|minio_cluster_nodes_offline_total|minio_cluster_nodes_online_total|minio_cluster_health_status|minio_cluster_drive_online_total|minio_cluster_drive_offline_total
+        action: keep
+  # THis configuration fetches bucket info
+  - name: minio-bucket
+    # allow specific minio configuration used by Prometheus
+    hostname: "{{ group_docker_cots.get('prometheus', {}).get('minio', {}).get('host', 'rs-minio') }}"
+    port: "{{ group_docker_cots.get('prometheus', {}).get('minio', {}).get('port', '9000') }}"
+    scheme: "{{ group_docker_cots.get('prometheus', {}).get('minio', {}).get('protocol', 'http') }}"
+    insecure: "{{ group_docker_cots.get('prometheus', {}).get('minio', {}).get('insecure') }}"
+    metrics_path: /minio/v2/metrics/bucket
+    active: "{{ group_docker_cots.minio is defined or group_docker_cots.get('prometheus', {}).minio is defined }}"
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: minio_bucket_objects_size_distribution|minio_bucket_traffic_received_bytes|minio_bucket_traffic_sent_bytes|minio_bucket_usage_object_total|minio_bucket_usage_total_bytes
+        action: keep
+    
+role_regards_prometheus_config_cots_replicated:
+  - name: node-exporter
+    hostname: rs-node-exporter
+    port: 9100
+    active: "{{ group_docker_cots.node_exporter is defined }}"
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: node_filesystem_avail_bytes|node_filesystem_size_bytes|node_load.*|node_memory_.*|node_network_receive_bytes_total|node_network_transmit_bytes_total|node_cpu_seconds_total|node_time_seconds|node_uname_info|process_start_time_seconds|node_timex_.+
+        action: keep
+  - name: telegraf
+    hostname: rs-telegraf
+    port: 9126
+    active: "{{ group_docker_cots.telegraf is defined }}"
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: docker_container_cpu_usage_total|docker_container_mem_limit|docker_container_mem_usage|docker_container_net_rx_bytes|docker_container_net_tx_bytes|docker_container_status_started_at|docker_container_status_uptime_ns|docker_n_containers_running|process_start_time_seconds
+        action: keep
+  - name: rabbitmq
+    hostname: rs-rabbitmq
+    port: 15692
+    active: "{{ group_docker_cots.rabbitmq is defined }}"
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: rabbitmq_build_info|rabbitmq_channel_consumers|rabbitmq_cluster|rabbitmq_connections_closed_total|rabbitmq_connections_opened_total|rabbitmq_node|rabbitmq_process_resident_memory_bytes|rabbitmq_resident_memory_limit_bytes|rabbitmq_disk_space_available_bytes|rabbitmq_queue_messages_.+|rabbitmq_consumers|rabbitmq_global_messages_.+|rabbitmq_identity_info|rabbitmq_queues.*|rabbitmq_connections.*|rabbitmq_channels
+        action: keep
+
+role_regards_prometheus_config_workers: "{{ group_docker_workers | default([]) }}"

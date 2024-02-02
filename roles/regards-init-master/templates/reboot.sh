@@ -16,7 +16,7 @@ if [ "$IS_GLOBAL_SERVICE" == "<nil>" ]; then
   typeset -i NB_REPLICAS
   NB_REPLICAS=$(docker service inspect {{ role_regards_init_master_stack_name }}_${1} --format '{{ '{{' }}.Spec.Mode.Replicated.Replicas{{ '}}' }}')
 
-  docker service scale {{ role_regards_init_master_stack_name }}_${1}=0
+  docker service scale {{ role_regards_init_master_stack_name }}_${1}=0 -d
   docker service scale {{ role_regards_init_master_stack_name }}_${1}=${NB_REPLICAS}
 else
   docker service rm {{ role_regards_init_master_stack_name }}_${1}

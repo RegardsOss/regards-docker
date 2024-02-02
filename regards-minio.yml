@@ -1,0 +1,24 @@
+---
+- name: Install REGARDS on master node
+  hosts: master
+  roles:
+    - regards-init-master
+
+- name: Initialize local workspaces on every nodes
+  hosts: regards_nodes:!swarm_manager_only_nodes
+  become: true
+  roles:
+    - regards-minio-workspace-local
+
+- name: Install SWARM configs and secrets files on master node and deploy stack files
+  hosts: master
+  become: true
+  roles:
+    - regards-minio-ssl
+    - regards-stack-minio
+    - regards-stack-network
+
+- name: Deploy REGARDS using Swarm
+  hosts: master
+  roles:
+    - regards-stack-start

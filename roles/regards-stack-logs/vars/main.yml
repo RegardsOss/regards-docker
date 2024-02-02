@@ -1,0 +1,478 @@
+---
+# Stack infos
+role_regards_stack_logs_stack_name: "{{ group_stack_name }}"
+
+# Folder structure
+role_regards_stack_logs_workspace_local: "{{ group_workdir_local }}{{ group_stack_name }}/workspace/"
+role_regards_stack_logs_config: "{{ group_workdir_local }}{{ group_stack_name }}/config/"
+role_regards_stack_logs_stack: "{{ group_workdir_local }}{{ group_stack_name }}/stack/"
+
+# Files owners
+role_regards_stack_logs_container_root_user: "{{ group_container_root_user }}"
+role_regards_stack_logs_container_root_group: "{{ group_container_root_group }}"
+
+# Docker users
+role_regards_stack_logs_container_run_uid: "{{ group_container_run_uid }}"
+role_regards_stack_logs_container_run_gid: "{{ group_container_run_gid }}"
+
+role_regards_stack_logs_is_defined: "{{ group_docker_cots.loki is defined or group_docker_cots.prometheus is defined or group_docker_cots.grafana is defined }}"
+
+# Docker conf
+role_regards_stack_logs_docker_network_name: "{{ group_docker_network_name }}"
+role_regards_stack_logs_registry: "{{ group_docker_registry }}"
+
+# Top level volumes / configs / secrets and REGARDS related volumes
+role_regards_stack_logs_top_level_nfs_servers: "{{ (group_docker_mounts | default({})).get('nfs', []) }}"
+
+# Healthcheck
+role_regards_stack_logs_enable_cots_healthcheck: "{{ (group_docker_cots_configuration | default({})).get('enable_healthcheck', false) | bool }}"
+
+# Resource limits
+role_regards_stack_logs_enable_cots_resource_limits: "{{ (group_docker_cots_configuration | default({})).get('enable_resource_limits', false) | bool }}"
+
+
+role_regards_stack_logs_services_common:
+  registry: "{{ role_regards_stack_logs_registry }}"
+  network: "{{ role_regards_stack_logs_docker_network_name }}"
+  user:
+    id: "{{ role_regards_stack_logs_container_run_uid }}"
+    gid: "{{ role_regards_stack_logs_container_run_gid }}"
+  heathcheck_active: "{{ role_regards_stack_logs_enable_cots_healthcheck }}"
+  top_level_nfs_servers: "{{ role_regards_stack_logs_top_level_nfs_servers }}"
+  workspace_local: "{{ role_regards_stack_logs_workspace_local }}"
+  enable_resource_limits: "{{ (group_docker_cots_configuration | default({})).get('enable_resource_limits', false) | bool }}"
+  resource_limits:
+    delay: "{{ (group_docker_restart_policy | default({})).get('delay', '10s') }}"
+    max_attempts: "{{ (group_docker_restart_policy | default({})).get('max_attempts', '0') }}"
+    window: "{{ (group_docker_restart_policy | default({})).get('window', '0s') }}"
+
+role_regards_stack_logs_volume_prometheus: "{{ (group_docker_mounts | default({})).get('prometheus', {}) }}"
+role_regards_stack_logs_volume_grafana: "{{ (group_docker_mounts | default({})).get('grafana', {}) }}"
+role_regards_stack_logs_volume_loki: "{{ (group_docker_mounts | default({})).get('loki', {}) }}"
+
+role_regards_stack_logs_cots_elasticsearch_exporter: "{{ group_docker_cots.get('elasticsearch_exporter', {}) }}"
+role_regards_stack_logs_cots_node_exporter: "{{ group_docker_cots.get('node_exporter', {}) }}"
+role_regards_stack_logs_cots_telegraf: "{{ group_docker_cots.get('telegraf', {}) }}"
+role_regards_stack_logs_cots_prometheus: "{{ group_docker_cots.get('prometheus', {}) }}"
+prometheus_default:
+  retention_period: 90d
+  retention_size: 150GB
+role_regards_stack_logs_cots_prometheus_retention_day: "{{ role_regards_stack_logs_cots_prometheus.get('retention_period', prometheus_default.retention_period) }}"
+role_regards_stack_logs_cots_prometheus_retention_size: "{{ role_regards_stack_logs_cots_prometheus.get('retention_size', prometheus_default.retention_size) }}"
+role_regards_stack_logs_cots_grafana: "{{ group_docker_cots.get('grafana', {}) }}"
+role_regards_stack_logs_cots_grafana_active_default_dashboard: "{{ role_regards_stack_logs_cots_grafana.get('configuration', {}).get('use_generic_dashboards', True) }}"
+role_regards_stack_logs_cots_loki: "{{ group_docker_cots.get('loki', {}) }}"
+role_regards_stack_logs_cots_kafka: "{{ group_docker_cots.get('kafka', {}) }}"
+role_regards_stack_logs_cots_fluentbit: "{{ group_docker_cots.get('fluentbit', {}) }}"
+role_regards_stack_logs_cots_fluentd: "{{ group_docker_cots.get('fluentd', {}) }}"
+
+role_regards_stack_logs_services:
+  prometheus:
+    active: "{{ group_docker_cots.prometheus is defined }}"
+    imageName: regards-prometheus
+    imageTag: "{{ role_regards_stack_logs_cots_prometheus.tag | default('latest') }}"
+    hostname: rs-prometheus
+    node_label_placement_constraint: "{{ role_regards_stack_logs_cots_prometheus.get('node_label_placement_constraint') }}"
+    stop_grace_period: 20s
+    ports:
+      - active: "{{ role_regards_stack_logs_cots_prometheus.http is defined }}"
+        host: "{{ role_regards_stack_logs_cots_prometheus.get('http') }}"
+        container: 9090
+    healthcheck:
+      test: ['CMD', 'promtool', 'query', 'series', '--match=prometheus_ready', 'http://localhost:9090/']
+      interval: 30s
+      timeout: 20s
+      retries: 20
+      start_period: 5s
+    resources:
+      limits:
+        cpus: '0.5'
+        memory: 1G
+        pids: 100000
+      reservations:
+        cpus: '0.05'
+        memory: 256M
+    configs:
+      - src_directory_location: "{{ role_regards_stack_logs_config }}prometheus/"
+        src_filename: prometheus.yml
+        destination: /etc/prometheus/prometheus.yml
+        env_containing_checksum: CHECKSUM_RS_PROMETHEUS_PROMETHEUS_YML
+        swarm_config_name_prefix: prometheus_prometheus_yml
+    volumes:
+      - swarm_volume_name_prefix: data-prometheus
+        src_default_directory_location: prometheus
+        config: "{{ role_regards_stack_logs_volume_prometheus }}"
+        destination: /data
+    envs:
+      RETENTION_TIME: "{{ role_regards_stack_logs_cots_prometheus_retention_day }}"
+      RETENTION_SIZE: "{{ role_regards_stack_logs_cots_prometheus_retention_size }}"
+  grafana:
+    active: "{{ group_docker_cots.grafana is defined }}"
+    imageName: regards-grafana
+    imageTag: "{{ role_regards_stack_logs_cots_grafana.tag | default('latest') }}"
+    hostname: rs-grafana
+    node_label_placement_constraint: "{{ role_regards_stack_logs_cots_grafana.get('node_label_placement_constraint') }}"
+    stop_grace_period: 20s
+    resources:
+      limits:
+        cpus: '1'
+        memory: 512M
+        pids: 100000
+      reservations:
+        cpus: '0.1'
+        memory: 64M
+    healthcheck:
+      test: ['CMD', 'curl', 'http://localhost:3000/api/health']
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 5s
+    ports:
+      - active: "{{ role_regards_stack_logs_cots_grafana.port is defined }}"
+        host: "{{ role_regards_stack_logs_cots_grafana.get('port') }}"
+        container: 3000
+    configs:
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/"
+        src_filename: datasources.yml
+        destination: /etc/grafana/provisioning/datasources/datasources.yml
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_DATASOURCES_YML
+        swarm_config_name_prefix: grafana_datasources_yml
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/"
+        src_filename: dashboards.yml
+        destination: /etc/grafana/provisioning/dashboards/dashboards.yml
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_DASHBOARDS_YML
+        swarm_config_name_prefix: grafana_dashboard_yaml
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/"
+        src_filename: grafana.ini
+        destination: /etc/grafana/grafana.ini
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_GRAFANA_INI
+        swarm_config_name_prefix: grafana_grafana_ini
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/ssl/"
+        src_filename: "{{ role_regards_stack_logs_cots_grafana.get('ssl', {}).get('crt') }}"
+        destination: "/etc/grafana/{{ role_regards_stack_logs_cots_grafana.get('ssl', {}).get('crt') }}"
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_SSL_CRT
+        swarm_config_name_prefix: grafana_ssl_crt
+        active: "{{ role_regards_stack_logs_cots_grafana.get('ssl', {}).crt is defined }}"
+
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/dashboards/"
+        src_filename: home.json
+        destination: /etc/grafana/provisioning/dashboards/home.json
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_HOME_JSON
+        swarm_config_name_prefix: grafana_home_json
+        active: "{{ role_regards_stack_logs_cots_grafana_active_default_dashboard|bool }}"
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/dashboards/"
+        src_filename: demo.json
+        destination: /etc/grafana/provisioning/dashboards/regards/home.json
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_DEMO_JSON
+        swarm_config_name_prefix: grafana_demo_json
+        active: "{{ role_regards_stack_logs_cots_grafana_active_default_dashboard|bool }}"
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/dashboards/"
+        src_filename: elasticsearch.json
+        destination: /etc/grafana/provisioning/dashboards/generic/elasticsearch.json
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_ELASTICSEARCH_JSON
+        swarm_config_name_prefix: grafana_es_json
+        active: "{{ role_regards_stack_logs_cots_grafana_active_default_dashboard|bool }}"
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/dashboards/"
+        src_filename: loki-logs.json
+        destination: /etc/grafana/provisioning/dashboards/generic/loki-logs.json
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_LOKI_LOGS_JSON
+        swarm_config_name_prefix: grafana_loki_logs_json
+        active: "{{ role_regards_stack_logs_cots_grafana_active_default_dashboard|bool }}"
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/dashboards/"
+        src_filename: loki-monitoring.json
+        destination: /etc/grafana/provisioning/dashboards/generic/loki-monitoring.json
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_LOKI_MONITORING_JSON
+        swarm_config_name_prefix: grafana_loki_monitor_json
+        active: "{{ role_regards_stack_logs_cots_grafana_active_default_dashboard|bool }}"
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/dashboards/"
+        src_filename: fluentd.json
+        destination: /etc/grafana/provisioning/dashboards/generic/fluentd.json
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_FLUENTD_JSON
+        swarm_config_name_prefix: grafana_fluentd_json
+        active: "{{ role_regards_stack_logs_cots_grafana_active_default_dashboard|bool }}"
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/dashboards/"
+        src_filename: minio.json
+        destination: /etc/grafana/provisioning/dashboards/generic/minio.json
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_MINIO_JSON
+        swarm_config_name_prefix: grafana_minio_json
+        active: "{{ role_regards_stack_logs_cots_grafana_active_default_dashboard|bool }}"
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/dashboards/"
+        src_filename: nginx.json
+        destination: /etc/grafana/provisioning/dashboards/generic/nginx.json
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_NGINX_JSON
+        swarm_config_name_prefix: grafana_nginx_json
+        active: "{{ role_regards_stack_logs_cots_grafana_active_default_dashboard|bool }}"
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/dashboards/"
+        src_filename: node-exporter.json
+        destination: /etc/grafana/provisioning/dashboards/generic/node-exporter.json
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_NODE_EXPORTER_JSON
+        swarm_config_name_prefix: grafana_node_exporter_json
+        active: "{{ role_regards_stack_logs_cots_grafana_active_default_dashboard|bool }}"
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/dashboards/"
+        src_filename: prometheus.json
+        destination: /etc/grafana/provisioning/dashboards/generic/prometheus.json
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_PROMETHEUS_JSON
+        swarm_config_name_prefix: grafana_prometheus_json
+        active: "{{ role_regards_stack_logs_cots_grafana_active_default_dashboard|bool }}"
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/dashboards/"
+        src_filename: rabbitmq.json
+        destination: /etc/grafana/provisioning/dashboards/generic/rabbitmq.json
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_RABBITMQ_JSON
+        swarm_config_name_prefix: grafana_rabbitmq_json
+        active: "{{ role_regards_stack_logs_cots_grafana_active_default_dashboard|bool }}"
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/dashboards/"
+        src_filename: regards_ms.json
+        destination: /etc/grafana/provisioning/dashboards/generic/regards_ms.json
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_REGARDS_MS_JSON
+        swarm_config_name_prefix: grafana_regards_ms_json
+        active: "{{ role_regards_stack_logs_cots_grafana_active_default_dashboard|bool }}"
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/dashboards/"
+        src_filename: container.json
+        destination: /etc/grafana/provisioning/dashboards/generic/container.json
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_CONTAINER_JSON
+        swarm_config_name_prefix: grafana_container_json
+        active: "{{ role_regards_stack_logs_cots_grafana_active_default_dashboard|bool }}"
+    secrets:
+      - src_directory_location: "{{ role_regards_stack_logs_config }}grafana/ssl/"
+        src_filename: "{{ role_regards_stack_logs_cots_grafana.get('ssl', {}).get('key') }}"
+        destination: "/etc/grafana/{{ role_regards_stack_logs_cots_grafana.get('ssl', {}).get('key') }}"
+        env_containing_checksum: CHECKSUM_RS_GRAFANA_SSL_KEY
+        swarm_secret_name_prefix: grafana_ssl_key
+        active: "{{ role_regards_stack_logs_cots_grafana.get('ssl', {}).key is defined }}"
+    volumes:
+      - swarm_volume_name_prefix: data-grafana
+        src_default_directory_location: grafana
+        config: "{{ role_regards_stack_logs_volume_grafana }}"
+        destination: /var/lib/grafana
+  loki:
+    active: "{{ group_docker_cots.loki is defined }}"
+    imageName: regards-loki
+    imageTag: "{{ role_regards_stack_logs_cots_loki.tag | default('latest') }}"
+    hostname: rs-loki
+    node_label_placement_constraint: "{{ role_regards_stack_logs_cots_loki.get('node_label_placement_constraint') }}"
+    stop_grace_period: 20s
+    ports:
+      - active: "{{ role_regards_stack_logs_cots_loki.http is defined }}"
+        host: "{{ role_regards_stack_logs_cots_loki.get('http') }}"
+        container: 3100
+    resources:
+      limits:
+        cpus: '0.5'
+        memory: 1G
+        pids: 100000
+      reservations:
+        cpus: '0.05'
+        memory: 256M
+    healthcheck:
+      test: ['CMD', 'logcli', 'labels', 'fluentd_worker']
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 5s
+    configs:
+      - src_directory_location: "{{ role_regards_stack_logs_config }}loki/"
+        src_filename: loki.yaml
+        destination: /etc/loki/loki.yaml
+        env_containing_checksum: CHECKSUM_RS_LOKI_LOKI_YML
+        swarm_config_name_prefix: loki_loki_yml
+    volumes:
+      - swarm_volume_name_prefix: data-loki
+        src_default_directory_location: loki
+        config: "{{ role_regards_stack_logs_volume_loki }}"
+        destination: /data/
+    tmpfs_volumes:
+      - /tmp
+  kafka:
+    active: "{{ group_docker_cots.kafka is defined }}"
+    imageName: regards-kafka
+    imageTag: "{{ role_regards_stack_logs_cots_kafka.tag | default('latest') }}"
+    hostname: rs-kafka-{{ '{{' }}.Task.Slot{{ '}}' }}
+    service: rs-kafka
+    node_label_placement_constraint: "{{ role_regards_stack_logs_cots_kafka.get('node_label_placement_constraint') }}"
+    envs:
+      ALLOW_PLAINTEXT_LISTENER : yes
+      ALLOW_ANONYMOUS_LOGIN : yes
+      # Required when you are running with a single-node cluster.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR : 1
+      # Kraft conf
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "{{ '{{' }}.Task.Slot{{ '}}' }}@rs-kafka-{{ '{{' }}.Task.Slot{{ '}}' }}:9093"
+      KAFKA_CFG_NODE_ID: "{{ '{{' }}.Task.Slot{{ '}}' }}"
+      KAFKA_KRAFT_CLUSTER_ID: abcdefghijklmnopqrstuv
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      # Listener configuration
+      # https://github.com/bitnami/containers/tree/main/bitnami/kafka#accessing-apache-kafka-with-internal-and-external-clients
+      KAFKA_CFG_LISTENERS : PLAINTEXT://:9092,PLAINTEXT_HOST://:29092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS : PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP : PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE : true
+    healthcheck:
+      test: ['CMD', 'kafka-cluster.sh', 'cluster-id', '--bootstrap-server', 'localhost:9092']
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 15s
+    resources:
+      limits:
+        cpus: '1'
+        memory: 2G
+        pids: 100000
+      reservations:
+        cpus: '0.5'
+        memory: 512M
+    tmpfs_volumes:
+      - /opt/bitnami/kafka/config/
+      - /bitnami/kafka
+      - /tmp
+  fluentbit:
+    active: "{{ group_docker_cots.fluentbit is defined }}"
+    imageName: regards-fluentbit
+    imageTag: "{{ role_regards_stack_logs_cots_fluentbit.tag | default('latest') }}"
+    hostname: rs-fluentbit
+    # Set this component, when active, always global
+    deployGlobal: true
+    capAddNetAdmin: True
+    envs:
+      NODE_HOSTNAME: "{{ '{{' }}.Node.Hostname{{ '}}' }}"
+    resources:
+      limits:
+        cpus: '0.1'
+        memory: 128M
+        pids: 100000
+      reservations:
+        cpus: '0.01'
+        memory: 32M
+    ports:
+      - active: True
+        host: 24224
+        container: 24224
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--output-document=-', 'http://localhost:2020/api/v1/health']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 0s
+  fluentd:
+    active: "{{ group_docker_cots.fluentd is defined }}"
+    imageName: regards-fluentd
+    imageTag: "{{ role_regards_stack_logs_cots_fluentd.tag | default('latest') }}"
+    hostname: rs-fluentd
+    node_label_placement_constraint: "{{ role_regards_stack_logs_cots_fluentd.get('node_label_placement_constraint') }}"
+    tmpfs_volumes:
+      - /tmp
+      - /fluentd/logs
+    configs:
+      - src_directory_location: "{{ role_regards_stack_logs_config }}fluentd/"
+        src_filename: fluent.conf
+        destination: /fluentd/etc/fluent.conf
+        env_containing_checksum: CHECKSUM_RS_FLUENTD_FLUENT_CONF
+        swarm_config_name_prefix: fluentd_fluent_conf
+    healthcheck:
+      test: ['CMD', 'curl', '-s', 'localhost:8888/']
+      interval: 20s
+      timeout: 20s
+      retries: 10
+      start_period: 0s
+    resources:
+      limits:
+        cpus: '0.5'
+        memory: 512M
+        pids: 100000
+      reservations:
+        cpus: '0.1'
+        memory: 128M
+
+
+
+
+
+
+
+
+role_regards_stack_logs_services_exporters:
+  elasticsearch_exporter:
+    active: "{{ group_docker_cots.elasticsearch_exporter is defined }}"
+    imageName: regards-elasticsearch-exporter
+    imageTag: "{{ role_regards_stack_logs_cots_elasticsearch_exporter.tag | default('latest') }}"
+    hostname: rs-elasticsearch-exporter
+    node_label_placement_constraint: "{{ role_regards_stack_logs_cots_elasticsearch_exporter.get('node_label_placement_constraint') }}"
+    resources:
+      limits:
+        cpus: '0.1'
+        memory: 16M
+        pids: 100000
+      reservations:
+        cpus: '0.01'
+        memory: 8M
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--output-document=-', 'localhost:9114/metrics']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 0s
+  node_exporter:
+    active: "{{ group_docker_cots.node_exporter is defined }}"
+    imageName: regards-node-exporter
+    imageTag: "{{ role_regards_stack_logs_cots_node_exporter.tag | default('latest') }}"
+    hostnameWithNodeHostname: rs-node-exporter
+    service: rs-node-exporter
+    # Set this component, when active, always global
+    deployGlobal: true
+    envs:
+      NODE_ID: "{{ '{{' }}.Node.ID{{ '}}' }}"
+    volumes:
+      # node exporter must have access to /proc and /sys to boot
+      - swarm_volume_name_prefix: node-exporter-proc
+        source: /proc
+        destination: /host/proc
+        ro: true
+      - swarm_volume_name_prefix: node-exporter-sys
+        source: /sys
+        destination: /host/sys
+        ro: true
+      - swarm_volume_name_prefix: node-exporter-regards-workspace
+        source: "{{ global_stack.workdir }}"
+        destination: /regards-workspace
+        ro: true
+    resources:
+      limits:
+        cpus: '0.1'
+        memory: 32M
+        pids: 100000
+      reservations:
+        cpus: '0.02'
+        memory: 8M
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--output-document=-', 'localhost:9100/metrics']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 0s
+
+  telegraf:
+    active: "{{ group_docker_cots.telegraf is defined }}"
+    imageName: regards-telegraf
+    imageTag: "{{ role_regards_stack_logs_cots_telegraf.tag | default('latest') }}"
+    hostnameWithNodeHostname: rs-telegraf
+    service: rs-telegraf
+    # Set this component, when active, always global
+    deployGlobal: true
+    # Specific security concern:
+    # run telegraf with docker group to allow it to access to the Docker socket
+    user: "{{ role_regards_stack_logs_container_run_uid }}:117"
+    direct_mounts:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    resources:
+      limits:
+        cpus: '0.1'
+        memory: 256M
+        pids: 100000
+      reservations:
+        cpus: '0.05'
+        memory: 256M
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--output-document=-', 'localhost:9126/metrics']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 0s
