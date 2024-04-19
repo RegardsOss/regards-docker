@@ -1,5 +1,6 @@
 ---
 role_regards_init_master_docker_network_name: "{{ group_docker_network_name }}"
+role_regards_init_master_validate_certs: "{{ group_validate_certs | default(lookup('ansible.builtin.env', 'DOCKER_TLS_VERIFY')|default(false, true)) }}"
 role_regards_init_master_docker_network_subnet: "{{ group_docker_network_ip_network }}0/24"
 role_regards_init_master_docker_network_gateway: "{{ group_docker_network_ip_network }}1"
 

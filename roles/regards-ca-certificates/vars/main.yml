@@ -2,7 +2,7 @@
 role_regards_ca_certificates_is_defined: "{{ group_config_mservices.ca_certificates is defined }}"
 
 role_regards_ca_certificates_destination: "{{ group_workdir_local }}{{ group_stack_name }}/config/regards/ca-certificates"
-role_regards_ca_certificates_location_inside_playbook: "{{ inventory_dir }}/group_vars/regards_nodes/files/ca-certificates"
+role_regards_ca_certificates_location_inside_playbook: "{{ group_docker_static_files_migrated | default(False) | ternary(inventory_dir + '/static/ca-certificates', inventory_dir + '/group_vars/regards_nodes/files/ca-certificates') }}"
 
 # Docker user
 role_regards_ca_certificates_container_root_user: "{{ group_container_root_user }}"

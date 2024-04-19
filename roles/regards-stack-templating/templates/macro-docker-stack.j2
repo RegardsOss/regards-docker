@@ -102,7 +102,7 @@
 {% else %}
       replicas: {{ service.replicas | default(1) }}
 {% endif %}
-{% if common.enable_resource_limits is defined and service.resources is defined %}
+{% if service.resources is defined %}
       resources:
         {{ service.resources | to_nice_yaml | indent(8) }}
 {% endif %}
@@ -151,11 +151,21 @@
 
 #########################################
 # Service > environment section
+# Display a line for every envionments:
+#    - not empty
+#    - or, if environment is a dict and environment.active is true
+#         --> this option allows to force empty venv creation
 #########################################
 {% macro initEnvSection(common, service) %}
     environment:
 {%    for key, value in service.envs.items() %}
-      - "{{ key }}={{value}}"
+{%      if value is mapping %}
+{%        if value.active %}
+      - "{{ key }}={{ value.value }}"
+{%        endif %}
+{%      elif value %}
+      - "{{ key }}={{ value }}"
+{%      endif %}
 {%     endfor %}
 {% endmacro %}
 
@@ -203,7 +213,7 @@
 {%   endif %}
     networks:
       - {{ common.network }}
-{%   if service.healthcheck is defined and common.heathcheck_active|bool %}
+{%   if service.healthcheck is defined %}
 {{     initHealthcheckSection(common, service) }}
 {%   endif %}
 {%   if service.volumes is defined or service.tmpfs_volumes is defined or service.direct_mounts is defined %}

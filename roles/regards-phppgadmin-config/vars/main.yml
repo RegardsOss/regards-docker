@@ -14,5 +14,4 @@ role_regards_phppgadmin_host: "{{ group_docker_cots.get('phppgadmin', {}).get('h
 role_regards_phppgadmin_config_ssl_files: "{{ group_docker_cots.get('phppgadmin', {}).get('ssl', {}) }}"
 # SSL src and dest infos
 role_regards_phppgadmin_config_ssl_destination: "{{ role_regards_phppgadmin_config_conf_local }}ssl"
-role_regards_phppgadmin_config_ssl_location_inside_playbook: "{{ inventory_dir }}/group_vars/regards_nodes/files/ssl"
-
+role_regards_phppgadmin_config_ssl_location_inside_playbook: "{{ group_docker_static_files_migrated | default(False) | ternary(inventory_dir + '/static/ssl', inventory_dir + '/group_vars/regards_nodes/files/ssl') }}"

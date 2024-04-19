@@ -8,4 +8,4 @@
     group: "{{ role_regards_minio_workspace_local_container_run_group }}"
     setype: "{{ role_regards_minio_workspace_local_setype }}"
     seuser: "{{ role_regards_minio_workspace_local_seuser }}"
-  
+  when: role_regards_minio_workspace_local_active|bool

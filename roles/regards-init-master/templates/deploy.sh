@@ -30,9 +30,6 @@ docker stack deploy \
 {% if role_regards_init_master_cots.elasticsearch is defined %}
   -c {{ role_regards_init_master_stack }}elastic.yml \
 {% endif %}
-{% if role_regards_init_master_cots.elasticsearch_logs is defined or role_regards_init_master_cots.kibana_logs is defined or role_regards_init_master_cots.fluent is defined %}
-  -c {{ role_regards_init_master_stack }}logs.yml \
-{% endif %}
 {% if role_regards_init_master_cots.loki is defined or role_regards_init_master_cots.prometheus is defined or role_regards_init_master_cots.grafana is defined %}
   -c {{ role_regards_init_master_stack }}logs-stack.yml \
 {% endif %}

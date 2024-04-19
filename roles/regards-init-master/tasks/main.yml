@@ -17,17 +17,25 @@
 - name: Get regards network info
   docker_network_info:
     name: "{{ role_regards_init_master_docker_network_name }}"
+    validate_certs: "{{ role_regards_init_master_validate_certs }}"
   register: docker_network_name_info
   vars:
     ansible_python_interpreter: "env python{{ python_version }}"
 
 - name: Should recreate regards network?
   ansible.builtin.set_fact:
-    recreate_regards_network: "{{ docker_network_name_info.exists != true or docker_network_name_info.network.Driver != \"overlay\" or docker_network_name_info.network.Attachable != true or docker_network_name_info.network.IPAM.Config[0].Gateway != role_regards_init_master_docker_network_gateway or docker_network_name_info.network.IPAM.Config[0].Subnet != role_regards_init_master_docker_network_subnet }}"
+    recreate_regards_network: "{{ docker_network_name_info.exists != true or 
+      docker_network_name_info.network.Driver != \"overlay\" or 
+      docker_network_name_info.network.Attachable != true or 
+      docker_network_name_info.network.EnableIPv6 != false or 
+      docker_network_name_info.network.IPAM.Config[0].Gateway != role_regards_init_master_docker_network_gateway or 
+      docker_network_name_info.network.IPAM.Config[0].Subnet != role_regards_init_master_docker_network_subnet 
+    }}"
 
 - name: Remove regards network
   docker_network:
     name: "{{ role_regards_init_master_docker_network_name  }}"
+    validate_certs: "{{ role_regards_init_master_validate_certs }}"
     state: absent
   when: recreate_regards_network|bool
   run_once: true
@@ -39,6 +47,7 @@
     name: "{{ role_regards_init_master_docker_network_name }}"
     attachable: true
     driver: overlay
+    enable_ipv6: false
     ipam_config:
       - subnet: "{{ role_regards_init_master_docker_network_subnet }}"
         gateway: "{{ role_regards_init_master_docker_network_gateway }}"

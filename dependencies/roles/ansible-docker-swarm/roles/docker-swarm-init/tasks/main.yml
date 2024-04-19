@@ -27,6 +27,9 @@
   docker_swarm:
     state: present
     advertise_addr: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:2377"
+    listen_addr: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:2377"
+    # 10 years certificate (in ns) expiration date
+    node_cert_expiry: 7566048000000000000
   when: worker_status.host_info.Swarm.LocalNodeState == "inactive"
   vars:
     ansible_python_interpreter: "env python{{ python_version }}"

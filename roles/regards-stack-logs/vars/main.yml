@@ -24,23 +24,14 @@ role_regards_stack_logs_registry: "{{ group_docker_registry }}"
 # Top level volumes / configs / secrets and REGARDS related volumes
 role_regards_stack_logs_top_level_nfs_servers: "{{ (group_docker_mounts | default({})).get('nfs', []) }}"
 
-# Healthcheck
-role_regards_stack_logs_enable_cots_healthcheck: "{{ (group_docker_cots_configuration | default({})).get('enable_healthcheck', false) | bool }}"
-
-# Resource limits
-role_regards_stack_logs_enable_cots_resource_limits: "{{ (group_docker_cots_configuration | default({})).get('enable_resource_limits', false) | bool }}"
-
-
 role_regards_stack_logs_services_common:
   registry: "{{ role_regards_stack_logs_registry }}"
   network: "{{ role_regards_stack_logs_docker_network_name }}"
   user:
     id: "{{ role_regards_stack_logs_container_run_uid }}"
     gid: "{{ role_regards_stack_logs_container_run_gid }}"
-  heathcheck_active: "{{ role_regards_stack_logs_enable_cots_healthcheck }}"
   top_level_nfs_servers: "{{ role_regards_stack_logs_top_level_nfs_servers }}"
   workspace_local: "{{ role_regards_stack_logs_workspace_local }}"
-  enable_resource_limits: "{{ (group_docker_cots_configuration | default({})).get('enable_resource_limits', false) | bool }}"
   resource_limits:
     delay: "{{ (group_docker_restart_policy | default({})).get('delay', '10s') }}"
     max_attempts: "{{ (group_docker_restart_policy | default({})).get('max_attempts', '0') }}"
@@ -258,7 +249,7 @@ role_regards_stack_logs_services:
     resources:
       limits:
         cpus: '0.5'
-        memory: 1G
+        memory: "{{ role_regards_stack_logs_cots_loki.get('containerLimit', '1G') }}"
         pids: 100000
       reservations:
         cpus: '0.05'
@@ -306,8 +297,16 @@ role_regards_stack_logs_services:
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP : PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE : true
+      KAFKA_HEAP_OPTS : "-Xmx{{ role_regards_stack_logs_cots_kafka.get('memoryLimit', '1024m') }} -Xms{{ role_regards_stack_logs_cots_kafka.get('memoryLimit', '1024m') }}"
+      # Override logs config to limit their size
+      # 10MB snapshot / max retention 50 MB or 24 hours 
+      KAFKA_CFG_LOG_RETENTION_HOURS: 24
+      KAFKA_CFG_LOG_RETENTION_BYTES: 52428800
+      KAFKA_CFG_LOG_SEGMENT_BYTES: 10485760
     healthcheck:
-      test: ['CMD', 'kafka-cluster.sh', 'cluster-id', '--bootstrap-server', 'localhost:9092']
+      # FIXME - commit this when kafka image deployed everywhere 
+      # test: ['CMD-SHELL', 'nc -z localhost 9092']
+      test: ['CMD', '/kafka-cluster-healthcheck.sh', 'cluster-id', '--bootstrap-server', 'localhost:9092']
       interval: 10s
       timeout: 10s
       retries: 10
@@ -315,7 +314,7 @@ role_regards_stack_logs_services:
     resources:
       limits:
         cpus: '1'
-        memory: 2G
+        memory: "{{ role_regards_stack_logs_cots_kafka.get('containerLimit', '2.5G') }}"
         pids: 100000
       reservations:
         cpus: '0.5'
@@ -399,7 +398,7 @@ role_regards_stack_logs_services_exporters:
     resources:
       limits:
         cpus: '0.1'
-        memory: 16M
+        memory: 64M
         pids: 100000
       reservations:
         cpus: '0.01'

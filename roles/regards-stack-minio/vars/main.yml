@@ -13,9 +13,6 @@ role_regards_stack_minio_container_root_group: "{{ group_container_root_group }}
 # Top level volumes / configs / secrets and REGARDS related volumes
 role_regards_stack_minio_top_level_nfs_servers: "{{ (group_docker_mounts | default({})).get('nfs', []) }}"
 
-# Healthcheck
-role_regards_stack_minio_enable_cots_healthcheck: "{{ (group_docker_cots_configuration | default({})).get('enable_healthcheck', false) | bool }}"
-
 # Folder structure
 role_regards_stack_minio_config_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/minio/"
 role_regards_stack_minio_workspace_local: "{{ group_workdir_local }}{{ group_stack_name }}/workspace/"
@@ -68,6 +65,11 @@ role_regards_stack_minio_server_url_env: "{{ role_regards_stack_minio_conf.get('
 role_regards_stack_minio_server_url_healthcheck: "{{ role_regards_stack_minio_conf.get('host', role_regards_stack_minio_server_protocol + '://localhost:9000') | replace(':443',':9000') }}"
 # curl resolve option when healthcheck requires to use public domain of the MinIO server
 role_regards_stack_minio_server_url_healthcheck_resolve: "--resolve {{ role_regards_stack_minio_conf.get('host', '') | replace('https://','') | replace('http://','') | replace(':443',':9000') }}:127.0.0.1"
+# Storage class config
+role_regards_stack_minio_storage_class:
+  standard_parity: "{{ role_regards_stack_minio_conf.get('storage_class', {}).get('standard_parity') }}"
+  reduced_redundancy_parity: "{{ role_regards_stack_minio_conf.get('storage_class', {}).get('reduced_redundancy_parity') }}"
+  comment: "{{ role_regards_stack_minio_conf.get('storage_class', {}).get('comment') }}"
 
 # MinIO log
 role_regards_stack_minio_mc_log_conf: "{{ group_docker_cots.get('minio_mc_log', {}) }}"
@@ -81,10 +83,8 @@ role_regards_stack_minio_services_common:
   user:
     id: "{{ role_regards_stack_minio_container_run_uid }}"
     gid: "{{ role_regards_stack_minio_container_run_gid }}"
-  heathcheck_active: "{{ role_regards_stack_minio_enable_cots_healthcheck }}"
   top_level_nfs_servers: "{{ role_regards_stack_minio_top_level_nfs_servers }}"
   workspace_local: "{{ role_regards_stack_minio_workspace_local }}"
-  enable_resource_limits: "{{ (group_docker_cots_configuration | default({})).get('enable_resource_limits', false) | bool }}"
   resource_limits:
     delay: "{{ (group_docker_restart_policy | default({})).get('delay', '10s') }}"
     max_attempts: "{{ (group_docker_restart_policy | default({})).get('max_attempts', '0') }}"
@@ -114,6 +114,9 @@ role_regards_stack_minio_services:
       MINIO_ROOT_PASSWORD: "{{ role_regards_stack_minio_root_password }}"
       MINIO_CLUSTER_URL: "{{ role_regards_stack_minio_cluster_env }}"
       MINIO_SERVER_URL: "{{ role_regards_stack_minio_server_url_env }}"
+      MINIO_STORAGE_CLASS_STANDARD: "{{ role_regards_stack_minio_storage_class.standard_parity }}"
+      MINIO_STORAGE_CLASS_RRS: "{{ role_regards_stack_minio_storage_class.reduced_redundancy_parity }}"
+      MINIO_STORAGE_CLASS_COMMENT: "{{ role_regards_stack_minio_storage_class.comment }}"
     configs:
       - src_directory_location: "{{ role_regards_stack_minio_config_local }}certs/"
         src_filename: "{{ role_regards_minio_ssl_internal_infos.crt }}"

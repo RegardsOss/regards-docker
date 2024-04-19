@@ -72,10 +72,8 @@ services:
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{%   if role_regards_stack_enable_cots_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.postgres | to_nice_yaml | indent(8) }}
-{%   endif %}
 {%   if role_regards_stack_cots.postgres.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -114,15 +112,9 @@ services:
     ports:
       - "{{ role_regards_stack_cots.postgres.client }}:5432"
 {%   endif %}
-{%   if role_regards_stack_initialize_default_logging|bool or role_regards_stack_cots.postgres.logging is defined %}
+{%   if role_regards_stack_cots.postgres.logging is defined %}
     logging:
-{%     if role_regards_stack_cots.postgres.logging is defined %}
       {{ role_regards_stack_cots.postgres.logging | to_nice_yaml | indent(6) }}
-{%     else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{%     endif %}
 {%   endif %}
 {% endif %}
 
@@ -138,25 +130,19 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-phppgadmin
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "curl -I {{ role_regards_stack_cots.phppgadmin.ssl is defined | ternary('https', 'http') }}://127.0.0.1:8080/fpm-ping {{ role_regards_stack_cots.phppgadmin.ssl is defined | ternary('-k', '') }}"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 1m
-{% endif %}
-{%   if role_regards_stack_cots.phppgadmin.node_label_placement_constraint is defined or role_regards_stack_enable_cots_resource_limits %}
     deploy:
-{%     if role_regards_stack_enable_cots_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.phppgadmin | to_nice_yaml | indent(8) }}
-{%     endif %}
-{%     if role_regards_stack_cots.phppgadmin.node_label_placement_constraint is defined %}
+{%   if role_regards_stack_cots.phppgadmin.node_label_placement_constraint is defined %}
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_cots.phppgadmin.node_label_placement_constraint.key }} == {{ role_regards_stack_cots.phppgadmin.node_label_placement_constraint.value }}
-{%     endif %}
 {%   endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
@@ -206,14 +192,8 @@ services:
       - source: phppgadmin_ssl_key
         target: /etc/ssl/server.key
 {%   endif %}
-{%   if role_regards_stack_initialize_default_logging|bool or role_regards_stack_cots.phppgadmin.logging is defined %}
+{%   if role_regards_stack_cots.phppgadmin.logging is defined %}
     logging:
-{%     if role_regards_stack_cots.phppgadmin.logging is defined %}
       {{ role_regards_stack_cots.phppgadmin.logging | to_nice_yaml | indent(6) }}
-{%     else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{%     endif %}
 {%   endif %}
 {% endif %}

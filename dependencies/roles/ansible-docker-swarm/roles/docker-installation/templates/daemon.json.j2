@@ -23,6 +23,10 @@
 {% endfor %}
     },
     "userns-remap": "{{ uid_map_user_name }}:{{ gid_map_group_name }}",
+{% if docker_active_debug|bool %}
+    "debug": true,
+{% endif %}
     "ipv6": false,
+    "userland-proxy": false,
     "hosts": ["unix:///var/run/docker.sock"]
 }

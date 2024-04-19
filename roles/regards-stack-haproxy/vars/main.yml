@@ -18,19 +18,11 @@ role_regards_stack_haproxy_container_run_gid: "{{ group_container_run_gid }}"
 role_regards_stack_haproxy_docker_network_name: "{{ group_docker_network_name }}"
 role_regards_stack_haproxy_registry: "{{ group_docker_registry }}"
 
-# Log configuration
-# When true, services do not define any "logging" configuration
-# As the conf to reach the log concentrator is defined in the docker daemon conf file
-role_regards_stack_haproxy_initialize_default_logging: "{{ group_docker_use_log_concentrator is not defined or not group_docker_use_log_concentrator|bool }}"
-
 # COTS
 role_regards_stack_haproxy_cots: "{{ group_docker_cots }}"
 # Optional Kibana
 role_regards_stack_haproxy_cots_elasticsearch: "{{  group_docker_cots.get('elasticsearch', {}) }}"
 role_regards_stack_haproxy_cots_haproxy: "{{  group_docker_cots.get('elasticsearch', {}) }}"
-
-# Resource limits
-role_regards_stack_haproxy_enable_cots_resource_limits: "{{ (group_docker_cots_configuration | default({})).get('enable_resource_limits', false) | bool }}"
 
 role_regards_stack_haproxy_resource_limits:
   haproxy:

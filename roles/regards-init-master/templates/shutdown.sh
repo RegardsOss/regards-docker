@@ -18,7 +18,7 @@ fi
 if [[ "${askBeforeContinuing}" == 0 || "$response" = "y" ]] ; then
   echo "Shutdown in progress for stack {{ role_regards_init_master_stack_name }} ..."
   if docker stack rm {{ role_regards_init_master_stack_name }}; then
-    # Encode the script before sending it threw SSH
+    # Encode the script before sending it through SSH
     SWARM_REMOVE_VOLUMES=$(base64 -w0 {{ role_regards_init_master_cli }}.swarm_remove_volumes.sh)
 
 {%   for hostname in groups['all'] %}
@@ -30,7 +30,7 @@ if [[ "${askBeforeContinuing}" == 0 || "$response" = "y" ]] ; then
     {{ role_regards_init_master_cli }}.swarm_remove_volumes.sh
     printf >&2 "[\033[32mLOCAL\033[m]\tVolumes correctly removed on current server.\n"
 {%       else %}
-    printf >&2 "\n\n[\033[32mSSH\033[m]\tConnecting to {{ hostvars[hostname]['ansible_host'] }} threw SSH...\n"
+    printf >&2 "\n\n[\033[32mSSH\033[m]\tConnecting to {{ hostvars[hostname]['ansible_host'] }} through SSH...\n"
     ssh {{ hostvars[hostname]['ansible_host'] }} "echo $SWARM_REMOVE_VOLUMES | base64 -d | bash"
     printf >&2 "[\033[32mSSH\033[m]\tVolumes correctly removed on {{ hostvars[hostname]['ansible_host'] }}.\n"
 {%       endif %}

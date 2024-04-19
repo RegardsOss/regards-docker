@@ -7,6 +7,9 @@ role_regards_front_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/
 role_regards_front_nginx_conf_unsecure: "{{ group_docker_mservices.front.nginx_conf | default('nginx.conf') }}"
 role_regards_front_nginx_target_conf_unsecure: "{{ role_regards_front_conf_local }}nginx.conf"
 
+# NGINX main configuration file for dynamic modules
+role_regards_front_dynamic_modules: "{{ group_docker_mservices.front.dynamic_modules | default([]) }}"
+
 # NGINX configuration file
 role_regards_front_nginx_conf: "{{ group_docker_mservices.front.nginx_conf | default('regards.conf') }}"
 role_regards_front_nginx_target_conf: "{{ role_regards_front_conf_local }}regards.conf"
@@ -35,7 +38,7 @@ role_regards_dns_resolver: "127.0.0.11"
 
 role_regards_front_is_ssl_defined: "{{ group_docker_mservices.front.ssl is defined }}"
 
-role_regards_front_host: "{{ group_docker_mservices.front.host }}"
+role_regards_front_server_name: "{{ group_docker_mservices.front.nginx_server_name | default(group_docker_mservices.front.host) }}"
 
-role_regards_front_securised: "{{ group_docker_mservices.front.securised | default(False) }}"
+role_regards_front_securised: "{{ group_docker_mservices.front.securised | default(True) }}"
 role_regards_front_has_rabbitmq_admin: "{{ (group_docker_mservices.front | default({})).rabbitmq_admin is defined }}"

@@ -16,7 +16,7 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: {{ worker.name }}
     read_only: true
-{% if role_regards_stack_enable_cots_healthcheck and worker.healthcheck is defined %}
+{% if worker.healthcheck is defined %}
     healthcheck:
       {{ worker.healthcheck | to_nice_yaml | indent(6) }}
 {% endif %}
@@ -46,7 +46,7 @@ services:
 {%   endif %}
 {%   if (worker.configuration | default({})).environment is defined %}
 {%     for key, value in worker.configuration.environment.items() %}
-      {{ key }}: "{{value}}"
+      - {{ key }}={{value}}
 {%     endfor %}
 {%   endif %}
 {% endif %}
@@ -79,18 +79,17 @@ services:
         target: {{ secret.destination }}
 {%   endfor %}
 {% endif %}
-{% if worker.jdwp is defined %}
+{% if worker.jdwp is defined or worker.ports is defined %}
     ports:
+{% if worker.jdwp is defined %}
       - "{{ worker.jdwp }}:8000"
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or worker.logging is defined %}
-    logging:
+{% if worker.ports is defined %}
+      {{ worker.ports | to_nice_yaml | indent(6) }}
+{% endif %}
+{% endif %}
 {%   if worker.logging is defined %}
+    logging:
       {{ worker.logging | to_nice_yaml | indent(6) }}
-{%   else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{%   endif %}
 {% endif %}
 {% endfor %}

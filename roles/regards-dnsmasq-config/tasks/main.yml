@@ -1,0 +1,52 @@
+---
+# DNS protection
+# Prevent our containers to retreive these domains on the real DNS server
+# as they only exist inside Docker Swarm embedded DNS server
+# this role compute the variable dns_private_domains automaticaly
+- block:
+    # Fetching workers variables
+    - set_fact:
+        role_regards_dnsmasq_config_swarm_worker_hostvars: "{{ groups['docker_nodes'] | difference(groups['swarm_manager_only_nodes']|default([])) | map('extract', hostvars) | list }}"
+    - set_fact:
+        # For each service, the service name is prepended to each "swarm_workers" node's hostname,
+        #   optionally filtered by node_label_placement_constraint (if any).
+        # elasticsearch:
+        #   global_service: true
+        #   node_label_placement_constraint:
+        #     key: type
+        #     value: elastic_and_rabbitmq
+        # will generate:
+        #   - elasticsearch-node04.cnes.fr
+        #   - elasticsearch-node05.cnes.fr
+        #   - elasticsearch-node06.cnes.fr
+        dnsmasq_private_domains: "{{
+          dnsmasq_private_domains|default([]) + (
+            (
+              (role_regards_dnsmasq_config_swarm_worker_hostvars
+                | selectattr('labels.'+item.value.node_label_placement_constraint.key, 'defined')
+                | selectattr('labels.'+item.value.node_label_placement_constraint.key, 'equalto', item.value.node_label_placement_constraint.value))
+              if item.value.node_label_placement_constraint is defined else
+                role_regards_dnsmasq_config_swarm_worker_hostvars
+              ) | map(attribute='ansible_host') | map('regex_replace', '^', item.key+'-')
+          ) | list
+        }}"
+      # Looping through services with "global_service" set to true
+      loop: "{{ group_docker_cots | dict2items() | selectattr('value.global_service', 'defined') | selectattr('value.global_service', 'equalto', true) | list }}"
+      loop_control:
+        # NOT printing all service variables for each item
+        label: "> {{item.key}} -> {{item.value.node_label_placement_constraint|default('NoConstraint')}}"
+
+    # Add "group_docker_mservices" and "group_docker_cots" services to dnsmasq config (prefixed with "tasks.rs-")
+    # Also add "group_docker_workers" services to dnsmasq config (prefixed with "tasks.")
+
+    - set_fact:
+        dnsmasq_private_domains: "{{
+          dnsmasq_private_domains|default([])
+            + ( (group_docker_mservices|default({})).keys()|list + group_docker_cots.keys()|list ) | map('regex_replace', '_', '-') | map('regex_replace', '^', 'tasks.rs-') | list
+            + ( (group_docker_workers|default([])) | map(attribute='name') | map('regex_replace', '^', 'tasks-') ) | list
+        }}"
+
+  # Running the task only once for the group
+  run_once: true
+  # and delegating to the ansible controller
+  delegate_to: localhost

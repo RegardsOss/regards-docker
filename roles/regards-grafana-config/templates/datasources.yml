@@ -19,6 +19,9 @@ datasources:
     version: 1
     editable: false
     uid: 2
+    jsonData:
+      timeout: {{ role_regards_grafana_config_configuration_loki.timeout_s }}
+      maxLines: {{ role_regards_grafana_config_configuration_loki.maxLines }}
 
 {% set ns = namespace(uid=100) %}
 
@@ -36,8 +39,8 @@ datasources:
       password: '{{ role_regards_grafana_config_configuration_postgres.password }}'
     jsonData:
       sslmode: 'disable'
-      maxOpenConns: 100
-      maxIdleConns: 100
+      maxOpenConns: 5
+      maxIdleConns: 5
       maxIdleConnsAuto: true
       connMaxLifetime: 14400
       postgresVersion: 1100
@@ -68,8 +71,8 @@ datasources:
 {%      else %}
       sslmode: 'disable'
 {%      endif %}
-      maxOpenConns: 100
-      maxIdleConns: 100
+      maxOpenConns: {{ postgres.maxOpenConns | default(5) }}
+      maxIdleConns: {{ postgres.maxIdleConns | default(5) }}
       maxIdleConnsAuto: true
       connMaxLifetime: 14400
       # Postgres version 903=9.3, 904=9.4, 905=9.5, 906=9.6, 1000=10...

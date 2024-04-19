@@ -80,6 +80,12 @@ docker_bip:
 # Docker options
 docker_storage_driver:
 
+docker_active_debug: true
+docker_ask_before_reinstall: false
+
 # Daemon docker DNS server reference
 # Default value is the dnsmasq running on the same server
 docker_dns: '{{ ansible_facts.default_ipv4.address }}'
+
+# Firewalld zone where rules are registered 
+firewalld_rule_zone: public

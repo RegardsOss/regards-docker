@@ -45,7 +45,7 @@ http {
     server {
 {% if role_regards_front_is_ssl_defined|bool %}
         listen                    8080 ssl;
-        server_name               {{ role_regards_front_host }};
+        server_name               {{ role_regards_front_server_name }};
         ssl_certificate           /etc/ssl/server.crt;
         ssl_certificate_key       /etc/ssl/server.key;
         ssl_protocols             TLSv1.2 TLSv1.3;
@@ -58,7 +58,6 @@ http {
         add_header X-Xss-Protection "1; mode=block";
         add_header X-Frame-Options "SAMEORIGIN";
         add_header X-Content-Type-Options "nosniff";
-        add_header X-Xss-Protection "1; mode=block";
 
         # Handle SWAGGER provided by Access Project
         location /swagger-ui/ {

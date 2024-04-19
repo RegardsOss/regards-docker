@@ -64,14 +64,12 @@ services:
 {% endif %}
     read_only: true
     stop_grace_period: 30m
-{% if role_regards_stack_enable_cots_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "rabbitmq-diagnostics --formatter=json is_booting | jq -r '.result' | grep true  || rabbitmq-diagnostics -q check_running"]
       interval: 5s
       timeout: 2m
       retries: 3
       start_period: 2h
-{% endif %}
     volumes:
       - type: volume
         source: data-rabbitmq-datavolume
@@ -117,25 +115,21 @@ services:
       - "{{ role_regards_stack_cots.rabbitmq.client_ssl }}:5671"
 {%   endif %}
 {% endif %}
-{% if role_regards_stack_cots.rabbitmq.node_label_placement_constraint is defined or role_regards_stack_cots.rabbitmq.global_service is defined or role_regards_stack_enable_cots_resource_limits %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{%   if role_regards_stack_enable_cots_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.rabbitmq | to_nice_yaml | indent(8) }}
-{%   endif %}
-{%   if role_regards_stack_cots.rabbitmq.global_service is defined %}
+{% if role_regards_stack_cots.rabbitmq.global_service is defined %}
       mode: global
-{%   endif %}
-{%   if role_regards_stack_cots.rabbitmq.node_label_placement_constraint is defined %}
+{% endif %}
+{% if role_regards_stack_cots.rabbitmq.node_label_placement_constraint is defined %}
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_cots.rabbitmq.node_label_placement_constraint.key }} == {{ role_regards_stack_cots.rabbitmq.node_label_placement_constraint.value }}
-{%   endif %}
 {% endif %}
 {% if role_regards_stack_cots.rabbitmq.global_service is defined %}
     environment:

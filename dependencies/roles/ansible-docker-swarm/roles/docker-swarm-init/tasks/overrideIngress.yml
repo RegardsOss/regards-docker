@@ -22,7 +22,7 @@
 - name: Should recreate ingress network?
   set_fact:
     recreate_ingress: "{{ 
-      ingress_info.exists == \"true\" and (
+      ingress_info.exists == true and (
       ingress_info.network.Ingress != true or 
       ingress_info.network.Options[\"com.docker.network.driver.mtu\"] | default(0) != \"1200\" or 
       ingress_info.network.IPAM.Config[0].Gateway != docker_ingress_network_gateway or 

@@ -68,25 +68,20 @@ services:
     hostname: rs-elasticsearch
 {% endif %}
     read_only: true
-{% if role_regards_stack_elasticsearch_enable_cots_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "curl -s -f -X GET 'localhost:9200' | jq '.cluster_uuid' | grep -q -e '_na_' || curl -s -f -X GET 'localhost:9200/_cluster/health?local=true' | jq '.status' | grep -q -e 'yellow' -e 'green' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-{% endif %}
-{% if role_regards_stack_elasticsearch_cots_elasticsearch.node_label_placement_constraint is defined or role_regards_stack_elasticsearch_cots_elasticsearch.global_service is defined or role_regards_stack_elasticsearch_enable_cots_resource_limits is defined %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_elasticsearch_cots_kibana_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_elasticsearch_cots_kibana_restart_policy.max_attempts }}
         window: {{ role_regards_stack_elasticsearch_cots_kibana_restart_policy.window }}
-{% if role_regards_stack_elasticsearch_enable_cots_resource_limits %}
       resources:
         {{ role_regards_stack_elasticsearch_resource_limits.elasticsearch | to_nice_yaml | indent(8) }}
-{% endif %}
 {% if role_regards_stack_elasticsearch_cots_elasticsearch.global_service is defined %}
       mode: global
       endpoint_mode: dnsrr
@@ -95,7 +90,6 @@ services:
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_elasticsearch_cots_elasticsearch.node_label_placement_constraint.key }} == {{ role_regards_stack_elasticsearch_cots_elasticsearch.node_label_placement_constraint.value }}
-{% endif %}
 {% endif %}
     networks:
       - {{ role_regards_stack_elasticsearch_docker_network_name }}
@@ -140,15 +134,9 @@ services:
       nofile:
         soft: 65536 # maximum number of open files for the Elasticsearch user, set to at least 65536 on modern systems
         hard: 65536
-{% if role_regards_stack_elasticsearch_initialize_default_logging|bool or role_regards_stack_elasticsearch_cots_elasticsearch.logging is defined %}
-    logging:
 {% if role_regards_stack_elasticsearch_cots_elasticsearch.logging is defined %}
+    logging:
       {{ role_regards_stack_elasticsearch_cots_elasticsearch.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -164,14 +152,12 @@ services:
     user: "{{ role_regards_stack_elasticsearch_container_run_uid }}:{{ role_regards_stack_elasticsearch_container_run_gid }}"
     hostname: rs-kibana
     read_only: true
-{% if role_regards_stack_elasticsearch_enable_cots_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "curl -I localhost:5601/api/status"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 2m
-{% endif %}
     networks:
       - {{ role_regards_stack_elasticsearch_docker_network_name }}
     volumes:
@@ -181,31 +167,21 @@ services:
     ports:
       - "{{ role_regards_stack_elasticsearch_cots_kibana.http }}:5601"
 {% endif %}
-{% if role_regards_stack_elasticsearch_initialize_default_logging|bool or role_regards_stack_elasticsearch_cots_kibana.logging is defined %}
-    logging:
 {% if role_regards_stack_elasticsearch_cots_kibana.logging is defined %}
+    logging:
       {{ role_regards_stack_elasticsearch_cots_kibana.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
 {% endif %}
-{% endif %}
-{% if role_regards_stack_elasticsearch_cots_kibana.node_label_placement_constraint is defined or role_regards_stack_elasticsearch_enable_cots_resource_limits is defined %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_elasticsearch_cots_kibana_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_elasticsearch_cots_kibana_restart_policy.max_attempts }}
         window: {{ role_regards_stack_elasticsearch_cots_kibana_restart_policy.window }}
-{% if role_regards_stack_elasticsearch_enable_cots_resource_limits is defined %}
       resources:
         {{ role_regards_stack_elasticsearch_resource_limits.kibana | to_nice_yaml | indent(8) }}
-{% endif %}
 {% if role_regards_stack_elasticsearch_cots_kibana.node_label_placement_constraint is defined %}
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_elasticsearch_cots_kibana.node_label_placement_constraint.key }} == {{ role_regards_stack_elasticsearch_cots_kibana.node_label_placement_constraint.value }}
-{% endif %}
 {% endif %}
 {% endif %}

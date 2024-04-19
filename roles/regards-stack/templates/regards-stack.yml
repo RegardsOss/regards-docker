@@ -650,30 +650,24 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-config
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9031/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 5s
       timeout: 10s
       retries: 10
       start_period: 1m
-{% endif %}
-{% if role_regards_stack_mservices.config.node_label_placement_constraint is defined or role_regards_stack_enable_mservices_resource_limits %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.config | to_nice_yaml | indent(8) }}
-{% endif %}
 {% if role_regards_stack_mservices.config.node_label_placement_constraint is defined %}
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_mservices.config.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.config.node_label_placement_constraint.value }}
-{% endif %}
 {% endif %}
     networks: 
       - {{ role_regards_stack_docker_network_name }}
@@ -681,6 +675,10 @@ services:
     ports:
       - "{{ role_regards_stack_mservices.config.http }}:9031"
 {% endif %}
+    environment:
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.config.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
     volumes:
       - type: volume
         source: logs-config-datavolume
@@ -796,15 +794,9 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.config.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.config.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.config.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -821,30 +813,28 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-registry
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9032/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 5s
       timeout: 10s
       retries: 10
       start_period: 2m
-{% endif %}
-{% if role_regards_stack_mservices.registry.node_label_placement_constraint is defined or role_regards_stack_enable_mservices_resource_limits %}
+    environment:
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.registry.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.registry | to_nice_yaml | indent(8) }}
-{% endif %}
 {% if role_regards_stack_mservices.registry.node_label_placement_constraint is defined %}
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_mservices.registry.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.registry.node_label_placement_constraint.value }}
-{% endif %}
 {% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
@@ -882,15 +872,9 @@ services:
       - "{{ role_regards_stack_mservices.registry.yourkit }}:10001"
 {% endif %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.registry.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.registry.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.registry.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -907,24 +891,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-gateway
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9030/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.gateway | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.gateway.replicas | default(1) }}
 {% if role_regards_stack_mservices.gateway.node_label_placement_constraint is defined %}
       placement:
@@ -933,6 +913,8 @@ services:
 {% endif %}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.gateway.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.gateway.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -992,15 +974,9 @@ services:
       - "{{ role_regards_stack_mservices.gateway.yourkit }}:10001"
 {% endif %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.gateway.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.gateway.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.gateway.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1016,35 +992,31 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-admin-instance
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9037/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 5m
-{% endif %}
-{% if role_regards_stack_mservices.admin_instance.node_label_placement_constraint is defined or role_regards_stack_enable_mservices_resource_limits %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.admin_instance | to_nice_yaml | indent(8) }}
-{% endif %}
 {% if role_regards_stack_mservices.admin_instance.node_label_placement_constraint is defined %}
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_mservices.admin_instance.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.admin_instance.node_label_placement_constraint.value }}
 {% endif %}
-{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
-      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}  
+      - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.admin_instance.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.admin_instance.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1085,15 +1057,9 @@ services:
       - "{{ role_regards_stack_mservices.admin_instance.yourkit }}:10001"
 {% endif %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.admin_instance.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.admin_instance.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.admin_instance.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1109,24 +1075,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-admin
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9033/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 5m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.admin | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.admin.replicas | default(1) }}
 {% if role_regards_stack_mservices.admin.node_label_placement_constraint is defined %}
       placement:
@@ -1135,6 +1097,8 @@ services:
 {% endif %}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.admin.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.admin.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1177,15 +1141,9 @@ services:
       - "{{ role_regards_stack_mservices.admin.yourkit }}:10001"
 {% endif %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.admin.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.admin.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.admin.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1201,24 +1159,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-authentication
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9034/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.authentication | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.authentication.replicas | default(1) }}
 {% if role_regards_stack_mservices.authentication.node_label_placement_constraint is defined %}
       placement:
@@ -1227,6 +1181,8 @@ services:
 {% endif %}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.authentication.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.authentication.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1289,15 +1245,9 @@ services:
       - "{{ role_regards_stack_mservices.authentication.yourkit }}:10001"
 {% endif %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.authentication.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.authentication.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.authentication.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1313,24 +1263,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-dam
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9035/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 8m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.dam | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.dam.replicas | default(1) }}
 {% if role_regards_stack_mservices.dam.node_label_placement_constraint is defined %}
       placement:
@@ -1341,6 +1287,8 @@ services:
       - {{ role_regards_stack_docker_network_name }}
     environment: 
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.dam.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.dam.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1404,15 +1352,9 @@ services:
       - "{{ role_regards_stack_mservices.dam.yourkit }}:10001"
 {% endif %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.dam.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.dam.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.dam.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1428,24 +1370,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-notifier
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9039/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 9m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.notifier | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.notifier.replicas | default(1) }}
 {% if role_regards_stack_mservices.notifier.node_label_placement_constraint is defined %}
       placement:
@@ -1456,6 +1394,8 @@ services:
       - {{ role_regards_stack_docker_network_name }}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.notifier.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.notifier.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1505,15 +1445,9 @@ services:
       - "{{ role_regards_stack_mservices.notifier.yourkit }}:10001"
 {% endif %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.notifier.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.notifier.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.notifier.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1529,24 +1463,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-fem
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9038/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.fem | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.fem.replicas | default(1) }}
 {% if role_regards_stack_mservices.fem.node_label_placement_constraint is defined %}
       placement:
@@ -1557,6 +1487,8 @@ services:
       - {{ role_regards_stack_docker_network_name }}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.fem.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.fem.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1613,15 +1545,9 @@ services:
       - "{{ role_regards_stack_mservices.fem.yourkit }}:10001"
 {% endif %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.fem.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.fem.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.fem.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1637,24 +1563,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-catalog
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9036/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.catalog | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.catalog.replicas | default(1) }}
 {% if role_regards_stack_mservices.catalog.node_label_placement_constraint is defined %}
       placement:
@@ -1676,6 +1598,8 @@ services:
 {% endif %}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.catalog.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.catalog.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1722,15 +1646,9 @@ services:
       - "{{ role_regards_stack_mservices.catalog.yourkit }}:10001"
 {% endif %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.catalog.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.catalog.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.catalog.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1746,35 +1664,31 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-access-instance
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9040/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 6m
-{% endif %}
-{% if role_regards_stack_mservices.access_instance.node_label_placement_constraint is defined or role_regards_stack_enable_mservices_resource_limits %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.access_instance | to_nice_yaml | indent(8) }}
-{% endif %}
 {% if role_regards_stack_mservices.access_instance.node_label_placement_constraint is defined %}
       placement:
         constraints:
           - node.labels.{{ role_regards_stack_mservices.access_instance.node_label_placement_constraint.key }} == {{ role_regards_stack_mservices.access_instance.node_label_placement_constraint.value }}
 {% endif %}
-{% endif %}
     networks:
       - {{ role_regards_stack_docker_network_name }}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.access_instance.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.access_instance.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1815,15 +1729,9 @@ services:
       - "{{ role_regards_stack_mservices.access_instance.yourkit }}:10001"
 {% endif %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.access_instance.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.access_instance.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.access_instance.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1839,24 +1747,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-access-project
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9041/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 6m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.access_project | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.access_project.replicas | default(1) }}
 {% if role_regards_stack_mservices.access_project.node_label_placement_constraint is defined %}
       placement:
@@ -1865,6 +1769,8 @@ services:
 {% endif %}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.access_project.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.access_project.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -1907,15 +1813,9 @@ services:
       - "{{ role_regards_stack_mservices.access_project.yourkit }}:10001"
 {% endif %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.access_project.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.access_project.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.access_project.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -1931,24 +1831,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-front
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "curl -I {{ group_docker_mservices.front.protocol }}://localhost:8080 {{ role_regards_stack_mservices.front.ssl is defined | ternary('-k', '') }} -H 'Host: {{ role_regards_stack_front_healthcheck_url }}'"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.front | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.front.replicas | default(1) }}
 {% if role_regards_stack_mservices.front.node_label_placement_constraint is defined %}
       placement:
@@ -2032,15 +1928,9 @@ services:
       - source: front_ssl_key
         target: /etc/ssl/server.key
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.front.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.front.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.front.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -2056,24 +1946,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-storage
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9042/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 9m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.storage | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.storage.replicas | default(1) }}
 {% if role_regards_stack_mservices.storage.node_label_placement_constraint is defined %}
       placement:
@@ -2084,6 +1970,8 @@ services:
       - {{ role_regards_stack_docker_network_name }}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.storage.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.storage.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -2155,15 +2043,9 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.storage.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.storage.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.storage.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -2179,24 +2061,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-order
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9043/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 9m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.order | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.order.replicas | default(1) }}
 {% if role_regards_stack_mservices.order.node_label_placement_constraint is defined %}
       placement:
@@ -2207,6 +2085,8 @@ services:
       - {{ role_regards_stack_docker_network_name }}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.order.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.order.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -2263,15 +2143,9 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.order.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.order.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.order.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -2287,24 +2161,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-processing
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9043/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.processing | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.processing.replicas | default(1) }}
 {% if role_regards_stack_mservices.processing.node_label_placement_constraint is defined %}
       placement:
@@ -2315,6 +2185,8 @@ services:
       - {{ role_regards_stack_docker_network_name }}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.processing.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.processing.jdwp is defined %}
       - ACTIVE_DEBUG=true
       # as /tmp is mounted as noexec into docker containers we configure specific tmp directory for jna lib
@@ -2373,15 +2245,9 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.processing.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.processing.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.processing.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -2397,24 +2263,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-ingest
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9044/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.ingest | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.ingest.replicas | default(1) }}
 {% if role_regards_stack_mservices.ingest.node_label_placement_constraint is defined %}
       placement:
@@ -2425,6 +2287,8 @@ services:
       - {{ role_regards_stack_docker_network_name }}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.ingest.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.ingest.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -2481,15 +2345,9 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.ingest.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.ingest.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.ingest.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
         
@@ -2505,24 +2363,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-dataprovider
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9045/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 9m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.dataprovider | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.dataprovider.replicas | default(1) }}
 {% if role_regards_stack_mservices.dataprovider.node_label_placement_constraint is defined %}
       placement:
@@ -2533,6 +2387,8 @@ services:
       - {{ role_regards_stack_docker_network_name }}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.dataprovider.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.dataprovider.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -2589,15 +2445,9 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.dataprovider.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.dataprovider.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.dataprovider.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -2613,24 +2463,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-worker-manager
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9047/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 7m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.worker_manager | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.worker_manager.replicas | default(1) }}
 {% if role_regards_stack_mservices.worker_manager.node_label_placement_constraint is defined %}
       placement:
@@ -2641,6 +2487,8 @@ services:
       - {{ role_regards_stack_docker_network_name }}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.worker_manager.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.worker_manager.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -2686,15 +2534,9 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.worker_manager.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.worker_manager.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.worker_manager.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -2710,24 +2552,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-lta-manager
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9048/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 9m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.lta_manager | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.lta_manager.replicas | default(1) }}
 {% if role_regards_stack_mservices.lta_manager.node_label_placement_constraint is defined %}
       placement:
@@ -2738,6 +2576,8 @@ services:
       - {{ role_regards_stack_docker_network_name }}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.lta_manager.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.lta_manager.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -2778,15 +2618,9 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.lta_manager.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.lta_manager.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.lta_manager.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -2802,24 +2636,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-delivery
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9049/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 9m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.delivery | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.delivery.replicas | default(1) }}
 {% if role_regards_stack_mservices.delivery.node_label_placement_constraint is defined %}
       placement:
@@ -2830,6 +2660,8 @@ services:
       - {{ role_regards_stack_docker_network_name }}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.delivery.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.delivery.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -2879,15 +2711,9 @@ services:
         target: "/etc/ca-certificates/{{ file }}"
 {% endfor %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.delivery.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.delivery.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.delivery.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -2903,24 +2729,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-file-catalog
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9050/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 9m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.file_catalog | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.file_catalog.replicas | default(1) }}
 {% if role_regards_stack_mservices.file_catalog.node_label_placement_constraint is defined %}
       placement:
@@ -2931,6 +2753,8 @@ services:
       - {{ role_regards_stack_docker_network_name }}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.file_catalog.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.file_catalog.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -2971,15 +2795,9 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.file_catalog.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.file_catalog.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.file_catalog.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -2995,24 +2813,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-file-access
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9051/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 9m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.file_access | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.file_access.replicas | default(1) }}
 {% if role_regards_stack_mservices.file_access.node_label_placement_constraint is defined %}
       placement:
@@ -3023,6 +2837,8 @@ services:
       - {{ role_regards_stack_docker_network_name }}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.file_access.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.file_access.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -3045,11 +2861,37 @@ services:
 {% endif %}
 {% endif %}
     volumes:
+{% if role_regards_stack_mservices.file_access.volumes is defined %}
+{% for volume in role_regards_stack_mservices.file_access.volumes %}
+      - {{ volume.source }}:{{ volume.destination }}
+{% endfor %}
+{% endif %}
+# Use the storage defined volume for now
+      - type: volume
+        source: storage-plugins-datavolume
+        target: /plugins
       - type: volume
         source: logs-file-access-datavolume
         target: /logs
       - type: tmpfs
         target: /tmp
+{% for data_input in role_regards_stack_volume_data_inputs %}
+      - type: volume
+        source: {{ data_input.name }}
+        target: {{ data_input.destination }}
+{% endfor %}
+      - type: volume
+        source: workspace-datavolume
+        target: /tmp/workspace
+      - type: volume
+        source: online-datavolume
+        target: /storages
+      - type: volume
+        source: cache-datavolume
+        target: /cache
+      - type: volume
+        source: dataset-attachments-input-volume
+        target: /dataset-attachments-input
     configs:
       - source: rs-file-access_logback.xml
         target: /config/logback.xml
@@ -3063,15 +2905,9 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.file_access.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.file_access.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.file_access.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}
 
@@ -3087,24 +2923,20 @@ services:
     user: "{{ role_regards_stack_container_run_uid }}:{{ role_regards_stack_container_run_gid }}"
     hostname: rs-file-packager
     read_only: true
-{% if role_regards_stack_enable_mservices_healthcheck %}
     healthcheck:
       test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9052/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 9m
-{% endif %}
     deploy:
       restart_policy:
         condition: any
         delay: {{ role_regards_stack_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_restart_policy.max_attempts }}
         window: {{ role_regards_stack_restart_policy.window }}
-{% if role_regards_stack_enable_mservices_resource_limits %}
       resources:
         {{ role_regards_stack_resource_limits.file_packager | to_nice_yaml | indent(8) }}
-{% endif %}
       replicas: {{ role_regards_stack_mservices.file_packager.replicas | default(1) }}
 {% if role_regards_stack_mservices.file_packager.node_label_placement_constraint is defined %}
       placement:
@@ -3115,6 +2947,8 @@ services:
       - {{ role_regards_stack_docker_network_name }}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}
+      - HEAP_SIZE={% set container_max_mem = role_regards_stack_resource_limits.file_packager.limits.memory | human_to_bytes %}{% if (container_max_mem < ('800M' | human_to_bytes)) %}EXTRA-SMALL{% elif container_max_mem < ('1200M' | human_to_bytes) %}SMALL{% elif container_max_mem < ('1600M' | human_to_bytes) %}MEDIUM{% elif container_max_mem < ('2000M' | human_to_bytes) %}LARGE{% else %}EXTRA-LARGE{% endif %}
+
 {% if role_regards_stack_mservices.file_packager.jdwp is defined %}
       - ACTIVE_DEBUG=true
 {% endif %}
@@ -3155,14 +2989,8 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
-{% if role_regards_stack_initialize_default_logging|bool or role_regards_stack_mservices.file_packager.logging is defined %}
-    logging:
 {% if role_regards_stack_mservices.file_packager.logging is defined %}
+    logging:
       {{ role_regards_stack_mservices.file_packager.logging | to_nice_yaml | indent(6) }}
-{% else %}
-      options:
-        max-size: "10m"
-        max-file: "10"
-{% endif %}
 {% endif %}
 {% endif %}

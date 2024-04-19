@@ -33,3 +33,6 @@ dnsmasq_private_domains: []
 dnsmasq_cache_size: 256
 
 dnsmasq_log: no
+
+# Firewalld zone where rule is registered 
+firewalld_rule_zone: public

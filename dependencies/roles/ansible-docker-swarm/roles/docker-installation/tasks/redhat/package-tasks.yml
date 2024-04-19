@@ -12,6 +12,13 @@
 # limitations under the License.
 #
 ---
+
+- import_tasks: redhat7/package-tasks.yml
+  when: ansible_facts['os_family'] == "RedHat" and ansible_facts["distribution_major_version"] < "8"
+
+- import_tasks: redhatHigher8/package-tasks.yml
+  when: ansible_facts['os_family'] == "RedHat" and ansible_facts["distribution_major_version"] >= "8"
+
 - name: "[REDHAT] {{ ansible_facts['distribution'] }} Add Docker Repository"
   get_url:
     url: https://download.docker.com/linux/centos/docker-ce.repo
@@ -30,29 +37,11 @@
     HTTPS_PROXY: "{{ role_docker_installation_https_proxy }}"
     NO_PROXY: "{{ role_docker_installation_no_proxy }}"
 
-- name: "[REDHAT] Remove banned Packages"
-  yum:
-    name:
-      - firewalld
-      - firewalld-filesystem
-      - docker
-      - docker-client
-      - docker-client-latest
-      - docker-common
-      - docker-latest
-      - docker-latest-logrotate
-      - docker-logrotate
-      - docker-engine
-    state: removed
-    update_cache: no
-
 - name: "[REDHAT] Install Docker Dependencies"
   yum:
     name: 
       - curl
       - container-selinux
-      - iptables
-      - iptables-services
       - containerd.io
       - docker-ce-cli
       - docker-ce

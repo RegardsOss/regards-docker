@@ -17,10 +17,8 @@ services:
         delay: {{ role_regards_stack_haproxy_resource_limits_restart_policy.delay }}
         max_attempts: {{ role_regards_stack_haproxy_resource_limits_restart_policy.max_attempts }}
         window: {{ role_regards_stack_haproxy_resource_limits_restart_policy.window }}
-{% if role_regards_stack_haproxy_enable_cots_resource_limits %}
       resources:
         {{ role_regards_stack_haproxy_resource_limits.haproxy | to_nice_yaml | indent(8) }}
-{% endif %}
       mode: global
     networks:
       - {{ role_regards_stack_haproxy_docker_network_name }}

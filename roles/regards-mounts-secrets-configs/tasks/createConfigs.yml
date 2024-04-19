@@ -20,3 +20,16 @@
     setype: "{{ role_regards_mounts_secrets_configs_setype }}"
     seuser: "{{ role_regards_mounts_secrets_configs_seuser }}"
   with_items: "{{ role_regards_mounts_secrets_configs_configs }}"
+  when: item.template | default(False) | bool == False
+
+- name: Copy configs as templates
+  ansible.builtin.template:
+    src: "{{ role_regards_mounts_secrets_configs_inventory_path_configs }}/{{ item.path }}/{{ item.file }}"
+    dest: "{{ role_regards_mounts_secrets_configs_configs_destination }}/{{ item.path }}/{{ item.file }}"
+    mode: '0770'
+    owner: "{{ role_regards_mounts_secrets_configs_container_root_user }}"
+    group: "{{ role_regards_mounts_secrets_configs_container_root_group }}"
+    setype: "{{ role_regards_mounts_secrets_configs_setype }}"
+    seuser: "{{ role_regards_mounts_secrets_configs_seuser }}"
+  with_items: "{{ role_regards_mounts_secrets_configs_configs }}"
+  when: item.template | default(False) | bool

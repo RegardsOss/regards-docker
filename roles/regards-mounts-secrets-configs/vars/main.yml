@@ -9,8 +9,8 @@ role_regards_mounts_secrets_configs_seuser: "{{ group_seuser }}"
 role_regards_mounts_secrets_configs_configs: "{{ (group_docker_mounts | default({})).get('configs', []) }}"
 role_regards_mounts_secrets_configs_secrets: "{{ (group_docker_mounts | default({})).get('secrets', []) }}"
 
-role_regards_mounts_secrets_configs_inventory_path_configs: "{{ inventory_dir }}/group_vars/regards_nodes/files"
-role_regards_mounts_secrets_configs_inventory_path_secrets: "{{ inventory_dir }}/group_vars/regards_nodes/files"
+role_regards_mounts_secrets_configs_inventory_path_configs: "{{ group_docker_static_files_migrated | default(False) | ternary(inventory_dir + '/static', inventory_dir + '/group_vars/regards_nodes/files') }}"
+role_regards_mounts_secrets_configs_inventory_path_secrets: "{{ group_docker_static_files_migrated | default(False) | ternary(inventory_dir + '/static', inventory_dir + '/group_vars/regards_nodes/files') }}"
 
 role_regards_mounts_secrets_configs_configs_destination: "{{ group_workdir_local }}{{ group_stack_name }}/config/mounted/configs"
 role_regards_mounts_secrets_configs_secrets_destination: "{{ group_workdir_local }}{{ group_stack_name }}/config/mounted/secrets"

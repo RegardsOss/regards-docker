@@ -1,0 +1,63 @@
+#
+# Copyright 2018-2020, CS GROUP – France, http://www.c-s.fr
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+- name: "[REDHAT >= 8] Restart firewalld service"
+  systemd:
+    name: firewalld
+    state: restarted
+    enabled: yes
+
+- name: "[REDHAT >= 8] Set log-denied to all in Firewalld"
+  command: firewall-cmd --set-log-denied=all
+
+- name: "[REDHAT >= 8] Active zone {{ firewalld_rule_zone }} on interface {{ role_docker_network_interface_label }}"
+  firewalld:
+    permanent: true
+    state: enabled
+    immediate: true
+    zone: '{{ firewalld_rule_zone }}'
+    interface: "{{ role_docker_network_interface_label }}"
+  notify:
+    - Reload firewalld
+    - Restart docker
+  
+- name: "[REDHAT >= 8] Allow new incoming packets on ports"
+  firewalld:
+    port: "{{ item.port }}/{{ item.protocol }}"
+    permanent: true
+    state: enabled
+    immediate: true
+    zone: '{{ firewalld_rule_zone }}'
+  with_items :
+    # Inbound swarm manager traffic
+    - { port: '2377', protocol: 'tcp' }
+    # TCP/UDP for container network discovery.
+    - { port: '7946', protocol: 'tcp' }
+    - { port: '7946', protocol: 'udp' }
+    # UDP for the container ingress network.
+    - { port: '4789', protocol: 'udp' }
+  notify:
+    - Reload firewalld
+    - Restart docker
+  tags: iptables-edit
+
+- name: "[REDHAT >= 8] Get default zone"
+  command: firewall-cmd --get-default-zone
+  register: firewall_current_zone
+
+- name: "[REDHAT >= 8] Set default zone"
+  command: "firewall-cmd --set-default-zone={{ firewalld_rule_zone }}"
+  notify:
+    - Reload firewalld
+  when: firewall_current_zone != firewalld_rule_zone

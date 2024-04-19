@@ -47,12 +47,17 @@ role_regards_grafana_config_configuration_elasticsearch:
 
 role_regards_grafana_config_configuration_custom_datasources_elasticsearch: "{{ role_regards_grafana_config_configuration_custom_datasources.get('elasticsearch', []) }}"
 
+role_regards_grafana_config_configuration_loki:
+  # timeout of grafana when running loki request in seconds 
+  timeout_s: "{{ role_regards_grafana_config_datasources.get('loki', {}).get('timeout_s', 600) }}"
+  maxLines: "{{ role_regards_grafana_config_datasources.get('loki', {}).get('maxLines', 1000) }}"
+
 role_regards_grafana_config_ssl_is_active: "{{ group_docker_cots.get('grafana', {}).ssl is defined }}"
 role_regards_grafana_config_ssl_files: "{{ group_docker_cots.get('grafana', {}).get('ssl', {}) }}"
 
 # SSL src and dest infos
 role_regards_grafana_config_ssl_destination: "{{ role_regards_grafana_config_conf_local }}ssl"
-role_regards_grafana_config_ssl_location_inside_playbook: "{{ inventory_dir }}/group_vars/regards_nodes/files/ssl"
+role_regards_grafana_config_ssl_location_inside_playbook: "{{ group_docker_static_files_migrated | default(False) | ternary(inventory_dir + '/static/ssl', inventory_dir + '/group_vars/regards_nodes/files/ssl') }}"
 
 role_regards_grafana_config_host: "{{ group_docker_cots.get('grafana', {}).get('host') }}"
 

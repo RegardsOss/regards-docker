@@ -19,7 +19,7 @@
 
 - name: Docker installation prompt
   pause: prompt='Please confirm you allow this setup to overide your docker configuration ! Press return to continue. Press Ctrl+c and then "a" to abort'
-  when: docker_stat_result.stat.exists
+  when: docker_stat_result.stat.exists and docker_ask_before_reinstall
 
 - import_tasks: redhat/package-tasks.yml
   when: ansible_facts['os_family'] == "RedHat"
@@ -66,10 +66,10 @@
   with_items :
     - "docker"
 
-- import_tasks: redhat/iptables-tasks.yml
+- import_tasks: redhat/firewall.yml
   when: ansible_facts['os_family'] == "RedHat"
 
-- import_tasks: debian/iptables-tasks.yml
+- import_tasks: debian/firewall.yml
   when: ansible_facts['os_family'] == "Debian"
 
 - name: Active kernel tuning
@@ -92,8 +92,8 @@
   with_dict: '{{ kernel_rhel_7_tuning_parameters }}'
   when: kernel_tuning|bool == true and ansible_facts['os_family'] == "RedHat" and ansible_facts["distribution_major_version"] == "7"
 
-- include_tasks: redhat/disable-checksum-ip-rhel-8.yml
-  when: ansible_facts['os_family'] == "RedHat" and ansible_facts["distribution_major_version"] == "8"
+- include_tasks: redhat/redhatHigher8/disable-checksum-ip.yml
+  when: ansible_facts['os_family'] == "RedHat" and ansible_facts["distribution_major_version"] >= "8"
 
 - include_tasks: docker-namespace.yml
 
@@ -148,30 +148,5 @@
 - include_tasks: overrideBridgeTask.yml
   when: "'docker_gwbridge_network' in hostvars[inventory_hostname]"
 
-- name: Active audit on Docker install
-  shell: auditctl -w /usr/bin/docker -p rwxa -k docker-daemon
-  ignore_errors: true
-
-- name: Active audit on Docker install
-  shell: auditctl -w /var/lib/docker -k docker
-  ignore_errors: true
-
-- name: Active audit on Docker install
-  shell: auditctl -w /etc/docker -k docker
-  ignore_errors: true
-
-- name: Active audit on Docker install
-  shell: auditctl -w /usr/lib/systemd/system/docker.service -k docker
-  ignore_errors: true
-
-- name: Active audit on Docker install
-  shell: auditctl -w /usr/lib/systemd/system/docker.socket -k docker
-  ignore_errors: true
-
-- name: Active audit on Docker install
-  shell: auditctl -w /etc/sysconfig/docker -k docker
-  ignore_errors: true
-
-- name: Active audit on Docker install
-  shell: auditctl -w /etc/docker/daemon.json -k docker
-  ignore_errors: true
+- include_tasks: redhat/audit.yml
+  when: ansible_facts['os_family'] == "RedHat"

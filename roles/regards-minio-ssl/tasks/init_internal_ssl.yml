@@ -11,7 +11,7 @@
 
 - name: Copy MinIO internal private key & certificate
   ansible.builtin.copy:
-    src: "{{ role_regards_minio_ssl_location_inside_playbook }}{{ item }}"
+    src: "{{ role_regards_minio_ssl_location_inside_playbook }}/{{ item }}"
     dest: "{{ role_regards_minio_config_certs_dir }}/{{ item }}"
     mode: '0440'
     owner: "{{ role_regards_minio_ssl_local_container_root_user }}"
@@ -24,7 +24,7 @@
 
 - name: Copy MinIO ca trust
   ansible.builtin.copy:
-    src: "{{ role_regards_minio_ssl_location_inside_playbook }}{{ role_regards_minio_ssl_internal_infos.ca_trust }}"
+    src: "{{ role_regards_minio_ssl_location_inside_playbook }}/{{ role_regards_minio_ssl_internal_infos.ca_trust }}"
     dest: "{{ role_regards_minio_config_certs_dir }}/CAs/{{ role_regards_minio_ssl_internal_infos.ca_trust }}"
     mode: '0440'
     owner: "{{ role_regards_minio_ssl_local_container_root_user }}"

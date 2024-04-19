@@ -132,6 +132,8 @@ role_regards_mconfig_dataprovider:
 fem_default:
   entities_per_job: 100
   read_batch_size: 1000
+  abort_delay_hours: 1
+  retry_delay_attempts: 5s,30s,2m,10m
 
 role_regards_mconfig_fem:
   entities_per_job: "{{ (group_docker_mservices.fem | default({})).get('configuration', {}).get('entities_per_job', fem_default.entities_per_job) }}"
@@ -139,6 +141,18 @@ role_regards_mconfig_fem:
   jobs_pool_size: "{{ (group_docker_mservices.fem | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.small_jobs_pool_size) }}"
   database_min_pool_size: "{{ (group_docker_mservices.fem | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
   database_max_pool_size: "{{ (group_docker_mservices.fem | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
+  abort_delay_hours: "{{ (group_docker_mservices.fem | default({})).get('configuration', {}).get('abort_delay_hours', fem_default.abort_delay_hours) }}"
+  retry_delay_attempts: "{{ (group_docker_mservices.fem | default({})).get('configuration', {}).get('retry_delay_attempts', fem_default.retry_delay_attempts) }}"
+
+# ----------------------------------
+# CATALOG configuration
+# ----------------------------------
+
+catalog_default:
+  restoration_availability_hours_limit: 24
+
+role_regards_mconfig_catalog:
+  restoration_availability_hours_limit: "{{ (group_docker_mservices.catalog | default({})).get('configuration', {}).get('restoration_availability_hours_limit', catalog_default.restoration_availability_hours_limit) }}"
 
 # ----------------------------------
 # Ingest configuration
@@ -165,6 +179,7 @@ notifier_default:
   # Notifier currently use a lot of NEW_TRANSACTION while processing 1 thing
   # so we need for now to increase the number of transaction (2x transactions per job for example)
   database_max_pool_size: 10
+  retry_delay_attempts: 5s,30s,2m,10m
 
 role_regards_mconfig_notifier:
   entities_per_job: "{{ (group_docker_mservices.notifier | default({})).get('configuration', {}).get('entities_per_job', notifier_default.entities_per_job) }}"
@@ -172,6 +187,7 @@ role_regards_mconfig_notifier:
   jobs_pool_size: "{{ (group_docker_mservices.notifier | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.small_jobs_pool_size) }}"
   database_min_pool_size: "{{ (group_docker_mservices.notifier | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
   database_max_pool_size: "{{ (group_docker_mservices.notifier | default({})).get('configuration', {}).get('database_max_pool_size', notifier_default.database_max_pool_size) }}"
+  retry_delay_attempts: "{{ (group_docker_mservices.notifier | default({})).get('configuration', {}).get('retry_delay_attempts', notifier_default.retry_delay_attempts) }}"
 
 # ----------------------------------
 # Order configuration
@@ -208,12 +224,14 @@ role_regards_mconfig_processing:
 
 worker_manager_default:
   read_batch_size: 1000
+  retry_delay_attempts: 5s,30s,2m,10m
 
 role_regards_mconfig_worker_manager:
   read_batch_size: "{{ (group_docker_mservices.worker_manager | default({})).get('configuration', {}).get('read_batch_size', worker_manager_default.read_batch_size) }}"
   jobs_pool_size: "{{ (group_docker_mservices.worker_manager | default({})).get('configuration', {}).get('jobs_pool_size', global_ms_default.large_jobs_pool_size) }}"
   database_min_pool_size: "{{ (group_docker_mservices.worker_manager | default({})).get('configuration', {}).get('database_min_pool_size', global_ms_default.database_min_pool_size) }}"
   database_max_pool_size: "{{ (group_docker_mservices.worker_manager | default({})).get('configuration', {}).get('database_max_pool_size', global_ms_default.database_max_pool_size) }}"
+  retry_delay_attempts: "{{ (group_docker_mservices.worker_manager | default({})).get('configuration', {}).get('retry_delay_attempts', worker_manager_default.retry_delay_attempts) }}"
 
 # ----------------------------------
 # LTA Manager configuration
@@ -381,10 +399,12 @@ role_regards_mconfig_postgres:
 
 # Source/Session services configuration.
 session_defaults:
-  retention_days: 30
+  retention_days: 5
+  dashboard_retention_days: 30
 
 role_regards_mconfig_session:
   retention_days: "{{ (group_config_mservices.session | default({})).get('retention_days', session_defaults.retention_days )}}"
+  dashboard_retention_days: "{{ (group_config_mservices.session | default({})).get('dashboard_retention_days', session_defaults.dashboard_retention_days )}}"
 
 role_regards_mconfig_public_url: "{{ group_docker_mservices.front.public_protocol | default(group_docker_mservices.front.protocol) }}://{{ group_docker_mservices.front.public_host | default(group_docker_mservices.front.host) }}:{{ group_docker_mservices.front.public_port | default(group_docker_mservices.front.port) }}"
 

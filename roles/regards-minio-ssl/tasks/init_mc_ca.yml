@@ -11,7 +11,7 @@
 
 - name: Copy mc CA trust certificate
   ansible.builtin.copy:
-    src: "{{ role_regards_minio_ssl_location_inside_playbook }}{{ role_regards_minio_mc_loc_ca }}"
+    src: "{{ role_regards_minio_ssl_location_inside_playbook }}/{{ role_regards_minio_mc_loc_ca }}"
     dest: "{{ role_regards_minio_mc_loc_ca_dir }}/{{ role_regards_minio_mc_loc_ca }}"
     mode: '0440'
     owner: "{{ role_regards_minio_ssl_local_container_root_user }}"

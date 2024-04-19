@@ -1,0 +1,3 @@
+---
+- import_tasks: redhatHigher8/audit.yml
+  when: ansible_facts["distribution_major_version"] >= "8"

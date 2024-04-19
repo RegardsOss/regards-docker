@@ -8,7 +8,7 @@ role_regards_minio_ssl_local_seuser: "{{ group_seuser }}"
 
 
 # SSL configuration
-role_regards_minio_ssl_location_inside_playbook: "{{ inventory_dir }}/group_vars/regards_nodes/files/ssl/"
+role_regards_minio_ssl_location_inside_playbook: "{{ group_docker_static_files_migrated | default(False) | ternary(inventory_dir + '/static/ssl', inventory_dir + '/group_vars/regards_nodes/files/ssl') }}"
 role_regards_minio_ssl_active: "{{ group_docker_cots.get('minio', {}).ssl is defined }}"
 role_regards_minio_internal_ssl_active: "{{ group_docker_cots.get('minio', {}).ssl_internal is defined }}"
 # Public SSL
