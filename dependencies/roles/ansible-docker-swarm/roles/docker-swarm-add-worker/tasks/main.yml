@@ -23,7 +23,7 @@
     state: join
     join_token: "{{ add_worker_join_token_worker }}"
     remote_addrs: "['{{ add_worker_remote_addr }}:2377']"
-    advertise_addr: 
+    advertise_addr:
   when: worker_status.host_info.Swarm.LocalNodeState == "inactive"
   vars:
     ansible_python_interpreter: "env python{{ python_version }}"

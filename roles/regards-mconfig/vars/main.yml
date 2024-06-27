@@ -46,6 +46,13 @@ role_regards_mconfig_global_default:
 # Name used to define this instance to other softwares
 role_regards_instance_name: "{{ global_regards.application_name | default('REGARDS') }}"
 
+# Flyway configuration
+role_regards_mconfig_config_mservices_flyway: "{{ (role_regards_mconfig_config_mservices | default({})).get('flyway', {}) }}"
+role_regards_mconfig_config_mservices_flyway_out_of_order: "{{ role_regards_mconfig_config_mservices_flyway.out_of_order | default(False) }}"
+
+# Hibernate query timeout in ms, default value to 5mins
+role_regards_mconfig_mservice_hibernate_query_timeout_ms: "{{ role_regards_mconfig_config_mservices.hibernate_query_timeout_ms | default('300000') }}"
+
 # ----------------------------------
 # Admin configuration
 # ----------------------------------
@@ -514,3 +521,8 @@ role_regards_mconfig_ssl:
   allow_insecure: "{{ (group_config_mservices.ssl | default({})).get('allow_insecure', false)}}"
 
 role_regards_stack_mservices_access_instance_postgis_enabled: "{{ (group_docker_mservices.access_instance | default({})).get('postgis', true) == true }}"
+
+# ----------------------------------
+# Migration to REGARDS 1.16 (Spring 3.3)
+# ----------------------------------
+role_regards_mconfig_mservice_legacy_spring: "{{ role_regards_mconfig_config_mservices.legacy_spring | default(true) }}"

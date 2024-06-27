@@ -76,8 +76,8 @@ role_regards_rabbitmq_config_definition:
   parameters: "{{ (group_docker_cots.rabbitmq | default({})).get('additional_parameters', []) }}"
   policies: []
   queues: "{{ (group_docker_cots.rabbitmq | default({})).get('additional_queues', []) }}"
-  exchanges: []
-  bindings: []
+  exchanges: "{{ (group_docker_cots.rabbitmq | default({})).get('additional_exchanges', []) }}"
+  bindings: "{{ (group_docker_cots.rabbitmq | default({})).get('additional_bindings', []) }}"
 
 role_regards_rabbitmq_config_definition_manual_revision: "{{ role_regards_rabbitmq_config_config_rabbitmq.get('manual_revision', '1') }}"
 

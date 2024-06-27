@@ -19,7 +19,7 @@
     enabled: yes
   with_items :
     - "iptables"
-  
+
 - name: "[REDHAT < 8] Allow new incoming packets on TCP ports"
   iptables:
     action: insert

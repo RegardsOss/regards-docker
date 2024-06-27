@@ -1,7 +1,6 @@
 ---
-role_regards_fluentd_config_fluent_legacy_is_defined: "{{ group_docker_cots.fluent is defined }}"
 role_regards_fluentd_config_fluent_is_defined: "{{ group_docker_cots.fluentd is defined }}"
-role_regards_fluentd_config_is_defined: "{{ role_regards_fluentd_config_fluent_is_defined|bool or role_regards_fluentd_config_fluent_legacy_is_defined|bool }}"
+role_regards_fluentd_config_is_defined: "{{ role_regards_fluentd_config_fluent_is_defined|bool }}"
 
 role_regards_fluentd_config_conf_local: "{{ group_workdir_local }}{{ group_stack_name }}/config/fluentd/"
 

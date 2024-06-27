@@ -22,14 +22,14 @@
 
 - name: "[REDHAT >= 8] Allow new incoming packets on ports from specific dests"
   firewalld:
-    rich_rule: 'rule family={{item.family | default("ipv4") }} destination address="{{ item.dest }}" port port="{{ item.port }}" protocol="{{ item.protocol }}" accept'
+    rich_rule: 'rule family={{ item.family | default("ipv4") }} destination address="{{ item.dest }}" port port="{{ item.port }}" protocol="{{ item.protocol }}" accept'
     permanent: true
     state: enabled
     immediate: true
     zone: '{{ firewalld_rule_zone }}'
   with_items :
     # DNS requests to host (udp/53)
-    - { dest: '{{ansible_facts.default_ipv4.address}}', port: '53', protocol: udp }
+    - { dest: '{{ ansible_facts.default_ipv4.address }}', port: '53', protocol: udp }
   notify:
     # updating firewalld rule (for DNSMasq) should restart
     # docker to let it regenerate proper rules

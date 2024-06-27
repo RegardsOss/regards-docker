@@ -4,10 +4,10 @@ role_docker_installation_http_proxy: "{{ ((environment_http_proxy is defined) an
 role_docker_installation_https_proxy: "{{ ((environment_https_proxy is defined) and (environment_https_proxy != None)) | ternary(environment_https_proxy, '') }}"
 role_docker_installation_no_proxy: "{{ ((environment_no_proxy is defined) and (environment_no_proxy != None)) | ternary(environment_no_proxy, '') }}"
 
-role_docker_network_interface_label: "{{ swarm_manager_eth | replace('ansible_','') }}"
+role_docker_network_interface_label: "{{ swarm_node_eth | replace('ansible_','') }}"
 
 # do not use SELinux with Docker swarm
 # as no security-opt option from https://docs.docker.com/engine/reference/run/#security-configuration
-# is available on service configuration 
+# is available on service configuration
 # see issue https://github.com/moby/moby/issues/41371
 docker_active_selinux: "{{ active_selinux | default(false) }}"

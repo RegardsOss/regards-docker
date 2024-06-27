@@ -14,7 +14,7 @@
 ---
 - name: "[DEBIAN] Update basic packages"
   apt:
-    name: 
+    name:
       - ntp
       - tcpdump
       - wget

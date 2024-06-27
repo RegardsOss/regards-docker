@@ -1,5 +1,5 @@
 ---
 python_version: 3
 
-add_manager_join_token_manager: "{{ hostvars[groups['swarm_manager'][0]]['manager_token'] }}"
-add_manager_remote_addr: "{{ hostvars[groups['swarm_manager'][0]][swarm_manager_eth]['ipv4']['address'] }}"
+# Swarm
+swarm_manager_eth:

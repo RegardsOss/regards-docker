@@ -31,8 +31,8 @@
     jump: ACCEPT
   with_items :
     # DNS requests to host (udp/53)
-    - { interface: docker0, dest: '{{ansible_facts.default_ipv4.address}}', port: '53', protocol: udp }
-    - { interface: docker_gwbridge, dest: '{{ansible_facts.default_ipv4.address}}', port: '53', protocol: udp }
+    - { interface: docker0, dest: '{{ ansible_facts.default_ipv4.address }}', port: '53', protocol: udp }
+    - { interface: docker_gwbridge, dest: '{{ ansible_facts.default_ipv4.address }}', port: '53', protocol: udp }
   tags: iptables-edit
 
 - name: "[DEBIAN] Save iptables"

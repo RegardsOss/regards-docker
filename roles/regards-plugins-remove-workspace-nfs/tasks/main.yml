@@ -1,0 +1,11 @@
+---
+- name: Iterate over NFS servers
+  ansible.builtin.include_tasks: removePluginNfs.yml
+  loop: "{{ role_regards_plugin_remove_workspace_nfs_top_level_nfs_servers }}"
+  # skipping NFS initialisation when we detect ro (Read only) in its config
+  when: 
+    - not 'ro,' in nfs_server.config.o
+    - nfs_server.get('skip_init_volumes', False)|bool == False
+    - role_regards_plugin_remove_workspace_nfs_active|bool
+  loop_control:
+    loop_var: nfs_server

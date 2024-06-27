@@ -17,12 +17,3 @@
     owner: "{{ role_regards_fluentd_config_container_root_user }}"
     group: "{{ role_regards_fluentd_config_container_root_group }}"
   when: role_regards_fluentd_config_fluent_is_defined|bool
-
-- name: Copy configuraton (legacy)
-  ansible.builtin.template:
-    src: fluent.conf
-    dest: "{{ role_regards_fluentd_config_conf_local }}/fluent.conf"
-    mode: '0770'
-    owner: "{{ role_regards_fluentd_config_container_root_user }}"
-    group: "{{ role_regards_fluentd_config_container_root_group }}"
-  when: role_regards_fluentd_config_fluent_legacy_is_defined|bool

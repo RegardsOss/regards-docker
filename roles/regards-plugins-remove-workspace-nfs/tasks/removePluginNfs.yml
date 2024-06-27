@@ -1,0 +1,71 @@
+---
+- name: "Remove tmp container {{ nfs_server.name }}"
+  docker_container:
+    name: "delete-plugin-on-nfs"
+    validate_certs: "{{ role_regards_plugin_remove_workspace_nfs_validate_certs }}"
+    state: absent
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"
+
+- name: Add tmp files to /tmp/
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "/tmp/{{ item }}"
+    mode: '0777'
+    owner: "{{ role_regards_plugin_remove_workspace_nfs_container_root_user }}"
+    group: "{{ role_regards_plugin_remove_workspace_nfs_container_root_group }}"
+  with_items:
+    - start.sh
+  become: true
+
+- name: "Create a tmp volume to initiate {{ nfs_server.name }}"
+  docker_volume:
+    name: tmp_nfs
+    validate_certs: "{{ role_regards_plugin_remove_workspace_nfs_validate_certs }}"
+    recreate: always
+    driver_options:
+      type: "{{ nfs_server.config.type | default('nfs') }}"
+      o: "{{ nfs_server.config.o }}"
+      device: "{{ nfs_server.config.device_prefix }}{{ role_regards_plugin_remove_workspace_nfs_mount_conf.get('device_postfix', 'regards/plugins/') }}"
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"
+
+- name: "Delete plugins on {{ nfs_server.name }}"
+  docker_container:
+    name: "delete-plugin-on-nfs"
+    validate_certs: "{{ role_regards_plugin_remove_workspace_nfs_validate_certs }}"
+    image: "{{ role_regards_plugin_remove_workspace_nfs_registry }}/regards-bash:{{ role_regards_plugin_remove_workspace_nfs_image_version }}"
+    pull: true
+    command: bash /start.sh
+    detach: false
+    network_mode: none
+    networks_cli_compatible: true
+    read_only: true
+    cleanup: true
+    user: "{{ role_regards_plugin_remove_workspace_nfs_run_uid }}:{{ role_regards_plugin_remove_workspace_nfs_run_gid }}"
+    # https://www.redhat.com/sysadmin/container-permission-denied-errors
+    privileged: true
+    userns_mode: host
+    # container_default_behavior: no_defaults
+    log_driver: json-file
+    volumes:
+      - /tmp/start.sh:/start.sh
+      - tmp_nfs:/plugins
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"
+
+- name: Delete tmp files
+  ansible.builtin.file:
+    path: "/tmp/{{ item }}"
+    state: absent
+  with_items:
+    - start.sh
+  become: true
+
+- name: Remove tmp volume
+  docker_volume:
+    name: tmp_nfs
+    validate_certs: "{{ role_regards_plugin_remove_workspace_nfs_validate_certs }}"
+    state: absent
+  vars:
+    ansible_python_interpreter: "env python{{ python_version }}"

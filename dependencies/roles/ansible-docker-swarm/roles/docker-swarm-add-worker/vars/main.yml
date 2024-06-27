@@ -1,0 +1,3 @@
+---
+add_worker_join_token_worker: "{{ hostvars[groups['swarm_manager'][0]]['worker_token'] }}"
+add_worker_remote_addr: "{{ hostvars[groups['swarm_manager'][0]][swarm_manager_eth]['ipv4']['address'] }}"

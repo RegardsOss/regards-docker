@@ -12,9 +12,9 @@ dnsmasq_group: nobody
 dnsmasq_listen_addr: '{{ ansible_facts.default_ipv4.address }}'
 
 # Use dnsmasq as an authoritative server (see dnsmasq "auth-server" option)
-#dnsmasq_auth_server: 
+#dnsmasq_auth_server:
 
-# dnsmasq_domain: 
+# dnsmasq_domain:
 dnsmasq_dnssec: no
 
 
@@ -34,5 +34,5 @@ dnsmasq_cache_size: 256
 
 dnsmasq_log: no
 
-# Firewalld zone where rule is registered 
+# Firewalld zone where rule is registered
 firewalld_rule_zone: public

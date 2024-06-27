@@ -655,14 +655,8 @@
             "indexByName": {},
             "renameByName": {
               "Time": "",
-              "elasticsearch-exporter": "",
-              "scalar(elasticsearch_cluster_health_status{color=\"green\"})": "Health",
-              "scalar(elasticsearch_cluster_health_status{color=\"green\"}) + scalar(elasticsearch_cluster_health_status{color=\"yellow\"}) * 2 + scalar(elasticsearch_cluster_health_status{color=\"red\"}) * 3": "Health",
-              "scalar(elasticsearch_cluster_health_status{color=\"yellow\"})": "Health",
-              "telegraf": "",
               "{__name__=\"elasticsearch_cluster_health_status\", cluster=\"regards\", color=\"green\", instance=\"rs-elasticsearch-exporter:9114\", job=\"elasticsearch-exporter\"}": "Health",
-              "{__name__=\"minio_cluster_health_status\", instance=\"{{ role_regards_grafana_config_minio_hostname }}:{{ role_regards_grafana_config_minio_port }}\", job=\"minio\", server=\"127.0.0.1:9000\"}": "Health",
-              "{instance=\"{{ role_regards_grafana_config_minio_hostname }}:{{ role_regards_grafana_config_minio_port }}\"}": "Health",
+              "{job=\"elasticsearch-exporter\"}": "elasticsearch-exporter",
               "{job=\"telegraf\"}": "StartedMsAgo"
             }
           }

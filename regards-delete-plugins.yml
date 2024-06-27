@@ -1,0 +1,4 @@
+- name: Remove all plugins on NFS
+  hosts: master
+  roles:
+    - regards-plugins-remove-workspace-nfs

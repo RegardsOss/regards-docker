@@ -23,7 +23,7 @@
 
 - name: Should recreate bridge network?
   set_fact:
-    recreate_gwbridge: "{{ 
+    recreate_gwbridge: "{{
       bridge_info.exists != true or
       bridge_info.network.Options[\"com.docker.network.bridge.name\"] != \"docker_gwbridge\" or
       bridge_info.network.Options[\"com.docker.network.bridge.enable_icc\"] != \"false\" or
@@ -36,11 +36,11 @@
       . /etc/profile.d/docker-client.sh;
       ip link set docker_gwbridge down;
       ip link del dev docker_gwbridge;
-      docker network disconnect -f docker_gwbridge gateway_ingress-sbox	|| true;
+      docker network disconnect -f docker_gwbridge gateway_ingress-sbox || true;
       printf 'Y' | docker network rm docker_gwbridge || true;
       docker network create --subnet {{ docker_gwbridge_network }} --opt com.docker.network.bridge.name=docker_gwbridge --opt com.docker.network.bridge.enable_icc=false --opt com.docker.network.bridge.enable_ip_masquerade=true docker_gwbridge
   when: recreate_gwbridge|bool
-  
+
 - name: Restart docker daemon
   systemd:
     name: docker

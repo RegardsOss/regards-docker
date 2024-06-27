@@ -8,7 +8,7 @@
     group: "{{ role_regards_elasticsearch_workspace_local_container_root_group }}"
     setype: "{{ role_regards_elasticsearch_workspace_local_setype }}"
     seuser: "{{ role_regards_elasticsearch_workspace_local_seuser }}"
-  when: role_regards_elasticsearch_workspace_local_elasticsearch_logs_defined or role_regards_elasticsearch_workspace_local_elasticsearch_defined
+  when: role_regards_elasticsearch_workspace_local_elasticsearch_defined
 
 - name: Create ES tmpjna folder
   ansible.builtin.file:
@@ -20,17 +20,6 @@
     setype: "{{ role_regards_elasticsearch_workspace_local_setype }}"
     seuser: "{{ role_regards_elasticsearch_workspace_local_seuser }}"
   when: role_regards_elasticsearch_workspace_local_elasticsearch_defined
-
-- name: Create ES Logs tmpjna folder
-  ansible.builtin.file:
-    path: "{{ role_regards_elasticsearch_workspace_local_path }}tmpjna-logs"
-    state: directory
-    mode: '2770'
-    owner: "{{ role_regards_elasticsearch_workspace_local_container_run_user }}"
-    group: "{{ role_regards_elasticsearch_workspace_local_container_run_group }}"
-    setype: "{{ role_regards_elasticsearch_workspace_local_setype }}"
-    seuser: "{{ role_regards_elasticsearch_workspace_local_seuser }}"
-  when: role_regards_elasticsearch_workspace_local_elasticsearch_logs_defined
 
 - name: Create ES data folder
   ansible.builtin.file:
@@ -53,25 +42,3 @@
     setype: "{{ role_regards_elasticsearch_workspace_local_setype }}"
     seuser: "{{ role_regards_elasticsearch_workspace_local_seuser }}"
   when: role_regards_elasticsearch_workspace_local_elasticsearch_defined and role_regards_elasticsearch_workspace_local_elasticsearch_backup_active
-
-- name: Create ES Logs data folder
-  ansible.builtin.file:
-    path: "{{ role_regards_elasticsearch_workspace_local_path }}data-logs"
-    state: directory
-    mode: '2770'
-    owner: "{{ role_regards_elasticsearch_workspace_local_container_run_user }}"
-    group: "{{ role_regards_elasticsearch_workspace_local_container_run_group }}"
-    setype: "{{ role_regards_elasticsearch_workspace_local_setype }}"
-    seuser: "{{ role_regards_elasticsearch_workspace_local_seuser }}"
-  when: role_regards_elasticsearch_workspace_local_elasticsearch_logs_defined and role_regards_elasticsearch_workspace_local_elasticsearch_logs_data_active
-
-- name: Create ES Logs backup folder
-  ansible.builtin.file:
-    path: "{{ role_regards_elasticsearch_workspace_local_path }}backup-logs"
-    state: directory
-    mode: '2770'
-    owner: "{{ role_regards_elasticsearch_workspace_local_container_run_user }}"
-    group: "{{ role_regards_elasticsearch_workspace_local_container_run_group }}"
-    setype: "{{ role_regards_elasticsearch_workspace_local_setype }}"
-    seuser: "{{ role_regards_elasticsearch_workspace_local_seuser }}"
-  when: role_regards_elasticsearch_workspace_local_elasticsearch_logs_defined and role_regards_elasticsearch_workspace_local_elasticsearch_logs_backup_active

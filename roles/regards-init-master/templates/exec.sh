@@ -14,20 +14,35 @@ typeset nbNodes=$(echo "$nodes" | wc -l)
 
 # Check if there is several containers
 if [ "$nbNodes" -gt 1 ]; then
-  printf "[\033[33mFAILED\033[m]\t Too many nodes detected for that service"
-  exit 1
+  COUNTER=0
+  for node in $nodes; do
+    printf >&2 "[\033[32m$COUNTER\033[m]\t$node\n"
+    COUNTER=$((COUNTER+1))
+  done;
+  read -p 'Which server do you want to connect to? ' nodeId
+
+  # Retrieve the corresponding node
+  COUNTER=0
+  for node in $nodes; do
+    if [ "${COUNTER}" = "${nodeId}" ]
+    then
+      typeset nodeToConnectTo=${node}
+    fi
+    COUNTER=$((COUNTER+1))
+  done;
+else
+  typeset nodeToConnectTo=${nodes}
 fi
 
-typeset containerId=$(docker service ps --no-trunc --format '{{ '{{' }}.ID{{ '}}' }}' --filter desired-state=Running ${stack_name}_${1})
-typeset containerName="${stack_name}_${1}.1.${containerId}"
+typeset containerName=$(docker service ps --no-trunc --format '{{ '{{' }}.Name{{ '}}' }}.{{ '{{' }}.ID{{ '}}' }}' --filter desired-state=Running --filter node=${nodeToConnectTo} ${stack_name}_${1})
 
 # Remove the first attribute (microservice name) now we've read it
 shift;
 
-if [ "${host}" = "${nodes}" ]
+if [ "${host}" = "${nodeToConnectTo}" ]
 then
   typeset command=$(echo "$@")
   exec bash -c "docker exec ${DOCKER_ARGS} ${containerName} ${command}"
 else
-  exec ssh -t "${nodes}" "docker exec ${DOCKER_ARGS} ${containerName} "$@""
+  exec ssh -t "${nodeToConnectTo}" "docker exec ${DOCKER_ARGS} ${containerName} "$@""
 fi

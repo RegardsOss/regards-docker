@@ -29,7 +29,7 @@
 
 - name: "[REDHAT >= 8] Install Firewall"
   yum:
-    name: 
+    name:
       - iptables
       - firewalld
       - firewalld-filesystem

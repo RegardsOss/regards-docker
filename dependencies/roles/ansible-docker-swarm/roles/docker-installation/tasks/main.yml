@@ -51,13 +51,13 @@
   modprobe:
     name: nf_conntrack_ipv4
     state: present
-  when: use_legacy_nf_conntrack.stdout != ""
+  when: use_legacy_nf_conntrack.stdout | length > 0
 
 - name: Load into kernel the latest conntrack - required by Swarm
   modprobe:
     name: nf_conntrack
     state: present
-  when: use_legacy_nf_conntrack.stdout == ""
+  when: use_legacy_nf_conntrack.stdout | length == 0
 
 - name: Stop services to clean iptables before save them
   systemd:
@@ -80,7 +80,7 @@
     reload: yes
     sysctl_file: '/etc/sysctl.d/50-ansible-docker-swarm-tuning.conf'
   with_dict: '{{ kernel_tuning_parameters }}'
-  when: kernel_tuning|bool == true
+  when: kernel_tuning|bool
 
 - name: Active RHEL kernel tuning
   sysctl:
@@ -90,7 +90,7 @@
     reload: yes
     sysctl_file: '/etc/sysctl.d/50-ansible-docker-swarm-tuning.conf'
   with_dict: '{{ kernel_rhel_7_tuning_parameters }}'
-  when: kernel_tuning|bool == true and ansible_facts['os_family'] == "RedHat" and ansible_facts["distribution_major_version"] == "7"
+  when: kernel_tuning|bool and ansible_facts['os_family'] == "RedHat" and ansible_facts["distribution_major_version"] == "7"
 
 - include_tasks: redhat/redhatHigher8/disable-checksum-ip.yml
   when: ansible_facts['os_family'] == "RedHat" and ansible_facts["distribution_major_version"] >= "8"

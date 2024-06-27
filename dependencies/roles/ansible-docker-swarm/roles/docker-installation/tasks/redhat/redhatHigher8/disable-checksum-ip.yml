@@ -16,7 +16,7 @@
 # Network interface cards can use the TCP offload engine (TOE) to offload processing certain operations to the network controller to improve the network throughput
 # @link https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/configuring_and_managing_networking/configuring-ethtool-offload-features_configuring-and-managing-networking#offload-features-supported-by-networkmanager_configuring-ethtool-offload-features
 - name: "[REDHAT >= 8] Check server has been patched"
-  lineinfile: 
+  lineinfile:
     dest: "/etc/sysconfig/network-scripts/ifcfg-{{ role_docker_network_interface_label }}"
     line: 'ETHTOOL_OPTS="-K {{ role_docker_network_interface_label }} tx-checksum-ip-generic off"'
   check_mode: yes

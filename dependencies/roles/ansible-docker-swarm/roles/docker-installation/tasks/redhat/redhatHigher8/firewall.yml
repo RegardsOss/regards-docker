@@ -31,7 +31,7 @@
   notify:
     - Reload firewalld
     - Restart docker
-  
+
 - name: "[REDHAT >= 8] Allow new incoming packets on ports"
   firewalld:
     port: "{{ item.port }}/{{ item.protocol }}"

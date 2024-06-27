@@ -30,7 +30,7 @@
 
 - name: "[REDHAT < 8] Install Firewall"
   yum:
-    name: 
+    name:
       - iptables
       - iptables-services
     state: latest

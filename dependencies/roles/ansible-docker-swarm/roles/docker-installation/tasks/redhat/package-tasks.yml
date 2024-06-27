@@ -39,7 +39,7 @@
 
 - name: "[REDHAT] Install Docker Dependencies"
   yum:
-    name: 
+    name:
       - curl
       - container-selinux
       - containerd.io

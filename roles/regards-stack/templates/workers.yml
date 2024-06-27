@@ -37,7 +37,18 @@ services:
           - node.labels.{{ worker.node_label_placement_constraint.key }} == {{ worker.node_label_placement_constraint.value }}
 {% endif %}
     networks:
-      - {{ role_regards_stack_docker_network_name }}
+      {{ role_regards_stack_docker_network_name }}:
+{% if (worker.configuration | default({})).external_networks is defined %}
+{% for external_network in worker.configuration.external_networks %}
+      {{ external_network.network }}:
+{% if external_network.aliases is defined %}
+        aliases:
+{% for alias in external_network.aliases %}
+          - {{ alias }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
 {% if ((worker.configuration | default({})).environment is defined) or (worker.jdwp is defined) or (worker.get('venv_replication', True) == False) %}
     environment:
       - REPLICATION_INSTANCE_ID={{ '{{.Task.Slot}}' }}

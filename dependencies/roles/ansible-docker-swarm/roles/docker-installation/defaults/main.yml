@@ -11,8 +11,10 @@ uid_map_user_name: dockermapuid
 
 
 # Swarm
+# Network interface of the Swarm manager
 swarm_manager_eth:
-
+# Current network interface where we install Docker
+swarm_node_eth: "{{ swarm_manager_eth }}"
 
 # Active kernel tuning
 kernel_tuning: true
@@ -87,5 +89,5 @@ docker_ask_before_reinstall: false
 # Default value is the dnsmasq running on the same server
 docker_dns: '{{ ansible_facts.default_ipv4.address }}'
 
-# Firewalld zone where rules are registered 
+# Firewalld zone where rules are registered
 firewalld_rule_zone: public
