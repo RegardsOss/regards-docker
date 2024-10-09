@@ -12,6 +12,15 @@
 - name: Set kernel.shmmax to sysctl for Ref
   sysctl:
     name: kernel.shmmax
-    value: "100663296"
+    # 256 MB
+    value: "268435456"
     sysctl_file: /etc/sysctl.d/56-regards-ref.conf
+    reload: true
+
+- name: Set kernel.shmall to sysctl for Ref
+  sysctl:
+    name: kernel.shmall
+    # 16 GB / 4 KB
+    value: "4194304"
+    sysctl_file: /etc/sysctl.d/57-regards-ref.conf
     reload: true

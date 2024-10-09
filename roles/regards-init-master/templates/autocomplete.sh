@@ -38,6 +38,9 @@ _script()
   swot-name-extraction-worker \
   swot-file-extraction-worker \
   feature-mapper-worker \
+  local-storage-worker \
+  s3-online-storage-worker \
+  s3-glacier-storage-worker \
   simple-worker "
   local cur prev
   COMPREPLY=()

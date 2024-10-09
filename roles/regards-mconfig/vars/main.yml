@@ -104,7 +104,7 @@ role_regards_mconfig_storage:
 
 dam_default:
   ingester_rate_ms: 60000
-  crawler_batch_size: 10000
+  crawler_batch_size: 2000
   crawler_init_time_ms: 60000
   check_polygon_orientation: false
   http_read_timeout: 60000
@@ -342,13 +342,11 @@ role_regards_mconfig_eureka:
 elastic_default:
   hosts: ""
   host: rs-elasticsearch
-  cluster: regards
   port: 9200
 
 role_regards_mconfig_elastic:
   hosts: "{{ (group_config_mservices.elastic | default({})).get('hosts', elastic_default.hosts) }}" 
   host: "{{ (group_config_mservices.elastic | default({})).get('host', elastic_default.host) }}"
-  cluster: "{{ (group_config_mservices.elastic | default({})).get('cluster', elastic_default.cluster) }}"
   port: "{{ (group_config_mservices.elastic | default({})).get('port', elastic_default.port) }}"
 
 

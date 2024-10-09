@@ -1,6 +1,6 @@
 # Name of the stack to deploy in docker swarm
 group_stack_name: regards
-# Everything stored in the workdir_local is not shared across swarm nodes. 
+# Everything stored in the workdir_local is not shared across swarm nodes.
 # We replicate everything on each swarm node to let microservice spawn whatever they want
 group_workdir_local: "{{ global_stack.workdir }}"
 
@@ -16,51 +16,38 @@ group_container_root_group: 'gregards_admin'
 group_container_run_user: 'docker-regards-data'
 group_container_run_group: 'gregards_data'
 # When Docker user namespace is active, we substract from the run_user:run_group
-# the shift we setup in Docker. It ensures that
+# the shift we set up in Docker. It ensures that
 # 1. containers are running with run_user:run_group on host server
 # 2. inside containers, prevent privilege escalation as uid:gid are at least the Docker uid:gid shift
-# When unactive, just provide run_user uid and run_group gid
+# When inactive, just provide run_user uid and run_group gid
 group_container_run_uid: 3050
 group_container_run_gid: 1050
 
-group_docker_network_name: 'regards_{{ group_stack_name }}'
+group_docker_network_name: "regards_{{ group_stack_name }}"
 group_docker_network_ip_network: '10.11.7.'
 
 group_docker_registry: ghcr.io/regardsoss
 
+# The domain used to access to current stack
+group_docker_stack_domain: regards.fr
+
+# Files have been moved from ./files/... to ../../static/...
+group_docker_static_files_migrated: True
+
 
 group_docker_tags:
-  cots: '{{ global_regards.version }}'
-  back: '{{ global_regards.version }}'
-  front: '{{ global_regards.version }}'
-  plugins: '{{ global_regards.version }}'
+  back: "{{ global_regards.version }}"
+  workers: "{{ global_regards.version }}"
+  plugins: "{{ global_regards.version }}"
+  front: "{{ global_regards.version }}"
+  cots: "{{ global_regards.version }}"
 
 # Plugins
-group_docker_plugins:
-  - image: rs-download-metalink-plugin
-    tag: "{{ group_docker_tags.plugins }}"
-  - image: rs-download-plugin
-    tag: "{{ group_docker_tags.plugins }}"
-  - image: rs-fem-driver-plugin
-    tag: "{{ group_docker_tags.plugins }}"
-  - image: rs-stac-plugin
-    tag: "{{ group_docker_tags.plugins }}"
-  - image: rs-custom-command-file-validation-plugin
-    tag: "{{ group_docker_tags.plugins }}"
-  - image: rs-aip-datasource-plugin
-    tag: "{{ group_docker_tags.plugins }}"
-  - image: rs-postgresql-datasource-plugin
-    tag: "{{ group_docker_tags.plugins }}"
-  - image: rs-feature-datasource-plugin
-    tag: "{{ group_docker_tags.plugins }}"
-  - image: rs-webservice-datasource-plugin
-    tag: "{{ group_docker_tags.plugins }}"
-  - image: rs-local-storage-location
-    tag: "{{ group_docker_tags.plugins }}"
-  - image: rs-enhanced-descriptive-aip-generation-plugin
-    tag: "{{ group_docker_tags.plugins }}"
-  - image: rs-rabbitmq-sender-plugin
-    tag: "{{ group_docker_tags.plugins }}"
+group_docker_plugins: []
+  # - image: rs-aip-datasource-plugin
+  #   tag: "{{ group_docker_tags.plugins }}"
+  # - image: rs-feature-datasource-plugin
+  #   tag: "{{ group_docker_tags.plugins }}"
 
 # Stack
 group_docker_mservices:
@@ -84,27 +71,15 @@ group_docker_mservices:
     tag: "{{ group_docker_tags.back }}"
   access_project:
     tag: "{{ group_docker_tags.back }}"
-#  notifier:
-#    tag: "{{ group_docker_tags.back }}"
-#  fem:
-#    tag: "{{ group_docker_tags.back }}"
-#  storage:
-#    tag: "{{ group_docker_tags.back }}"
-#  order:
-#    tag: "{{ group_docker_tags.back }}"
-#  ingest:
-#    tag: "{{ group_docker_tags.back }}"
-#  dataprovider:
-#    tag: "{{ group_docker_tags.back }}"
-#  processing:
-#    tag: "{{ group_docker_tags.back }}"
-#  worker_manager:
-#    tag: "{{ group_docker_tags.back }}"
   front:
-    protocol: http
-    host: "{{ global_stack.master_node_host_name }}"
-    port: 80
+    protocol: https
+    host: "{{ group_docker_stack_domain }}"
+    port: 443
+    rabbitmq_admin: 15672
     tag: "{{ group_docker_tags.front }}"
+    ssl:
+      crt: "{{ group_docker_stack_domain }}.crt"
+      key: "{{ group_docker_stack_domain }}.key"
 
 # WORKERS
 group_docker_workers: []
@@ -113,43 +88,59 @@ group_docker_workers: []
 group_docker_cots:
   elasticsearch:
     tag: "{{ group_docker_tags.cots }}"
-  kibana:
-    tag: "{{ group_docker_tags.cots }}"
-    http: 5601
-  maildev:
-    tag: "{{ group_docker_tags.cots }}"
-    http: 5081
+    node_label_placement_constraint:
+      key: type
+      value: node1
+  # Remove postgres when you use your mutualised instance
   postgres:
     tag: "{{ group_docker_tags.cots }}"
     node_label_placement_constraint:
-      key: postgres
-      value: indeed
+      key: type
+      value: node2
   phppgadmin:
     tag: "{{ group_docker_tags.cots }}"
     http: 5080
   rabbitmq:
     tag: "{{ group_docker_tags.cots }}"
-    http: 15672
+    global_service: true
+    client_ssl: 5671
+    # more configuration required:
+    # admin configuration: https://regardsoss.github.io/docs/next/setup/swarm/advanced/rabbitmq#configure-admin
+    # ssl configuration: https://regardsoss.github.io/docs/next/setup/swarm/advanced/rabbitmq#with-tls
+    node_label_placement_constraint:
+      key: type
+      value: node3
   elasticsearch_exporter:
     tag: "{{ group_docker_tags.cots }}"
   node_exporter:
     tag: "{{ group_docker_tags.cots }}"
+    # Node exporter is a global service
   telegraf:
     tag: "{{ group_docker_tags.cots }}"
-    # Telegraf, Node exporter and Fluentbit are global services
+    # Telegraf is a global service
+  prometheus:
+    tag: "{{ group_docker_tags.cots }}"
+    node_label_placement_constraint:
+      key: type
+      value: node1
+  grafana:
+    tag: "{{ group_docker_tags.cots }}"
+    port: 3000
+    node_label_placement_constraint:
+      key: type
+      value: node3
+  loki:
+    tag: "{{ group_docker_tags.cots }}"
+    node_label_placement_constraint:
+      key: type
+      value: node2
   kafka:
     tag: "{{ group_docker_tags.cots }}"
   fluentbit:
     tag: "{{ group_docker_tags.cots }}"
+    # Fluentbit is a global service
   fluentd:
     tag: "{{ group_docker_tags.cots }}"
-  prometheus:
-    tag: "{{ group_docker_tags.cots }}"
-  loki:
-    tag: "{{ group_docker_tags.cots }}"
-  grafana:
-    tag: "{{ group_docker_tags.cots }}"
-    port: 3000
 
 # COTS configuration
 group_docker_cots_configuration:
@@ -157,12 +148,17 @@ group_docker_cots_configuration:
     nbTenant: 10
   elasticsearch:
     cluster_name: regards-{{ group_stack_name }}
-  elasticsearch_logs:
-    cluster_name: regards-{{ group_stack_name }}_logs
-
+  rabbitmq:
+    ssl:
+      crt: "{{ group_docker_stack_domain }}.crt"
+      key: "{{ group_docker_stack_domain }}.key"
+      ca:  "{{ group_docker_stack_domain }}.ca.crt"
 
 group_config_mservices:
   init_project: "{{ global_regards.project_name }}"
+  mail:
+    host: smtprelay.regards.fr
+    port: 25
   access_token_validity: 2592000
   password_config:
     regex: ^.+$
@@ -173,3 +169,21 @@ group_config_mservices:
   proxy:
     url: "{{ global_proxy.url | default(false) }}"
     no_proxy: "{{ global_proxy.no_proxy | default(None) }}"
+  # amqp:
+  #   # see https://regardsoss.github.io/docs/next/setup/swarm/advanced/rabbitmq#configure-admin
+  #   user: fixme
+  #   password: fixme
+  # postgres:
+  #   # see https://regardsoss.github.io/docs/next/setup/swarm/advanced/postgres-database
+  #   instance:
+  #     host: fixme.regards.fr
+  #     port: 5432
+  #     user: fixme
+  #     password: fixme
+  #     db: fixme
+  #   init_project:
+  #     host: fixme
+  #     port: fixme
+  #     user: fixme
+  #     password: fixme
+  #     db: fixme

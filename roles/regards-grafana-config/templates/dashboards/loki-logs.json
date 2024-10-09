@@ -330,8 +330,8 @@
             "type": "loki",
             "uid": "2"
           },
-          "editorMode": "code",
-          "expr": "{swarm_service=~\"$swarm_service\", swarm_node=~\"$swarm_node\", swarm_service_id=~\"$swarm_service_id\", level=~\"$level\"} |~ \"(?i)$searchable_pattern\" != \"/actuator\" | json | line_format \"[{{ '{{' }}.swarm_service{{ '}}' }}]\\t[{{ '{{' }}.level{{ '}}' }}]\\t[{{ '{{' }}.file{{ '}}' }}] - {{ '{{' }}.message{{ '}}' }}{{ '{{' }}.msg{{ '}}' }}{{ '{{' }}.log{{ '}}' }}{{ '{{' }}.request{{ '}}' }} {{ '{{' }}.stack_trace{{ '}}' }}\"",
+          "editorMode": "builder",
+          "expr": "{swarm_service=~\"$swarm_service\", swarm_node=~\"$swarm_node\", swarm_service_id=~\"$swarm_service_id\", level=~\"$level\"} |= `$searchable_pattern` != `/actuator` | json | line_format `[{{ '{{' }}.swarm_service{{ '}}' }}]\\t[{{ '{{' }}.level{{ '}}' }}]\\t[{{ '{{' }}.file{{ '}}' }}] - {{ '{{' }}.message{{ '}}' }}{{ '{{' }}.msg{{ '}}' }}{{ '{{' }}.log{{ '}}' }}{{ '{{' }}.request{{ '}}' }} {{ '{{' }}.stack_trace{{ '}}' }}`",
           "hide": false,
           "queryType": "range",
           "refId": "B"
@@ -531,6 +531,6 @@
   "timezone": "",
   "title": "Logs",
   "uid": "fRIvzUZMz",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }

@@ -1399,7 +1399,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "editorMode": "code",
           "expr": "avg(node_load5{instance=~\"$swarm_nodes\"}) /  count(count(node_cpu_seconds_total{instance=~\"$swarm_nodes\"}) by (cpu)) * 100",
@@ -1458,69 +1458,76 @@
         "includeAll": true,
         "multi": false,
         "name": "monitored_services",
-        "options": [
-          {
+        {% set options = [{
             "selected": true,
             "text": "All",
             "value": "$__all"
-          },
+          }] %}
 {%  if role_regards_grafana_config_loki_active %}
+{% set _ = options.append(
           {
             "selected": false,
             "text": "rs-loki",
             "value": "rs-loki"
-          },
+          }) %}
 {%  endif %}
 {%  if role_regards_grafana_config_prometheus_active %}
+{% set _ = options.append(
           {
             "selected": false,
             "text": "rs-prometheus",
             "value": "rs-prometheus"
-          },
+          }) %}
 {%  endif %}
 {%  if role_regards_grafana_config_node_exporter_active %}
+{% set _ = options.append(
           {
             "selected": false,
             "text": "rs-node-exporter",
             "value": "rs-node-exporter"
-          },
+          }) %}
 {%  endif %}
 {%  if role_regards_grafana_config_telegraf_active %}
+{% set _ = options.append(
           {
             "selected": false,
             "text": "rs-telegraf",
             "value": "rs-telegraf"
-          },
+          }) %}
 {%  endif %}
 {%  if role_regards_grafana_config_phppgadmin_active %}
+{% set _ = options.append(
           {
             "selected": false,
             "text": "rs-phppgadmin",
             "value": "rs-phppgadmin"
-          },
+          }) %}
 {%  endif %}
 {%  if role_regards_grafana_config_kibana_active %}
+{% set _ = options.append(
           {
             "selected": false,
             "text": "rs-kibana",
             "value": "rs-kibana"
-          },
+          }) %}
 {%  endif %}
 {%  if role_regards_grafana_config_kafka_active %}
+{% set _ = options.append(
           {
             "selected": false,
             "text": "rs-kafka",
             "value": "rs-kafka"
-          },
+          }) %}
 {%  endif %}
 {%  if role_regards_grafana_config_fluentbit_active %}
+{% set _ = options.append(
           {
             "selected": false,
             "text": "rs-fluentbit",
             "value": "rs-fluentbit"
-          }
+          }) %}
 {%  endif %}
-        ],
+        "options": {{ options | to_json }},
         "query": "{%  if role_regards_grafana_config_loki_active %}rs-loki,{%  endif %}{%  if role_regards_grafana_config_prometheus_active %}rs-prometheus,{%  endif %}{%  if role_regards_grafana_config_node_exporter_active %} rs-node-exporter,{%  endif %}{%  if role_regards_grafana_config_telegraf_active %}rs-telegraf,{%  endif %}{%  if role_regards_grafana_config_phppgadmin_active %} rs-phppgadmin,{%  endif %}{%  if role_regards_grafana_config_kibana_active %}rs-kibana,{%  endif %}{%  if role_regards_grafana_config_kafka_active %}rs-kafka,{%  endif %}{%  if role_regards_grafana_config_fluentbit_active %}rs-fluentbit{%  endif %}",
         "queryValue": "",
         "skipUrlSync": false,

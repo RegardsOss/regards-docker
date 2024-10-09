@@ -1,19 +1,21 @@
 [regards_nodes]
-regards-master                                 ansible_host=host-server1  ansible_user=root ansible_password=password
-regards-slave  labels='{"postgres": "indeed"}' ansible_host=host-server2  ansible_user=root ansible_password=password
+regards-master  labels='{"type": "node1"}' ansible_host=server01.regards.fr ansible_connection=local
+regards-slave1  labels='{"type": "node2"}' ansible_host=server01.regards.fr
+regards-slave2  labels='{"type": "node3"}' ansible_host=server01.regards.fr
 
 [master]
 regards-master
 
 [slaves]
-regards-slave
+regards-slave-[1:2]
 
+# Install Docker swarm
 [docker_nodes]
 regards-master
-regards-slave
+regards-slave-[1:2]
 
 [swarm_manager]
 regards-master
 
 [swarm_workers]
-regards-slave
+regards-slave-[1:2]

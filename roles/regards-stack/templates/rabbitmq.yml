@@ -3,10 +3,8 @@ version: '3.9'
 # Config name must contains less than 32 [a-zA-Z0-9-_.] caracters
 configs:
   rs-rabbitmq_definitions.json:
-    # Hacky solution: this file changes everytime a password inside this file is generated, so this is disconnected
-    # from file change. Operators must use rabbitmq.manual_revision to make this config file refreshed
-    name: rabbitmq_definitions_json_{{ role_regards_stack_rabbitmq_manual_revision }}
-    file: {{ role_regards_stack_config }}rabbitmq/definitions_{{ role_regards_stack_rabbitmq_manual_revision }}.json
+    name: rabbitmq_definitions_json_{{ role_regards_stack_rabbitmq_manual_revision.stdout }}
+    file: {{ role_regards_stack_config }}rabbitmq/definitions_{{ role_regards_stack_rabbitmq_manual_revision.stdout }}.json
   rs-rabbitmq_rabbitmq.conf:
     name: rabbitmq_rabbitmq_conf_${CHECKSUM_RS_RABBITMQ_RABBITMQ_CONF}
     file: {{ role_regards_stack_config }}rabbitmq/rabbitmq.conf

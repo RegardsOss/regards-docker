@@ -59,7 +59,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "Busy state of all CPU cores together",
       "fieldConfig": {
@@ -126,7 +126,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "editorMode": "code",
           "expr": "(sum by(instance) (irate(node_cpu_seconds_total{instance=\"$node\", mode!=\"idle\"}[$__rate_interval])) / on(instance) group_left sum by (instance)((irate(node_cpu_seconds_total{instance=\"$node\"}[$__rate_interval])))) * 100",
@@ -144,7 +144,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "Busy state of all CPU cores together (5 min average)",
       "fieldConfig": {
@@ -211,7 +211,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "avg(node_load5{instance=\"$node\"}) /  count(count(node_cpu_seconds_total{instance=\"$node\"}) by (cpu)) * 100",
           "format": "time_series",
@@ -227,7 +227,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "Busy state of all CPU cores together (15 min average)",
       "fieldConfig": {
@@ -294,7 +294,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "avg(node_load15{instance=\"$node\"}) /  count(count(node_cpu_seconds_total{instance=\"$node\"}) by (cpu)) * 100",
           "hide": false,
@@ -309,7 +309,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "Non available RAM memory",
       "fieldConfig": {
@@ -368,7 +368,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "((node_memory_MemTotal_bytes{instance=\"$node\"} - node_memory_MemFree_bytes{instance=\"$node\"}) / (node_memory_MemTotal_bytes{instance=\"$node\"} )) * 100",
           "format": "time_series",
@@ -380,7 +380,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "100 - ((node_memory_MemAvailable_bytes{instance=\"$node\"} * 100) / node_memory_MemTotal_bytes{instance=\"$node\"})",
           "format": "time_series",
@@ -396,7 +396,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "Used Swap",
       "fieldConfig": {
@@ -463,7 +463,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "((node_memory_SwapTotal_bytes{instance=\"$node\"} - node_memory_SwapFree_bytes{instance=\"$node\"}) / (node_memory_SwapTotal_bytes{instance=\"$node\"} )) * 100",
           "intervalFactor": 1,
@@ -477,7 +477,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "Used Root FS",
       "fieldConfig": {
@@ -544,7 +544,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "100 - ((node_filesystem_avail_bytes{instance=\"$node\",mountpoint=\"/\",fstype!=\"rootfs\"} * 100) / node_filesystem_size_bytes{instance=\"$node\",mountpoint=\"/\",fstype!=\"rootfs\"})",
           "format": "time_series",
@@ -559,7 +559,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "Total number of CPU cores",
       "fieldConfig": {
@@ -623,7 +623,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "count(count(node_cpu_seconds_total{instance=\"$node\"}) by (cpu))",
           "interval": "",
@@ -639,7 +639,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "System uptime",
       "fieldConfig": {
@@ -705,7 +705,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "node_time_seconds{instance=\"$node\"} - node_boot_time_seconds{instance=\"$node\"}",
           "intervalFactor": 1,
@@ -719,7 +719,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "Total RootFS",
       "fieldConfig": {
@@ -788,7 +788,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "node_filesystem_size_bytes{instance=\"$node\",mountpoint=\"/\",fstype!=\"rootfs\"}",
           "format": "time_series",
@@ -804,7 +804,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "Total RAM",
       "fieldConfig": {
@@ -869,7 +869,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "node_memory_MemTotal_bytes{instance=\"$node\"}",
           "intervalFactor": 1,
@@ -883,7 +883,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "Total SWAP",
       "fieldConfig": {
@@ -948,7 +948,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "node_memory_SwapTotal_bytes{instance=\"$node\"}",
           "intervalFactor": 1,
@@ -988,7 +988,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "Basic CPU info",
       "fieldConfig": {
@@ -1178,7 +1178,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "editorMode": "code",
           "expr": "sum by(instance) (irate(node_cpu_seconds_total{instance=\"$node\", mode=\"system\"}[$__rate_interval])) / on(instance) group_left sum by (instance)((irate(node_cpu_seconds_total{instance=\"$node\"}[$__rate_interval])))",
@@ -1193,7 +1193,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "editorMode": "code",
           "expr": "sum by(instance) (irate(node_cpu_seconds_total{instance=\"$node\", mode=\"user\"}[$__rate_interval])) / on(instance) group_left sum by (instance)((irate(node_cpu_seconds_total{instance=\"$node\"}[$__rate_interval])))",
@@ -1208,7 +1208,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "editorMode": "code",
           "expr": "sum by(instance) (irate(node_cpu_seconds_total{instance=\"$node\", mode=\"iowait\"}[$__rate_interval])) / on(instance) group_left sum by (instance)((irate(node_cpu_seconds_total{instance=\"$node\"}[$__rate_interval])))",
@@ -1222,7 +1222,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "editorMode": "code",
           "expr": "sum by(instance) (irate(node_cpu_seconds_total{instance=\"$node\", mode=~\".*irq\"}[$__rate_interval])) / on(instance) group_left sum by (instance)((irate(node_cpu_seconds_total{instance=\"$node\"}[$__rate_interval])))",
@@ -1236,7 +1236,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "editorMode": "code",
           "expr": "sum by(instance) (irate(node_cpu_seconds_total{instance=\"$node\", mode!='idle',mode!='user',mode!='system',mode!='iowait',mode!='irq',mode!='softirq'}[$__rate_interval])) / on(instance) group_left sum by (instance)((irate(node_cpu_seconds_total{instance=\"$node\"}[$__rate_interval])))",
@@ -1250,7 +1250,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "editorMode": "code",
           "expr": "sum by(instance) (irate(node_cpu_seconds_total{instance=\"$node\", mode=\"idle\"}[$__rate_interval])) / on(instance) group_left sum by (instance)((irate(node_cpu_seconds_total{instance=\"$node\"}[$__rate_interval])))",
@@ -1268,7 +1268,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "Basic memory usage",
       "fieldConfig": {
@@ -1720,7 +1720,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "node_memory_MemTotal_bytes{instance=\"$node\"}",
           "format": "time_series",
@@ -1733,7 +1733,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "node_memory_MemTotal_bytes{instance=\"$node\"} - node_memory_MemFree_bytes{instance=\"$node\"} - (node_memory_Cached_bytes{instance=\"$node\"} + node_memory_Buffers_bytes{instance=\"$node\"} + node_memory_SReclaimable_bytes{instance=\"$node\"})",
           "format": "time_series",
@@ -1746,7 +1746,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "node_memory_Cached_bytes{instance=\"$node\"} + node_memory_Buffers_bytes{instance=\"$node\"} + node_memory_SReclaimable_bytes{instance=\"$node\"}",
           "format": "time_series",
@@ -1758,7 +1758,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "node_memory_MemFree_bytes{instance=\"$node\"}",
           "format": "time_series",
@@ -1770,7 +1770,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "(node_memory_SwapTotal_bytes{instance=\"$node\"} - node_memory_SwapFree_bytes{instance=\"$node\"})",
           "format": "time_series",
@@ -1786,7 +1786,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "Basic network info per interface",
       "fieldConfig": {
@@ -2226,7 +2226,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "irate(node_network_receive_bytes_total{instance=\"$node\"}[$__rate_interval])*8",
           "format": "time_series",
@@ -2238,7 +2238,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "irate(node_network_transmit_bytes_total{instance=\"$node\"}[$__rate_interval])*8",
           "format": "time_series",
@@ -2254,7 +2254,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "Disk space used of all filesystems mounted",
       "fieldConfig": {
@@ -2338,7 +2338,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "100 - ((node_filesystem_avail_bytes{instance=\"$node\",device!~'rootfs'} * 100) / node_filesystem_size_bytes{instance=\"$node\",device!~'rootfs'})",
           "format": "time_series",
@@ -2368,7 +2368,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "description": "",
           "fieldConfig": {
@@ -2470,7 +2470,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "node_timex_estimated_error_seconds{instance=\"$node\"}",
               "format": "time_series",
@@ -2484,7 +2484,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "node_timex_offset_seconds{instance=\"$node\"}",
               "format": "time_series",
@@ -2498,7 +2498,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "node_timex_maxerror_seconds{instance=\"$node\"}",
               "format": "time_series",
@@ -2516,7 +2516,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "description": "",
           "fieldConfig": {
@@ -2602,7 +2602,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "node_timex_loop_time_constant{instance=\"$node\"}",
               "format": "time_series",
@@ -2619,7 +2619,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "description": "",
           "fieldConfig": {
@@ -2721,7 +2721,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "node_timex_sync_status{instance=\"$node\"}",
               "format": "time_series",
@@ -2734,7 +2734,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "node_timex_frequency_adjustment_ratio{instance=\"$node\"}",
               "format": "time_series",
@@ -2751,7 +2751,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "description": "",
           "fieldConfig": {
@@ -2837,7 +2837,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "node_timex_tick_seconds{instance=\"$node\"}",
               "format": "time_series",
@@ -2850,7 +2850,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "node_timex_tai_offset_seconds{instance=\"$node\"}",
               "format": "time_series",

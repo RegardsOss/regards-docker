@@ -1,0 +1,34 @@
+name_space_uid: 1400000
+name_space_gid: 1400000
+name_space_range: 100000
+docker_group_gid: "{{ name_space_gid|int + 117 }}"
+
+swarm_manager_eth: "ansible_{{ global_stack.docker.network_interface }}"
+
+docker_bip: 10.122.20.1/24
+docker_ingress_network: 10.122.22.0/24
+docker_ingress_network_gateway: 10.122.22.1
+docker_gwbridge_network: 10.122.21.0/24
+
+docker_data_root: "{{ global_stack.docker.workdir }}"
+docker_storage_driver: overlay2
+
+docker_http_proxy: "{{ global_proxy.url | default(None) }}"
+docker_no_proxy:  "{{ global_proxy.no_proxy | default(None) }}"
+
+environment_http_proxy: "{{ global_proxy.url | default(None) }}"
+environment_https_proxy: "{{ global_proxy.url | default(None) }}"
+environment_no_proxy: "{{ global_proxy.no_proxy | default(None) }}"
+yum_proxy: "{{ global_proxy.url | default(None) }}"
+
+python_version: 3
+
+# Logging Driver
+log_driver_type: fluentd
+log_driver_opts:
+  fluentd-address : 127.0.0.1:24224
+  fluentd-async : "true"
+  fluentd-retry-wait : 15s
+  fluentd-sub-second-precision: "true"
+  cache-max-size: 10m
+  cache-max-file: 10

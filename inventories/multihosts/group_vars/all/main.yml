@@ -1,6 +1,6 @@
 global_stack:
   # Master node host name
-  master_node_host_name: PO15489
+  master_node_host_name: server01.regards.fr
   # Local path used to install REGARDS across every node
   workdir: /opt/regards-demo/
   # Docker configuration
@@ -13,7 +13,7 @@ global_stack:
 # Regards basic configuration
 global_regards:
   # Version to deploy
-  version: 1.14.3
+  version: 1.14.9
   # Name of the first initialized project
   project_name: demo
   # Default instance admin user

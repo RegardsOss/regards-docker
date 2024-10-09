@@ -1,0 +1,10 @@
+---
+- name: "Check if {{ role_regards_rabbitmq_config_stack_name }} stack is running"
+  shell: "docker stack ls --format '{{ '{{' }} .Name {{ '}}' }}' | grep -w {{ role_regards_rabbitmq_config_stack_name }} || true"
+  register: role_regards_rabbitmq_config_stack_info
+  ignore_errors: true
+
+- name: Fail if you try to update RabbitMQ configuration file while stack is running
+  fail:
+    msg: "You need to shutdown {{ role_regards_rabbitmq_config_stack_name }} stack as your RabbitMQ inventory has changed"
+  when: role_regards_rabbitmq_config_stack_info.stdout | length > 0

@@ -9,16 +9,29 @@
     setype: "{{ role_regards_rabbitmq_config_setype }}"
     seuser: "{{ role_regards_rabbitmq_config_seuser }}"
 
-- name: Create RabbitMQ definitions config file
+- name: Compute RabbitMQ definition.json config file checksum using inventory values
+  command: python{{ python_version }} -c 'import hashlib; import json; data = "{{ role_regards_rabbitmq_config_properties_used_in_definition_file | to_json | b64encode}}"; print(hashlib.md5(data.encode()).hexdigest())'
+  register: role_regards_rabbitmq_config_definition_manual_revision
+
+- name: "Check if RabbitMQ definitions_{{ role_regards_rabbitmq_config_definition_manual_revision.stdout }}.json exists"
+  stat:
+    path: "{{ role_regards_rabbitmq_config_conf_local }}/definitions_{{ role_regards_rabbitmq_config_definition_manual_revision.stdout }}.json"
+  register: role_regards_rabbitmq_config_definition_stats
+
+# Stop the build if the stack is running and we need to create a new definitions file, as it wont boot
+- ansible.builtin.include_tasks: stop-playbook-if-stack-running.yml
+  when: not role_regards_rabbitmq_config_definition_stats.stat.exists
+
+- name: "Create RabbitMQ definitions_{{ role_regards_rabbitmq_config_definition_manual_revision.stdout }}.json file ONLY if you've updated your RabbitMQ inventory configuration, otherwise do not edit the file"
   ansible.builtin.copy:
-    dest: "{{ role_regards_rabbitmq_config_conf_local }}/definitions_{{ role_regards_rabbitmq_config_definition_manual_revision }}.json"
+    dest: "{{ role_regards_rabbitmq_config_conf_local }}/definitions_{{ role_regards_rabbitmq_config_definition_manual_revision.stdout }}.json"
     content: "{{ role_regards_rabbitmq_config_definition | to_nice_json }}"
     mode: '0770'
-    force: false
     owner: "{{ role_regards_rabbitmq_config_container_root_user }}"
     group: "{{ role_regards_rabbitmq_config_container_root_group }}"
     setype: "{{ role_regards_rabbitmq_config_setype }}"
     seuser: "{{ role_regards_rabbitmq_config_seuser }}"
+  when: not role_regards_rabbitmq_config_definition_stats.stat.exists
 
 - name: Generate RabbitMQ config file
   ansible.builtin.template:

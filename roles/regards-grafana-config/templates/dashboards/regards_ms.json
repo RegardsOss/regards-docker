@@ -219,7 +219,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "fieldConfig": {
         "defaults": {
@@ -287,7 +287,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "editorMode": "code",
           "expr": "sum(jvm_memory_used_bytes{job=\"$application-scrape\", area=\"heap\"})*100/sum(jvm_memory_max_bytes{job=\"$application-scrape\", area=\"heap\"})",
@@ -1691,7 +1691,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "fieldConfig": {
         "defaults": {
@@ -1775,7 +1775,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "sum(jvm_memory_used_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", area=\"heap\"})",
           "format": "time_series",
@@ -1788,7 +1788,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "sum(jvm_memory_committed_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", area=\"heap\"})",
           "format": "time_series",
@@ -1800,7 +1800,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "sum(jvm_memory_max_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", area=\"heap\"})",
           "format": "time_series",
@@ -1816,7 +1816,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "fieldConfig": {
         "defaults": {
@@ -1900,7 +1900,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "sum(jvm_memory_used_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", area=\"nonheap\"})",
           "format": "time_series",
@@ -1914,7 +1914,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "sum(jvm_memory_committed_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", area=\"nonheap\"})",
           "format": "time_series",
@@ -1926,7 +1926,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "sum(jvm_memory_max_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", area=\"nonheap\"})",
           "format": "time_series",
@@ -1942,7 +1942,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "fieldConfig": {
         "defaults": {
@@ -2026,7 +2026,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "sum(jvm_memory_used_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"})",
           "format": "time_series",
@@ -2039,7 +2039,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "sum(jvm_memory_committed_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"})",
           "format": "time_series",
@@ -2051,7 +2051,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "sum(jvm_memory_max_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"})",
           "format": "time_series",
@@ -2267,7 +2267,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "fieldConfig": {
         "defaults": {
@@ -2353,7 +2353,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "system_cpu_usage{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
           "format": "time_series",
@@ -2367,7 +2367,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "process_cpu_usage{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
           "format": "time_series",
@@ -2379,7 +2379,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "avg_over_time(process_cpu_usage{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}[1h])",
           "format": "time_series",
@@ -2395,7 +2395,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "fieldConfig": {
         "defaults": {
@@ -2480,7 +2480,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "system_load_average_1m{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
           "format": "time_series",
@@ -2493,7 +2493,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "system_cpu_count{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
           "format": "time_series",
@@ -2508,7 +2508,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "fieldConfig": {
         "defaults": {
@@ -2593,7 +2593,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "jvm_threads_live_threads{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
           "format": "time_series",
@@ -2606,7 +2606,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "jvm_threads_daemon_threads{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
           "format": "time_series",
@@ -2619,7 +2619,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "jvm_threads_peak_threads{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
           "format": "time_series",
@@ -2631,7 +2631,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "process_threads{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
           "format": "time_series",
@@ -2648,7 +2648,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "fieldConfig": {
         "defaults": {
@@ -2822,7 +2822,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "jvm_threads_states_threads{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
           "format": "time_series",
@@ -2837,7 +2837,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "fieldConfig": {
         "defaults": {
@@ -2998,7 +2998,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "increase(logback_events_total{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}[1m])",
           "format": "time_series",
@@ -3016,7 +3016,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "fieldConfig": {
         "defaults": {
@@ -3102,7 +3102,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "process_files_open_files{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
           "format": "time_series",
@@ -3116,7 +3116,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "process_files_max_files{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
           "format": "time_series",
@@ -3148,7 +3148,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "fieldConfig": {
             "defaults": {
@@ -3232,7 +3232,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jvm_memory_used_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", id=~\"$jvm_memory_pool_heap\"}",
               "format": "time_series",
@@ -3247,7 +3247,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jvm_memory_committed_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", id=~\"$jvm_memory_pool_heap\"}",
               "format": "time_series",
@@ -3262,7 +3262,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jvm_memory_max_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", id=~\"$jvm_memory_pool_heap\"}",
               "format": "time_series",
@@ -3309,7 +3309,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "fieldConfig": {
             "defaults": {
@@ -3393,7 +3393,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jvm_memory_used_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", id=~\"$jvm_memory_pool_nonheap\"}",
               "format": "time_series",
@@ -3408,7 +3408,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jvm_memory_committed_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", id=~\"$jvm_memory_pool_nonheap\"}",
               "format": "time_series",
@@ -3423,7 +3423,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jvm_memory_max_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", id=~\"$jvm_memory_pool_nonheap\"}",
               "format": "time_series",
@@ -3469,7 +3469,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "fieldConfig": {
             "defaults": {
@@ -3549,7 +3549,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "rate(jvm_gc_pause_seconds_count{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}[1m])",
               "format": "time_series",
@@ -3565,7 +3565,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "fieldConfig": {
             "defaults": {
@@ -3645,7 +3645,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "rate(jvm_gc_pause_seconds_sum{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}[1m])/rate(jvm_gc_pause_seconds_count{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}[1m])",
               "format": "time_series",
@@ -3658,7 +3658,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jvm_gc_pause_seconds_max{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
               "format": "time_series",
@@ -3675,7 +3675,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "fieldConfig": {
             "defaults": {
@@ -3755,7 +3755,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "rate(jvm_gc_memory_allocated_bytes_total{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}[1m])",
               "format": "time_series",
@@ -3767,7 +3767,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "rate(jvm_gc_memory_promoted_bytes_total{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}[1m])",
               "format": "time_series",
@@ -3810,7 +3810,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "fieldConfig": {
             "defaults": {
@@ -3892,7 +3892,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "sum(rate(http_server_requests_seconds_count{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}[1m]))",
               "format": "time_series",
@@ -3907,7 +3907,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "fieldConfig": {
             "defaults": {
@@ -4020,7 +4020,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "sum(rate(http_server_requests_seconds_count{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", status=~\"5..\"}[1m]))",
               "format": "time_series",
@@ -4035,7 +4035,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "fieldConfig": {
             "defaults": {
@@ -4117,7 +4117,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "sum(rate(http_server_requests_seconds_sum{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", status!~\"5..\"}[1m]))/sum(rate(http_server_requests_seconds_count{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", status!~\"5..\"}[1m]))",
               "format": "time_series",
@@ -4129,7 +4129,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "max(http_server_requests_seconds_max{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", status!~\"5..\"})",
               "format": "time_series",
@@ -4145,7 +4145,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "description": "",
           "fieldConfig": {
@@ -4228,7 +4228,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "tomcat_threads_busy_threads{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
               "format": "time_series",
@@ -4240,7 +4240,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "tomcat_threads_current_threads{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
               "format": "time_series",
@@ -4252,7 +4252,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "tomcat_threads_config_max_threads{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
               "format": "time_series",
@@ -4264,7 +4264,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jetty_threads_busy{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
               "format": "time_series",
@@ -4276,7 +4276,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jetty_threads_current{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
               "format": "time_series",
@@ -4288,7 +4288,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jetty_threads_config_max{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
               "format": "time_series",
@@ -4331,7 +4331,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "fieldConfig": {
             "defaults": {
@@ -4411,7 +4411,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jvm_classes_loaded_classes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\"}",
               "format": "time_series",
@@ -4428,7 +4428,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "fieldConfig": {
             "defaults": {
@@ -4507,7 +4507,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "delta(jvm_classes_loaded_classes{job=\"$application-scrape\",instance=~\"$instance\"}[1m])",
               "format": "time_series",
@@ -4553,7 +4553,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "fieldConfig": {
             "defaults": {
@@ -4633,7 +4633,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jvm_buffer_memory_used_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", id=\"direct\"}",
               "format": "time_series",
@@ -4646,7 +4646,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jvm_buffer_total_capacity_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", id=\"direct\"}",
               "format": "time_series",
@@ -4663,7 +4663,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "fieldConfig": {
             "defaults": {
@@ -4744,7 +4744,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jvm_buffer_count_buffers{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", id=\"direct\"}",
               "format": "time_series",
@@ -4761,7 +4761,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "fieldConfig": {
             "defaults": {
@@ -4841,7 +4841,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jvm_buffer_memory_used_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", id=\"mapped\"}",
               "format": "time_series",
@@ -4854,7 +4854,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jvm_buffer_total_capacity_bytes{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", id=\"mapped\"}",
               "format": "time_series",
@@ -4871,7 +4871,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "fieldConfig": {
             "defaults": {
@@ -4952,7 +4952,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": 1
+                "uid": "1"
               },
               "expr": "jvm_buffer_count_buffers{job=\"$application-scrape\", replication_instance=~\"$replication_instance\", id=\"mapped\"}",
               "format": "time_series",

@@ -33,7 +33,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "Percentage of uptime during the most recent 2d period.",
       "fieldConfig": {
@@ -102,7 +102,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "avg(avg_over_time(up{job=~\"prometheus\"}[2h]) * 100)",
           "format": "time_series",
@@ -118,7 +118,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": 1
+        "uid": "1"
       },
       "description": "Total number of time series in prometheus",
       "fieldConfig": {
@@ -186,7 +186,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": 1
+            "uid": "1"
           },
           "expr": "sum(prometheus_tsdb_head_series{job=~\"prometheus\"})",
           "format": "time_series",

@@ -9,7 +9,18 @@
   with_items:
     - regards-stack.yml
     - global-mounts.yml
-    - rabbitmq.yml
+
+- name: Compute RabbitMQ definition.json config file checksum using inventory values
+  command: python{{ python_version }} -c 'import hashlib; import json; data = "{{ role_regards_stack_rabbitmq_properties_used_in_definition_file | to_json | b64encode}}"; print(hashlib.md5(data.encode()).hexdigest())'
+  register: role_regards_stack_rabbitmq_manual_revision
+
+- name: "Generate RabbitMQ stack file with definitions_{{ role_regards_stack_rabbitmq_manual_revision.stdout }}.json"
+  ansible.builtin.template:
+    src: rabbitmq.yml
+    dest: "{{ role_regards_stack_stack }}"
+    mode: '0740'
+    owner: "{{ role_regards_stack_container_root_user }}"
+    group: "{{ role_regards_stack_container_root_group }}"
 
 - name: Generate elastic stack file using external role
   ansible.builtin.include_role:

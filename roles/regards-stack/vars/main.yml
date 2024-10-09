@@ -35,17 +35,22 @@ role_regards_stack_mservices_access_instance_image_name: "rs-access-instance{{ (
 postgres_default:
   user: azertyuiop123456789
   password: azertyuiop123456789
+  size: medium
 
 role_regards_stack_config_postgres:
   user: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('user', postgres_default.user) }}"
   password: "{{ (group_config_mservices.postgres | default({})).get('instance', {}).get('user', postgres_default.password) }}"
+  size: "{{ group_docker_cots.get('postgres', {}).get('size', postgres_default.size) }}"
 
 rabbitmq_default:
   use_longname: true
-  manual_revision: '1'
 
 role_regards_stack_config_rabbitmq_use_longname: "{{ group_docker_cots.get('rabbitmq', {}).get('use_longname', rabbitmq_default.use_longname) }}"
-role_regards_stack_rabbitmq_manual_revision: "{{ group_docker_cots.get('rabbitmq', {}).get('manual_revision', rabbitmq_default.manual_revision) }}"
+role_regards_stack_rabbitmq_config: "{{ group_docker_cots.get('rabbitmq', {}) }}"
+# RabbitMQ properties used to compute the definition.json content md5
+# For example, we do not take the image tag here as there is no impact on the definition.json content
+# This variable is also duplicated inside regards-rabbitmq-config vars file
+role_regards_stack_rabbitmq_properties_used_in_definition_file: "{{role_regards_stack_rabbitmq_config | dict2items | selectattr('key', 'in', ['additional_users', 'additional_parameters', 'additional_queues', 'additional_exchanges', 'additional_bindings', 'user', 'password']) | list | items2dict}}"
 
 role_regards_stack_public_url: "{{ group_docker_mservices.front.public_protocol | default(group_docker_mservices.front.protocol) }}:\\/\\/{{ group_docker_mservices.front.public_host | default(group_docker_mservices.front.host) }}:{{ group_docker_mservices.front.public_port | default(group_docker_mservices.front.port) }}"
 
@@ -119,6 +124,17 @@ role_regards_stack_rabbitmq_ssl_active: "{{ group_docker_cots_configuration.get(
 role_regards_stack_rabbitmq_folder_certificates: "{{ group_workdir_local }}{{ group_stack_name }}/config/rabbitmq/ca-certificates/"
 role_regards_stack_rabbitmq_ssl_certificates_conf: "{{ group_docker_cots_configuration.get('rabbitmq', {}).get('ssl', {}) }}"
 
+postgres_memory_by_size:
+  small:
+    limit: 1G
+    reservation: 256M
+  medium:
+    limit: 3G
+    reservation: 1G
+  large:
+    limit: 6G
+    reservation: 3G
+
 role_regards_stack_resource_limits:
 # COTS
   rabbitmq:
@@ -140,11 +156,11 @@ role_regards_stack_resource_limits:
   postgres:
     limits:
       cpus: "{{ group_docker_cots.get('postgres', {}).get('cpuLimit', '1') }}"
-      memory: "{{ group_docker_cots.get('postgres', {}).get('memoryLimit', '1G') }}"
+      memory: "{{ group_docker_cots.get('postgres', {}).get('memoryLimit', postgres_memory_by_size[role_regards_stack_config_postgres.size].limit) }}"
       pids: 100000
     reservations:
       cpus: "{{ group_docker_cots.get('postgres', {}).get('cpuReserved', '0.5') }}"
-      memory: "{{ group_docker_cots.get('postgres', {}).get('memoryReserved', '256M') }}"
+      memory: "{{ group_docker_cots.get('postgres', {}).get('memoryReserved', postgres_memory_by_size[role_regards_stack_config_postgres.size].reservation) }}"
   # Microservices
   # CPU limit is tailored to handle microservice boot time
   config:

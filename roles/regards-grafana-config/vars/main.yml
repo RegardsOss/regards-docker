@@ -41,7 +41,7 @@ role_regards_grafana_config_configuration_custom_datasources_postgres: "{{ role_
 
 role_regards_grafana_config_configuration_elasticsearch:
   active: "{{ group_docker_cots.elasticsearch is defined }}"
-  url: rs-elasticsearch:9200
+  url: http://rs-elasticsearch:9200
   user: 
   indexes: "{{ role_regards_grafana_config_datasources.get('regards_cots', {}).get('elasticsearch_indexes', [group_stack_name]) }}"
 

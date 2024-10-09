@@ -24,3 +24,53 @@ role_regards_postgres_config_config_default_project: "{{ group_config_mservices.
 role_regards_postgres_config_nb_connections_by_tenant: 5
 
 role_regards_postgres_config_nb_tenant: "{{ group_docker_cots_configuration.postgres.nbTenant }}"
+
+role_regards_postgres_config_config_postgres: "{{ group_docker_cots.postgres | default({})}}"
+
+role_regards_postgres_config_postgres_size: "{{ role_regards_postgres_config_config_postgres.get('size', 'small') }}"
+
+postgres_memory_default:
+  small:
+    shared_buffers: 256MB
+    effective_cache_size: 768MB
+    maintenance_work_mem: 128MB
+    checkpoint_completion_target: 0.7
+    wal_buffers: 4MB
+    default_statistics_target: 50
+    random_page_cost: 1.2
+    effective_io_concurrency: 10
+    work_mem: 4MB
+    min_wal_size: 256MB
+    max_wal_size: 512MB
+    max_worker_processes: 4
+    autovacuum: 'off'
+  medium:
+    shared_buffers: 768MB
+    effective_cache_size: 2GB
+    maintenance_work_mem: 256MB
+    checkpoint_completion_target: 0.9
+    wal_buffers: 8MB
+    default_statistics_target: 100
+    random_page_cost: 1.1
+    effective_io_concurrency: 200
+    work_mem: 16MB
+    min_wal_size: 1GB
+    max_wal_size: 2GB
+    max_worker_processes: 8
+    autovacuum: 'on'
+  large:
+    shared_buffers: 1536MB
+    effective_cache_size: 4GB
+    maintenance_work_mem: 512MB
+    checkpoint_completion_target: 0.9
+    wal_buffers: 16MB
+    default_statistics_target: 100
+    random_page_cost: 1.1
+    effective_io_concurrency: 300
+    work_mem: 32MB
+    min_wal_size: 2GB
+    max_wal_size: 4GB
+    max_worker_processes: 12
+    autovacuum: 'on'
+
+role_regards_postgres_config_configuration_current_size: "{{ postgres_memory_default[role_regards_postgres_config_postgres_size] }}"

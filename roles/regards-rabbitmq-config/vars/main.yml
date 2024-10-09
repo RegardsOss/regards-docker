@@ -79,7 +79,11 @@ role_regards_rabbitmq_config_definition:
   exchanges: "{{ (group_docker_cots.rabbitmq | default({})).get('additional_exchanges', []) }}"
   bindings: "{{ (group_docker_cots.rabbitmq | default({})).get('additional_bindings', []) }}"
 
-role_regards_rabbitmq_config_definition_manual_revision: "{{ role_regards_rabbitmq_config_config_rabbitmq.get('manual_revision', '1') }}"
-
 role_regards_rabbitmq_config_container_limit: "{{ group_docker_cots.get('rabbitmq', {}).get('containerLimit', '2500m') }}"
 role_regards_rabbitmq_config_memory_high_watermark: "{{ group_docker_cots.get('rabbitmq', {}).get('memoryHighWatermark', '0.4') }}"
+
+# RabbitMQ properties used to compute the definition.json content md5
+# For example, we do not take the image tag here as there is no impact on the definition.json content
+# This variable is also duplicated inside regards-stack vars file
+role_regards_rabbitmq_config_properties_used_in_definition_file: "{{role_regards_rabbitmq_config_config_rabbitmq | dict2items | selectattr('key', 'in', ['additional_users', 'additional_parameters', 'additional_queues', 'additional_exchanges', 'additional_bindings', 'user', 'password']) | list | items2dict}}"
+role_regards_rabbitmq_config_stack_name: "{{ group_stack_name }}"

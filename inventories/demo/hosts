@@ -1,5 +1,5 @@
 [regards_nodes]
-regards-master ansible_connection=local  ansible_host='{{global_stack.master_node_host_name}}'
+regards-master ansible_connection=local  ansible_host=server01.regards.fr
 
 [master]
 regards-master
