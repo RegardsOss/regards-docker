@@ -19,7 +19,6 @@ global_regards:
   # Default instance admin user
   admin:
     login: regards@cnes.fr
-    password: regards
 
 # Allow install new repository for docker installation
 group_enable_add_repo: true

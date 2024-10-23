@@ -1,0 +1,48 @@
+regards_vault:
+  # Configuration related to Regards Docker network
+  group_docker_network_ip_network: 10.11.7.
+  # Configuration related to REGARDS microservices
+  # see group_config_mservices for usage
+  group_config_mservices:
+    # Instance admin account configuration
+    instance_admin:
+      password: regards
+    # Token secret (64 characters max)
+    jwt_secret: '!!!!!==========abcdefghijklmnopqrstuvwxyz0123456789==========!!!!!'
+    jwt_key_hs256: '!!!!!==========abcdefghijklmnopqrstuvwxyz0123456789==========!!!!!'
+    jwt_key_hs384: ''
+    jwt_key_hs512: '!!!!!==========abcdefghijklmnopqrstuvwxyz0123456789==========!!!!!'
+    order_jwt_secret: '~~~~~!!!!!!!!!!!0123456789abcdefghijklmnopqrstuvwxyz!!!!!!!!!!!~~~~~'
+    # Password to crypt DB secret (16 characters max)
+    cipher_iv: '1234567812345678'
+    # Configuration related to REGARDS Postgres databases
+    postgres:
+      # Internal database used by REGARDS to allow multitenancy
+      instance:
+        password: xxx
+      # First tenant database used by REGARDS on first boot
+      init_project:
+        password: xxx
+  # Configuration related to COTS
+  # RabbitMQ, Grafana, MinIO...
+  # see group_docker_cots for usage
+  group_docker_cots:
+    # Configuration related to AMQP / RabbitMQ
+    rabbitmq:
+      # Used by REGARDS to connect to RabbitMQ
+      regards:
+        password: regards
+      # additional_users:
+      #   # Add any missionized account here under
+      #   # yyyy is the component name that connects to your instance. Ex: airbus, nasa, chronos...
+      #   yyyy:
+      #     password: xxxx
+    # Configuration related to databases used by Grafana to allow supervision
+    grafana:
+      datasources:
+        custom:
+          # Used by Grafana to access to tenants databases
+          # Must be "read only" users
+          postgres:
+            foe_tenant:
+              password: xxx

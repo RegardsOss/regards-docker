@@ -31,6 +31,9 @@ services:
         {{ worker.resources | to_nice_yaml | indent(8) }}
 {% endif %}
       replicas: {{ worker.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if worker.node_label_placement_constraint is defined %}
       placement:
         constraints:

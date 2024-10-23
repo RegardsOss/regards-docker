@@ -2,11 +2,11 @@ global_stack:
   # Master node host name
   master_node_host_name: server01.regards.fr
   # Local path used to install REGARDS across every node
-  workdir: /opt/regards-demo/
+  workdir: /data/regards/
   # Docker configuration
   docker:
     # Docker installation directory
-    workdir: /home/docker
+    workdir: /var/lib/docker
     # Docker network interface
     network_interface: eth0
 
@@ -19,7 +19,6 @@ global_regards:
   # Default instance admin user
   admin:
     login: regards@cnes.fr
-    password: regards
 
 # Allow install new repository for docker installation
 group_enable_add_repo: true

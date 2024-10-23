@@ -24,7 +24,7 @@ group_container_run_uid: 3050
 group_container_run_gid: 1050
 
 group_docker_network_name: "regards_{{ group_stack_name }}"
-group_docker_network_ip_network: '10.11.7.'
+group_docker_network_ip_network: "{{ regards_vault.group_docker_network_ip_network }}"
 
 group_docker_registry: ghcr.io/regardsoss
 
@@ -33,7 +33,6 @@ group_docker_stack_domain: regards.fr
 
 # Files have been moved from ./files/... to ../../static/...
 group_docker_static_files_migrated: True
-
 
 group_docker_tags:
   back: "{{ global_regards.version }}"
@@ -91,22 +90,25 @@ group_docker_cots:
     node_label_placement_constraint:
       key: type
       value: node1
-  # Remove postgres when you use your mutualised instance
-  postgres:
-    tag: "{{ group_docker_tags.cots }}"
-    node_label_placement_constraint:
-      key: type
-      value: node2
   phppgadmin:
     tag: "{{ group_docker_tags.cots }}"
     http: 5080
+    db: 
+      - name: fixme
+        host: fixme
+        port: 5432
+        defaultdb: fixme
+        theme: cappuccino
+    setting_main_theme: cappuccino
   rabbitmq:
     tag: "{{ group_docker_tags.cots }}"
+    # see https://regardsoss.github.io/docs/setup/swarm/advanced/rabbitmq#configure-admin
+    user: regards
+    password: "{{ regards_vault.group_docker_cots.rabbitmq.regards.password }}"
     global_service: true
     client_ssl: 5671
     # more configuration required:
-    # admin configuration: https://regardsoss.github.io/docs/next/setup/swarm/advanced/rabbitmq#configure-admin
-    # ssl configuration: https://regardsoss.github.io/docs/next/setup/swarm/advanced/rabbitmq#with-tls
+    # ssl configuration: https://regardsoss.github.io/docs/setup/swarm/advanced/rabbitmq#with-tls
     node_label_placement_constraint:
       key: type
       value: node3
@@ -126,6 +128,22 @@ group_docker_cots:
   grafana:
     tag: "{{ group_docker_tags.cots }}"
     port: 3000
+    host: "{{ group_docker_stack_domain }}"
+    ssl:
+      crt: "{{ group_docker_stack_domain }}.crt"
+      key: "{{ group_docker_stack_domain }}.key"
+    datasources:
+      regards_cots:
+        elasticsearch_indexes:
+          - "{{ global_regards.project_name }}"
+      custom:
+        postgres:
+          - name: fixme
+            url: fixme
+            user: fixme
+            password: "{{ regards_vault.group_docker_cots.grafana.datasources.custom.postgres.foe_tenant.password }}"
+            databases: 
+              - fixme
     node_label_placement_constraint:
       key: type
       value: node3
@@ -144,10 +162,8 @@ group_docker_cots:
 
 # COTS configuration
 group_docker_cots_configuration:
-  postgres:
-    nbTenant: 10
   elasticsearch:
-    cluster_name: regards-{{ group_stack_name }}
+    cluster_name: regards
   rabbitmq:
     ssl:
       crt: "{{ group_docker_stack_domain }}.crt"
@@ -165,25 +181,32 @@ group_config_mservices:
     info: Password must contains at least 1 character
   instance_admin:
     username: "{{ global_regards.admin.login }}"
-    password: "{{ global_regards.admin.password }}"
+    password: "{{ regards_vault.group_config_mservices.instance_admin.password }}"
+  # Token secret (REGARDS API and Orders direct download links) - (64 characters max)
+  jwt_secret: "{{ regards_vault.group_config_mservices.authentication.jwt_secret }}"
+  jwt_key_hs256: "{{ regards_vault.group_config_mservices.authentication.jwt_key_hs256 }}"
+  jwt_key_hs384: "{{ regards_vault.group_config_mservices.authentication.jwt_key_hs384 }}"
+  jwt_key_hs512: "{{ regards_vault.group_config_mservices.authentication.jwt_key_hs512 }}"
+  order_jwt_secret: "{{ regards_vault.group_config_mservices.authentication.order_jwt_secret }}"
+  # Password to crypt DB secret (16 characters max)
+  cipher_iv: "{{ regards_vault.group_config_mservices.authentication.cipher_iv }}"
   proxy:
     url: "{{ global_proxy.url | default(false) }}"
     no_proxy: "{{ global_proxy.no_proxy | default(None) }}"
-  # amqp:
-  #   # see https://regardsoss.github.io/docs/next/setup/swarm/advanced/rabbitmq#configure-admin
-  #   user: fixme
-  #   password: fixme
-  # postgres:
-  #   # see https://regardsoss.github.io/docs/next/setup/swarm/advanced/postgres-database
-  #   instance:
-  #     host: fixme.regards.fr
-  #     port: 5432
-  #     user: fixme
-  #     password: fixme
-  #     db: fixme
-  #   init_project:
-  #     host: fixme
-  #     port: fixme
-  #     user: fixme
-  #     password: fixme
-  #     db: fixme
+  amqp:
+    user: "{{ group_docker_cots.rabbitmq.user }}"
+    password: "{{ group_docker_cots.rabbitmq.password }}"
+  postgres:
+    # see https://regardsoss.github.io/docs/setup/swarm/advanced/postgres-database
+    instance:
+      host: fixme.regards.fr
+      port: 5432
+      user: fixme
+      password: "{{ regards_vault.group_config_mservices.postgres.instance.password }}"
+      db: fixme
+    init_project:
+      host: fixme
+      port: fixme
+      user: fixme
+      password: "{{ regards_vault.group_config_mservices.postgres.init_project.password }}"
+      db: fixme

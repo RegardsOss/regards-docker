@@ -906,6 +906,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.gateway | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.gateway.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.gateway.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -1090,6 +1093,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.admin | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.admin.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.admin.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -1174,6 +1180,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.authentication | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.authentication.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.authentication.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -1278,6 +1287,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.dam | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.dam.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.dam.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -1385,6 +1397,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.notifier | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.notifier.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.notifier.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -1478,6 +1493,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.fem | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.fem.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.fem.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -1578,6 +1596,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.catalog | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.catalog.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.catalog.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -1762,6 +1783,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.access_project | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.access_project.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.access_project.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -1846,6 +1870,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.front | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.front.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.front.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -1961,6 +1988,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.storage | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.storage.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.storage.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -2076,6 +2106,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.order | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.order.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.order.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -2143,6 +2176,12 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
+{% if role_regards_stack_ca_certificates|length > 0 %}
+{% for file in role_regards_stack_ca_certificates %}
+      - source: ca_cert_{{ file.split('.') | first }}
+        target: "/etc/ca-certificates/{{ file }}"
+{% endfor %}
+{% endif %}
 {% if role_regards_stack_mservices.order.logging is defined %}
     logging:
       {{ role_regards_stack_mservices.order.logging | to_nice_yaml | indent(6) }}
@@ -2176,6 +2215,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.processing | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.processing.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.processing.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -2245,6 +2287,12 @@ services:
         target: {{ config.destination }}
 {% endfor %}
 {% endif %}
+{% if role_regards_stack_ca_certificates|length > 0 %}
+{% for file in role_regards_stack_ca_certificates %}
+      - source: ca_cert_{{ file.split('.') | first }}
+        target: "/etc/ca-certificates/{{ file }}"
+{% endfor %}
+{% endif %}
 {% if role_regards_stack_mservices.processing.logging is defined %}
     logging:
       {{ role_regards_stack_mservices.processing.logging | to_nice_yaml | indent(6) }}
@@ -2278,6 +2326,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.ingest | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.ingest.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.ingest.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -2378,6 +2429,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.dataprovider | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.dataprovider.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.dataprovider.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -2478,6 +2532,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.worker_manager | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.worker_manager.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.worker_manager.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -2567,6 +2624,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.lta_manager | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.lta_manager.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.lta_manager.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -2651,6 +2711,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.delivery | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.delivery.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.delivery.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -2744,6 +2807,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.file_catalog | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.file_catalog.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.file_catalog.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -2828,6 +2894,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.file_access | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.file_access.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.file_access.node_label_placement_constraint is defined %}
       placement:
         constraints:
@@ -2938,6 +3007,9 @@ services:
       resources:
         {{ role_regards_stack_resource_limits.file_packager | to_nice_yaml | indent(8) }}
       replicas: {{ role_regards_stack_mservices.file_packager.replicas | default(1) }}
+      update_config:
+        parallelism: 0
+        delay: 0s
 {% if role_regards_stack_mservices.file_packager.node_label_placement_constraint is defined %}
       placement:
         constraints:

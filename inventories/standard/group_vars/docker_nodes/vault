@@ -1,0 +1,6 @@
+docker_vault:
+  # Subnet/netmask address. Basically, it cannot end with .0
+  docker_bip: 10.122.20.1/24
+  docker_ingress_network:  10.122.22.0/24
+  docker_ingress_network_gateway: 10.122.22.1
+  docker_gwbridge_network: 10.122.21.0/24

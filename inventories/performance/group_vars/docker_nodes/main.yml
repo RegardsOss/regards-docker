@@ -5,10 +5,10 @@ docker_group_gid: "{{ name_space_gid|int + 117 }}"
 
 swarm_manager_eth: "ansible_{{ global_stack.docker.network_interface }}"
 
-docker_bip: 10.122.20.1/24
-docker_ingress_network: 10.122.22.0/24
-docker_ingress_network_gateway: 10.122.22.1
-docker_gwbridge_network: 10.122.21.0/24
+docker_bip: "{{ docker_vault.docker_bip }}"
+docker_ingress_network: "{{ docker_vault.docker_ingress_network }}"
+docker_ingress_network_gateway: "{{ docker_vault.docker_ingress_network_gateway }}"
+docker_gwbridge_network: "{{ docker_vault.docker_gwbridge_network }}"
 
 docker_data_root: "{{ global_stack.docker.workdir }}"
 docker_storage_driver: overlay2
