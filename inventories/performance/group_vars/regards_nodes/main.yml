@@ -150,7 +150,7 @@ group_docker_cots:
     tag: "{{ group_docker_tags.cots }}"
     node_label_placement_constraint:
       key: type
-      value: log
+      value: logs
   node_exporter:
     tag: "{{ group_docker_tags.cots }}"
     # Node exporter is a global service
@@ -161,7 +161,7 @@ group_docker_cots:
     tag: "{{ group_docker_tags.cots }}"
     node_label_placement_constraint:
       key: type
-      value: log
+      value: logs
   grafana:
     tag: "{{ group_docker_tags.cots }}"
     port: 3000
@@ -183,18 +183,18 @@ group_docker_cots:
               - fixme
     node_label_placement_constraint:
       key: type
-      value: log
+      value: logs
   loki:
     tag: "{{ group_docker_tags.cots }}"
     containerLimit: 3g
     node_label_placement_constraint:
       key: type
-      value: log
+      value: logs
   kafka:
     tag: "{{ group_docker_tags.cots }}"
     node_label_placement_constraint:
       key: type
-      value: log
+      value: logs
   fluentbit:
     tag: "{{ group_docker_tags.cots }}"
     # Fluentbit is a global service
@@ -202,7 +202,7 @@ group_docker_cots:
     tag: "{{ group_docker_tags.cots }}"
     node_label_placement_constraint:
       key: type
-      value: log
+      value: logs
 
 # COTS configuration
 group_docker_cots_configuration:

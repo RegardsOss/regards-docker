@@ -5,7 +5,7 @@ regards-master-3                             ansible_host=server03.regards.fr
 regards-slave-1  labels='{"type": "cots"}'   ansible_host=server04.regards.fr
 regards-slave-2  labels='{"type": "cots"}'   ansible_host=server05.regards.fr
 regards-slave-3  labels='{"type": "cots"}'   ansible_host=server06.regards.fr
-regards-slave-4  labels='{"type": "log"}'    ansible_host=server07.regards.fr
+regards-slave-4  labels='{"type": "logs"}'   ansible_host=server07.regards.fr
 regards-slave-5  labels='{"type": "common"}' ansible_host=server08.regards.fr
 regards-slave-6  labels='{"type": "common"}' ansible_host=server09.regards.fr
 regards-slave-7  labels='{"type": "common"}' ansible_host=server10.regards.fr

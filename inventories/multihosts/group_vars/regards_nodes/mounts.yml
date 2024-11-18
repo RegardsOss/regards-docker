@@ -1,11 +1,16 @@
 # Define volumes, REGARDS volumes, configs and secrets
 group_docker_mounts:
   # Define NFS configurations used by REGARDS volumes
-  nfs: []
-  # Allows some files inside <inventory>/group_vars/regards_nodes/files/... to be attached 
+  nfs:
+    - name: nfs-regards
+      config:
+        # see /etc/auto.direct configuration about /shared - just add ,addr=<domain> at the end
+        o: FIXME
+        device_prefix: "nfs-server-p01:/REGARDS/"
+  # Allows some files inside <inventory>/static/... to be attached 
   # to frontend / workers containers as Secret file (read only) 
   secrets: []
-  # Allows some files inside <inventory>/group_vars/regards_nodes/files/... to be attached 
+  # Allows some files inside <inventory>/static/... to be attached 
   # to frontend / workers containers as Config file (read only) 
   configs: []
   volumes: []
@@ -14,12 +19,17 @@ group_docker_mounts:
     data_inputs: []
     # For DAM documents
     dam:
+      nfs: nfs-regards
     storage:
       # For online local storages
       online:
+        nfs: nfs-regards
       # For STORAGE cache
       cache:
+        nfs: nfs-regards
     # Common microservices workspace directory
     workspace:
+      nfs: nfs-regards
     # Microservices plugins directory
     plugins:
+      nfs: nfs-regards

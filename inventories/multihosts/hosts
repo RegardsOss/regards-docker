@@ -1,7 +1,7 @@
 [regards_nodes]
-regards-master  labels='{"type": "node1"}' ansible_host=server01.regards.fr ansible_connection=local
-regards-slave1  labels='{"type": "node2"}' ansible_host=server01.regards.fr
-regards-slave2  labels='{"type": "node3"}' ansible_host=server01.regards.fr
+regards-master  labels='{"type": "logs"}' ansible_host=server01.regards.fr ansible_connection=local
+regards-slave1                            ansible_host=server02.regards.fr
+regards-slave2                            ansible_host=server03.regards.fr
 
 [master]
 regards-master

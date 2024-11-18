@@ -20,7 +20,7 @@ global_regards:
   admin:
     login: regards@cnes.fr
 
-# Allow install new repository for docker installation
+# Allow installing new repository for docker installation
 group_enable_add_repo: true
 
 global_proxy:

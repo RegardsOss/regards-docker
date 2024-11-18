@@ -86,13 +86,16 @@ group_docker_workers: []
 # COTS
 group_docker_cots:
   elasticsearch:
+    memoryLimit: 1g
     tag: "{{ group_docker_tags.cots }}"
-    node_label_placement_constraint:
-      key: type
-      value: node1
+    global_service: true
   phppgadmin:
     tag: "{{ group_docker_tags.cots }}"
     http: 5080
+    host: "{{ group_docker_stack_domain }}"
+    ssl:
+      crt: "{{ group_docker_stack_domain }}.crt"
+      key: "{{ group_docker_stack_domain }}.key"
     db: 
       - name: fixme
         host: fixme
@@ -102,6 +105,7 @@ group_docker_cots:
     setting_main_theme: cappuccino
   rabbitmq:
     tag: "{{ group_docker_tags.cots }}"
+    global_service: true
     # see https://regardsoss.github.io/docs/setup/swarm/advanced/rabbitmq#configure-admin
     user: regards
     password: "{{ regards_vault.group_docker_cots.rabbitmq.regards.password }}"
@@ -109,9 +113,6 @@ group_docker_cots:
     client_ssl: 5671
     # more configuration required:
     # ssl configuration: https://regardsoss.github.io/docs/setup/swarm/advanced/rabbitmq#with-tls
-    node_label_placement_constraint:
-      key: type
-      value: node3
   elasticsearch_exporter:
     tag: "{{ group_docker_tags.cots }}"
   node_exporter:
@@ -124,7 +125,7 @@ group_docker_cots:
     tag: "{{ group_docker_tags.cots }}"
     node_label_placement_constraint:
       key: type
-      value: node1
+      value: logs
   grafana:
     tag: "{{ group_docker_tags.cots }}"
     port: 3000
@@ -146,12 +147,12 @@ group_docker_cots:
               - fixme
     node_label_placement_constraint:
       key: type
-      value: node3
+      value: logs
   loki:
     tag: "{{ group_docker_tags.cots }}"
     node_label_placement_constraint:
       key: type
-      value: node2
+      value: logs
   kafka:
     tag: "{{ group_docker_tags.cots }}"
   fluentbit:

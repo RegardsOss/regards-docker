@@ -2,10 +2,10 @@
 group_docker_mounts:
   # Define NFS configurations used by REGARDS volumes
   nfs: []
-  # Allows some files inside <inventory>/group_vars/regards_nodes/files/... to be attached 
+  # Allows some files inside <inventory>/static/... to be attached 
   # to frontend / workers containers as Secret file (read only) 
   secrets: []
-  # Allows some files inside <inventory>/group_vars/regards_nodes/files/... to be attached 
+  # Allows some files inside <inventory>/static/... to be attached 
   # to frontend / workers containers as Config file (read only) 
   configs: []
   volumes: []

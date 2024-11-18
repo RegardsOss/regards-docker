@@ -7,10 +7,10 @@ group_docker_mounts:
         # see /etc/auto.direct configuration about /shared - just add ,addr=<domain> at the end
         o: FIXME
         device_prefix: "nfs-server-p01:/REGARDS/"
-  # Allows some files inside <inventory>/group_vars/regards_nodes/files/... to be attached 
+  # Allows some files inside <inventory>/static/... to be attached 
   # to frontend / workers containers as Secret file (read only) 
   secrets: []
-  # Allows some files inside <inventory>/group_vars/regards_nodes/files/... to be attached 
+  # Allows some files inside <inventory>/static/... to be attached 
   # to frontend / workers containers as Config file (read only) 
   configs: []
   volumes: []

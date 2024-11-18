@@ -5,6 +5,7 @@ docker_group_gid: "{{ name_space_gid|int + 117 }}"
 
 swarm_manager_eth: "ansible_{{ global_stack.docker.network_interface }}"
 
+# Subnet/netmask address. Basically, it cannot end with .0
 docker_bip: "{{ docker_vault.docker_bip }}"
 docker_ingress_network: "{{ docker_vault.docker_ingress_network }}"
 docker_ingress_network_gateway: "{{ docker_vault.docker_ingress_network_gateway }}"
