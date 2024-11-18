@@ -814,7 +814,7 @@ services:
     hostname: rs-registry
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9032/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 5s
       timeout: 10s
       retries: 10
@@ -892,7 +892,7 @@ services:
     hostname: rs-gateway
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9030/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -996,7 +996,7 @@ services:
     hostname: rs-admin-instance
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9037/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1079,7 +1079,7 @@ services:
     hostname: rs-admin
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9033/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1166,7 +1166,7 @@ services:
     hostname: rs-authentication
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9034/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1273,7 +1273,7 @@ services:
     hostname: rs-dam
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9035/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1383,7 +1383,7 @@ services:
     hostname: rs-notifier
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9039/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1479,7 +1479,7 @@ services:
     hostname: rs-fem
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9038/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1582,7 +1582,7 @@ services:
     hostname: rs-catalog
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9036/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1686,7 +1686,7 @@ services:
     hostname: rs-access-instance
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9040/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1769,7 +1769,7 @@ services:
     hostname: rs-access-project
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9041/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -1974,7 +1974,7 @@ services:
     hostname: rs-storage
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9042/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -2092,7 +2092,7 @@ services:
     hostname: rs-order
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9043/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -2201,7 +2201,7 @@ services:
     hostname: rs-processing
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9043/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -2312,7 +2312,7 @@ services:
     hostname: rs-ingest
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9044/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -2415,7 +2415,7 @@ services:
     hostname: rs-dataprovider
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9045/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -2518,7 +2518,7 @@ services:
     hostname: rs-worker-manager
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9047/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -2610,7 +2610,7 @@ services:
     hostname: rs-lta-manager
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9048/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -2697,7 +2697,7 @@ services:
     hostname: rs-delivery
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9049/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance && exit 1)"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -2793,7 +2793,7 @@ services:
     hostname: rs-file-catalog
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9050/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -2880,7 +2880,7 @@ services:
     hostname: rs-file-access
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9051/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -2993,7 +2993,7 @@ services:
     hostname: rs-file-packager
     read_only: true
     healthcheck:
-      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:9052/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
+      test: ["CMD-SHELL", "set -eo pipefail; (curl --silent --fail --request GET http://localhost:8081/actuator/health?scope=instance | jq --exit-status -n 'inputs | if has(\"status\") then .status == \"UP\" else false end') || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

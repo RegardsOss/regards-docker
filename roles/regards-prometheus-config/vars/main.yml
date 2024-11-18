@@ -11,79 +11,79 @@ role_regards_prometheus_config_seuser: "{{ group_seuser }}"
 role_regards_prometheus_config_mservices:
   - name: rs-admin-instance-scrape
     hostname: rs-admin-instance
-    port: 9037
+    port: 8081
     active: "{{ group_docker_mservices.admin_instance is defined }}"
   - name: rs-admin-scrape
     hostname: rs-admin
-    port: 9033
+    port: 8081
     active: "{{ group_docker_mservices.admin is defined }}"
   - name: rs-authentication-scrape
     hostname: rs-authentication
-    port: 9034
+    port: 8081
     active: "{{ group_docker_mservices.authentication is defined }}"
   - name: rs-dam-scrape
     hostname: rs-dam
-    port: 9035
+    port: 8081
     active: "{{ group_docker_mservices.dam is defined }}"
   - name: rs-notifier-scrape
     hostname: rs-notifier
-    port: 9039
+    port: 8081
     active: "{{ group_docker_mservices.notifier is defined }}"
   - name: rs-fem-scrape
     hostname: rs-fem
-    port: 9038
+    port: 8081
     active: "{{ group_docker_mservices.fem is defined }}"
   - name: rs-catalog-scrape
     hostname: rs-catalog
-    port: 9036
+    port: 8081
     active: "{{ group_docker_mservices.catalog is defined }}"
   - name: rs-access-instance-scrape
     hostname: rs-access-instance
-    port: 9040
+    port: 8081
     active: "{{ group_docker_mservices.access_instance is defined }}"
   - name: rs-access-project-scrape
     hostname: rs-access-project
-    port: 9041
+    port: 8081
     active: "{{ group_docker_mservices.access_project is defined }}"
   - name: rs-storage-scrape
     hostname: rs-storage
-    port: 9042
+    port: 8081
     active: "{{ group_docker_mservices.storage is defined }}"
   - name: rs-order-scrape
     hostname: rs-order
-    port: 9043
+    port: 8081
     active: "{{ group_docker_mservices.order is defined }}"
   - name: rs-processing-scrape
     hostname: rs-processing
-    port: 9043
+    port: 8081
     active: "{{ group_docker_mservices.processing is defined }}"
   - name: rs-ingest-scrape
     hostname: rs-ingest
-    port: 9044
+    port: 8081
     active: "{{ group_docker_mservices.ingest is defined }}"
   - name: rs-dataprovider-scrape
     hostname: rs-dataprovider
-    port: 9045
+    port: 8081
     active: "{{ group_docker_mservices.dataprovider is defined }}"
   - name: rs-worker-manager-scrape
     hostname: rs-worker-manager
-    port: 9047
+    port: 8081
     active: "{{ group_docker_mservices.worker_manager is defined }}"
   - name: rs-lta-manager-scrape
     hostname: rs-lta-manager
-    port: 9048
+    port: 8081
     active: "{{ group_docker_mservices.lta_manager is defined }}"
   - name: rs-file-catalog-scrape
     hostname: rs-file-catalog
-    port: 9050
+    port: 8081
     active: "{{ group_docker_mservices.file_catalog is defined }}"
   - name: rs-file-access-scrape
     hostname: rs-file-access
-    port: 9051
+    port: 8081
     active: "{{ group_docker_mservices.file_access is defined }}"
   - name: rs-file-packager-scrape
     hostname: rs-file-packager
-    port: 9052
+    port: 8081
     active: "{{ group_docker_mservices.file_packager is defined }}"
 
 role_regards_prometheus_config_cots:
